@@ -1,0 +1,79 @@
+{
+    "medora":"Medora Clinic",
+    "skip":"Skip",
+    "previous":"previous",
+    "next":"next",
+
+
+    "start_now":"Start Now",
+    "welcome":"Welcome to Medora",
+
+    "onboarding_description1":"Your digital health companion for managing your appointments and medical records easily and securely.",
+    "onboarding_title2":"Book Appointments,Anytime,Anywhere",
+    "onboarding_description2":"Choose between a clinic visit, a home visit, or an online consultation at your convenience.",
+    "onboarding_title3":"Medora App Your Health",
+    "onboarding_description3":"Fast and secure access to your test results, prescriptions, and medical history anytime.",
+
+
+    "register_title":"Create Account",
+    "register_subtitle":"Enter your details to get started with your medical profile.",
+    "first":"First Name ",
+    "last":"Last Name ",
+    "male":"male",
+    "female":"female",
+    "email":"Email Address",
+    "phone":"enter your phone number",
+    "gender":"gender",
+    "birth":"birth",
+    "pass":"Password",
+    "confirm":"Confirm Password",
+    "blood":"Blood Type",
+    "ill":"previous_illnesses",
+     "register":"Register",
+     "refering":"By registering, you agree to our ",
+     "terms":"Terms of Service",
+     "and":" and ",
+     "privacy":"Privacy Policy",
+     "or":"OR",
+    "already-have":"Already have an account?",
+    "login":"Login",
+
+
+    "otp_title":"Verification Code",
+    "otp_subtitle":"Enter the 6-digit code sent to your email ",
+    "Verify":"Verify",
+
+    "verify_email_title":"Reset Password Code",
+    "verify_email_subtitle":"Enter the 6-digit code sent to your email ",
+
+    "login_title":"Welcome back 👋",
+    "login_subtitle":"Please enter your credentials to access your portal.",
+    "continue":"Or continue with",
+    "forgot":"Forgot Password?",
+    "ques-login":"Don’t have an account ? ",
+    "create":"register",
+
+
+    "patient_home_welecome":"Welcome, Ahmed 👋",
+    "patient_home_welecome2":"Your health journey is our priority.\nHow can we help you today?",
+    "patient_welecome_press":"press the add button below to book appointment",
+
+    "home":"home",
+    "records":"records",
+    "alerts":"alerts",
+    "profile":"profile",
+    "offers":"Offers",
+    "specialists":"Specialties",
+    "next_title":"Next Appointment",
+    "visit":"Clinic Visit",
+    "browse":"Browse Specialties",
+    "health_title":"My Health Overview"
+
+
+
+
+
+ 
+
+
+}
