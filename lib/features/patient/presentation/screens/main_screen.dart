@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-//import 'package:get/get.dart' hide Trans;
-//import 'package:medora/core/routing/app_router.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/common/widgets/nav_bar_painter.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/features/patient/presentation/screens/patient_home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
 
   int selectedIndex = 0;
 
-  final pages = [SizedBox(), SizedBox(), SizedBox(), SizedBox()];
+  final pages = [PatientHomeScreen(), SizedBox(), SizedBox(), SizedBox()];
 
   void changeTab(int index) {
     setState(() {
@@ -65,9 +66,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-
-   @override
-
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
         offset: Offset(0, -10),
         child: InkWell(
           onTap: () {
-          //  Get.toNamed(AppRouter.addService);
+            Get.toNamed(AppRouter.book);
           },
           child: Container(
             height: 64.09,
@@ -113,7 +112,6 @@ class _MainScreenState extends State<MainScreen> {
         height: 69.22,
         child: Stack(
           children: [
-            
             CustomPaint(
               size: const Size(double.infinity, 69.22),
               painter: NavBarPainter(fabRadius: 37.78),
@@ -137,7 +135,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
 
-           
             Row(
               children: [
                 navItem(
