@@ -1,9 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/common/widgets/search_field.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_summary_model.dart';
 import 'package:medora_git/features/patient/data/models/offer_model.dart';
@@ -132,7 +134,14 @@ class PatientHomeScreen extends StatelessWidget {
 
                 SectionTitle(title: 'offers'.tr()),
                 const SizedBox(height: 12),
-                const SliderComponent(offers: _offers),
+                SliderComponent(
+                  offers: _offers,
+                  onOfferTap: (offer) {
+                    if (offer.id == '3') {
+                      Get.toNamed(AppRouter.conversations);
+                    }
+                  },
+                ),
 
                 const SizedBox(height: 24),
 

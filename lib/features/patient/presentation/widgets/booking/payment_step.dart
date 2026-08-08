@@ -48,13 +48,17 @@ class PaymentStep extends StatelessWidget {
                 const Divider(height: 24),
                 _feeRow(
                   "Total Fee",
-                  "\$${controller.consultationFee.value.toStringAsFixed(2)}",
+                  controller.amountToPayNow.value > 0
+                      ? "\$${controller.amountToPayNow.value}"
+                      : "\$${controller.consultationFee.value.toStringAsFixed(2)}",
                   isBold: true,
                 ),
                 const SizedBox(height: 12),
                 _feeRow(
                   "Required Deposit (50%)",
-                  "\$${controller.depositAmount.toStringAsFixed(2)}",
+                  controller.amountToPayNow.value > 0
+                      ? "\$${controller.amountToPayNow.value}"
+                      : "\$${controller.depositAmount.toStringAsFixed(2)}",
                   isBold: true,
                   color: AppColors.primary700,
                 ),
@@ -119,14 +123,27 @@ class PaymentStep extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: controller.confirmPayment,
-              child: Text(
-                "Pay Deposit & Confirm",
-                style: GoogleFonts.roboto(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+              onPressed: controller.isLoading.value
+                  ? null
+                  : controller.payNow,
+              child: Obx(
+                () => controller.isLoading.value
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        "Pay Deposit & Confirm",
+                        style: GoogleFonts.roboto(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ),

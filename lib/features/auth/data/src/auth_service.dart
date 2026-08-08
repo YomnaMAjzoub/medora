@@ -3,25 +3,28 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/storage/appconfig.dart';
+import 'package:medora_git/features/auth/data/models/login_response_model.dart';
+import 'package:medora_git/features/auth/data/models/register_response_model.dart';
+import 'package:medora_git/features/auth/data/models/verify_otp_response_model.dart';
 
 class AuthService {
   final Dio dio = Dio();
   final GetStorage storage = GetStorage();
 
-  Future<bool> register(
-    String firstName,
-    String lastName,
-    String gender,
-    String birth,
-    String email,
-    String phone,
-    String password,
-    String confirmPass,
+  Future<RegisterResponseModel> register({
+    required String firstName,
+    required String lastName,
+    required String gender,
+    required String birth,
+    required String email,
+    required String phone,
+    required String password,
+    required String confirmPass,
     String? bloodType,
     String? illness,
-  ) async {
+  }) async {
     try {
-      final Map<String, dynamic> data = {
+      final formData = FormData.fromMap({
         'first_name': firstName,
         'last_name': lastName,
         'gender': gender,
@@ -30,90 +33,77 @@ class AuthService {
         'phone': phone,
         'password': password,
         'password_confirmation': confirmPass,
-      };
-      if (bloodType != null && bloodType.isNotEmpty) {
-        data['blood_type'] = bloodType;
-      }
+        if (bloodType != null && bloodType.isNotEmpty) 'blood_type': bloodType,
+        if (illness != null && illness.isNotEmpty)
+          'previous_illnesses': illness,
+      });
 
-      if (illness != null && illness.isNotEmpty) {
-        data['previous_illnesses'] = illness;
-      }
-      Response response = await dio.post(
+      final response = await dio.post(
         '${AppConfig.baseUrl}/register',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'content-type': 'application/json',
-          },
-        ),
-        data: data,
-      );
-      log('Register Response: ${response.data.toString()}');
-      if (response.statusCode == 201 &&
-          response.data['message'] ==
-              'Registration successful. Please check your email for the OTP to verify your account.') {
-        final token = response.data['user']['access_token'];
-        if (token != null) {
-          await storage.write('access_token', token);
-        }
-        return true;
-      } else {
-        throw response.data?['message'] ?? response.statusMessage ?? 'Registration failed';
-      }
-    } on DioException catch (e) {
-      throw ErrorHandler.handleDioError(e);
-    }
-  }
-
-  Future<bool> verifyCode(String email, String code) async {
-    try {
-      Response response = await dio.post(
-        '${AppConfig.baseUrl}/verify-otp',
+        data: formData,
         options: Options(headers: {'Accept': 'application/json'}),
-        data: {'email': email, 'otp_code': code},
       );
-      log('verification Response: ${response.data.toString()}');
-      if (response.statusCode == 200 || response.data['message'] == 'success') {
-        final token = response.data['user']['access_token'];
-        if (token != null) {
-          await storage.write('access_token', token);
-        }
-        return true;
-      } else {
-        throw response.data['message'] ?? 'verification failed';
-      }
+
+      return RegisterResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
-      throw ErrorHandler.handleDioError(e);
+      throw Exception(ErrorHandler.handleDioError(e));
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<VerifyOtpResponseModel> verifyCode({
+    required String email,
+    required String code,
+  }) async {
     try {
-      Response response = await dio.post(
-        '${AppConfig.baseUrl}/login',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'content-type': 'application/json',
-          },
-        ),
-        data: {'email': email, 'password': password},
+      final formData = FormData.fromMap({
+        'email': email,
+        'otp_code': code,
+      });
+
+      final response = await dio.post(
+        '${AppConfig.baseUrl}/verify-otp',
+        data: formData,
+        options: Options(headers: {'Accept': 'application/json'}),
       );
-      log(response.data.toString());
-      if (response.statusCode == 200 || response.data['message'] == 'success') {
-        final token = response.data['access_token'];
-        
-        if (token != null) {
-          storage.write('access_token', token);
-          return true;
-        } else {
-          throw 'Token not found in response';
-        }
-      } else {
-        throw response.data['message'] ?? 'Login failed';
-      }
+
+      return VerifyOtpResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
-      throw ErrorHandler.handleDioError(e);
+      throw Exception(ErrorHandler.handleDioError(e));
+    }
+  }
+
+  Future<LoginResponseModel> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final fcmToken = storage.read<String>('fcm_token');
+      final formData = FormData.fromMap({
+        'email': email,
+        'password': password,
+        if (fcmToken != null && fcmToken.isNotEmpty)
+          'fcm_token': fcmToken,
+      });
+
+      final response = await dio.post(
+        '${AppConfig.baseUrl}/login',
+        data: formData,
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
+
+      final result = LoginResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+
+      await storage.write('access_token', result.accessToken);
+
+      return result;
+    } on DioException catch (e) {
+      throw Exception(ErrorHandler.handleDioError(e));
     }
   }
 

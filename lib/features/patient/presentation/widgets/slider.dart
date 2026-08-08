@@ -7,9 +7,10 @@ import 'package:medora_git/features/patient/data/models/offer_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class SliderComponent extends StatefulWidget {
-  const SliderComponent({this.offers, super.key});
+  const SliderComponent({this.offers, this.onOfferTap, super.key});
 
   final List<OfferModel>? offers;
+  final ValueChanged<OfferModel>? onOfferTap;
 
   @override
   State<SliderComponent> createState() => _SliderComponentState();
@@ -42,35 +43,38 @@ class _SliderComponentState extends State<SliderComponent> {
               ),
               child: offer == null
                   ? null
-                  : Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 6,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              offer.title,
-                              style: GoogleFonts.roboto(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.white,
+                  : GestureDetector(
+                      onTap: () => widget.onOfferTap?.call(offer),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 6,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                offer.title,
+                                style: GoogleFonts.roboto(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.white,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              offer.subtitle,
-                              style: GoogleFonts.roboto(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.white,
+                              const SizedBox(height: 6),
+                              Text(
+                                offer.subtitle,
+                                style: GoogleFonts.roboto(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.white,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

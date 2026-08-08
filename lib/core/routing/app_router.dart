@@ -9,5 +9,6 @@ class AppRouter {
   static const patient = '/home';
   static const book = '/book';
   static const role = '/role';
-  
+  static const conversations = '/conversations';
+  static const chat = '/chat';
 }

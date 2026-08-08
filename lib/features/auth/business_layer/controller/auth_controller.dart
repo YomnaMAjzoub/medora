@@ -20,6 +20,7 @@ class AuthController extends GetxController {
 
   void selectRole(String role) {
     selectedRole.value = role;
+    authService.storage.write('role', role);
   }
 
   void setBloodType(String value) {
@@ -112,32 +113,27 @@ class AuthController extends GetxController {
   ) async {
     try {
       isloading.value = true;
-      bool result = await authService.register(
-        firstName,
-        lastName,
-        gender,
-        birth,
-        email,
-        phone,
-        password,
-        confirmPass,
-        bloodType,
-        illness,
+      final result = await authService.register(
+        firstName: firstName,
+        lastName: lastName,
+        gender: gender,
+        birth: birth,
+        email: email,
+        phone: phone,
+        password: password,
+        confirmPass: confirmPass,
+        bloodType: bloodType,
+        illness: illness,
       );
-      if (result) {
-        onSuccess('Registration successful. Please verify your email.');
-        Get.toNamed(
-          AppRouter.otp,
-          arguments: {'email': email, 'isRegister': true},
-        );
-      } else {
-        onError('Registration failed');
-      }
+      onSuccess(result.message);
+      Get.toNamed(
+        AppRouter.otp,
+        arguments: {'email': email, 'isRegister': true},
+      );
     } catch (e) {
-      final msg = e.toString() ;
-          errorMessage.value = msg;
-            onError(msg);
-
+      final msg = e.toString();
+      errorMessage.value = msg;
+      onError(msg);
     } finally {
       isloading.value = false;
     }
@@ -151,13 +147,10 @@ class AuthController extends GetxController {
   ) async {
     try {
       isloading.value = true;
-      bool result = await authService.verifyCode(email, code);
-      if (result) {
-        onSuccess('Email verified successfully.');
-        Get.offAllNamed(AppRouter.login);
-      } else {
-        onError('verification failed');
-      }
+      final result = await authService.verifyCode(email: email, code: code);
+      await authService.storage.write('user_id', result.user.id);
+      onSuccess(result.message);
+      Get.offAllNamed(AppRouter.login);
     } catch (e) {
       errorMessage.value = e.toString();
       onError(errorMessage.value);
@@ -174,21 +167,23 @@ class AuthController extends GetxController {
   ) async {
     try {
       isloading.value = true;
-      bool result = await authService.login(email, password);
-      if (result) {
-        onSuccess('Login successful');
-        String? role = authService.storage.read('role');
-        role ??= selectedRole.value;
-       if (role == "patient") {
+      final result = await authService.login(email: email, password: password);
+      final user = result.user;
+      if (user != null) {
+        await authService.storage.write('user_id', user.id);
+        if (user.role.isNotEmpty) {
+          await authService.storage.write('role', user.role);
+        }
+      }
+      onSuccess(result.message);
+      String? role = authService.storage.read('role');
+      role ??= selectedRole.value;
+      if (role == "patient") {
         Get.offAllNamed(AppRouter.main);
       } else if (role == "doctor") {
-       // Get.offAllNamed(AppRouter.doctorHome);
+        // Get.offAllNamed(AppRouter.doctorHome);
       } else if (role == "staff") {
-       // Get.offAllNamed(AppRouter.staffHome);
-      } 
-
-      } else {
-        onError('Login failed');
+        // Get.offAllNamed(AppRouter.staffHome);
       }
     } catch (e) {
       errorMessage.value = e.toString();

@@ -14,8 +14,9 @@ switch(e.type) {
         return 'Security error';
         case DioExceptionType.badResponse:  
         if (data is Map && data.containsKey('message')) {
-          return data['data']['message']??data['message'];
+          return data['data']?['message'] ?? data['message'];
         }
+        break;
       case DioExceptionType.cancel:
         return 'Request was cancelled';
       case DioExceptionType.unknown:

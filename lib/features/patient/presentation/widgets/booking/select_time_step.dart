@@ -1,20 +1,16 @@
-import 'package:flutter/material.dart' hide DayPeriod;
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
-import 'package:medora_git/features/patient/data/models/time_slot_model.dart';
+import 'package:medora_git/features/patient/business_layer/controller/doctor_calendar_controller.dart';
+import 'package:medora_git/features/patient/data/models/doctor_calendar_slot_model.dart';
 
-/// Step 4 of the booking flow: pick a day from the next two bookable
-/// weeks, then a time slot on that day. Unlike steps 1-3, this one needs
-/// an explicit "Continue" tap -- date and time are two separate choices
-/// on the same screen, so there's no single tap that means "done".
-///
-/// The bookable dates and time slots below are static placeholder data --
-/// swap [_bookableDates]/[_slotsFor] for a real backend call once it's
-/// ready. Only the actual date/time picked lives on [BookingController],
-/// since later steps (and eventually payment) need it.
+/// Step 4 of the booking flow: pick a day from the month calendar, then a
+/// slot. Slots come from the real availability API via
+/// [DoctorCalendarController]; the picked date/time is mirrored onto
+/// [BookingController] so later steps (and payment) can use it.
 class SelectTimeStep extends StatefulWidget {
   const SelectTimeStep({super.key});
 
@@ -23,71 +19,29 @@ class SelectTimeStep extends StatefulWidget {
 }
 
 class _SelectTimeStepState extends State<SelectTimeStep> {
-  final BookingController controller = Get.find<BookingController>();
+  late final BookingController bookingController;
+  late final DoctorCalendarController calendarController;
   late DateTime _visibleMonth;
-
-  static List<DateTime> get _bookableDates {
-    final today = DateTime.now();
-    return List.generate(14, (i) {
-      final date = today.add(Duration(days: i));
-      return DateTime(date.year, date.month, date.day);
-    });
-  }
-
-  static bool _isDateBookable(DateTime date) =>
-      _bookableDates.any((d) => d.isAtSameMomentAs(date));
-
-  static List<TimeSlotModel> _slotsFor(DateTime date) {
-    const morning = [
-      '09:00 AM',
-      '09:30 AM',
-      '10:00 AM',
-      '10:30 AM',
-      '11:00 AM',
-      '11:30 AM',
-    ];
-    const afternoon = [
-      '01:00 PM',
-      '01:30 PM',
-      '02:00 PM',
-      '02:30 PM',
-      '03:00 PM',
-      '03:30 PM',
-    ];
-    const evening = ['05:00 PM', '05:30 PM', '06:00 PM'];
-
-    var offset = 0;
-    bool isAvailable() => (date.day + offset++) % 4 != 0;
-
-    return [
-      for (final time in morning)
-        TimeSlotModel(
-          time: time,
-          period: DayPeriod.morning,
-          isAvailable: isAvailable(),
-        ),
-      for (final time in afternoon)
-        TimeSlotModel(
-          time: time,
-          period: DayPeriod.afternoon,
-          isAvailable: isAvailable(),
-        ),
-      for (final time in evening)
-        TimeSlotModel(
-          time: time,
-          period: DayPeriod.evening,
-          isAvailable: isAvailable(),
-        ),
-    ];
-  }
 
   @override
   void initState() {
     super.initState();
-    final initialDate = controller.selectedDate.value ?? _bookableDates.first;
+    bookingController = Get.find<BookingController>();
+    calendarController = Get.isRegistered<DoctorCalendarController>()
+        ? Get.find<DoctorCalendarController>()
+        : Get.put(DoctorCalendarController());
+
+    final doctorId =
+        int.tryParse(bookingController.selectedDoctor.value?.id ?? '');
+    if (doctorId != null) {
+      calendarController.loadForDoctor(doctorId);
+    }
+
+    final initialDate =
+        bookingController.selectedDate.value ?? DateTime.now();
     _visibleMonth = DateTime(initialDate.year, initialDate.month);
-    if (controller.selectedDate.value == null) {
-      controller.selectDate(initialDate);
+    if (bookingController.selectedDate.value == null) {
+      bookingController.selectDate(initialDate);
     }
   }
 
@@ -98,6 +52,24 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
         _visibleMonth.month + delta,
       ),
     );
+  }
+
+  void _handleDayTap(DateTime date) {
+    final current = calendarController.selectedDate.value;
+    if (current.year == date.year &&
+        current.month == date.month &&
+        current.day == date.day) {
+      return;
+    }
+    bookingController.selectDate(date);
+    calendarController.selectCalendarDate(date);
+  }
+
+  void _handleSlotTap(CalendarSlotModel slot) {
+    calendarController.selectSlot(slot);
+    if (calendarController.selectedSlot.value == slot) {
+      bookingController.selectTimeSlot(slot.time);
+    }
   }
 
   @override
@@ -124,52 +96,109 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
           _MonthCalendar(
             visibleMonth: _visibleMonth,
             onChangeMonth: _changeMonth,
-            controller: controller,
+            onDayTap: _handleDayTap,
+            calendarController: calendarController,
           ),
           const SizedBox(height: 24),
+          Obx(
+            () => Text(
+              'Available Time',
+              style: GoogleFonts.roboto(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.grey500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Obx(
+            () => Text(
+              DateFormat('EEEE, MMMM d').format(
+                calendarController.selectedDate.value,
+              ),
+              style: GoogleFonts.roboto(
+                fontSize: 13,
+                color: AppColors.grey300,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
           Obx(() {
-            final date = controller.selectedDate.value;
-            if (date == null) return const SizedBox.shrink();
+            if (calendarController.errorMessage.value.isNotEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'Couldn\'t load availability. Please try again.',
+                    style: GoogleFonts.roboto(
+                      fontSize: 13,
+                      color: AppColors.grey300,
+                    ),
+                  ),
+                ),
+              );
+            }
+            if (calendarController.isLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final allSlots = calendarController.slots;
+            if (allSlots.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'No available slots for this day.',
+                    style: GoogleFonts.roboto(
+                      fontSize: 13,
+                      color: AppColors.grey300,
+                    ),
+                  ),
+                ),
+              );
+            }
+            final morning = allSlots
+                .where((s) => int.parse(s.time.split(':').first) < 12)
+                .toList();
+            final afternoon = allSlots
+                .where((s) {
+                  final hour = int.parse(s.time.split(':').first);
+                  return hour >= 12 && hour < 17;
+                })
+                .toList();
+            final evening = allSlots
+                .where((s) => int.parse(s.time.split(':').first) >= 17)
+                .toList();
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Available Time',
-                  style: GoogleFonts.roboto(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.grey500,
+                if (morning.isNotEmpty)
+                  _SlotSection(
+                    label: 'Morning',
+                    icon: Icons.wb_sunny_outlined,
+                    slots: morning,
+                    onSlotTap: _handleSlotTap,
+                    calendarController: calendarController,
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  DateFormat('EEEE, MMMM d').format(date),
-                  style: GoogleFonts.roboto(
-                    fontSize: 13,
-                    color: AppColors.grey300,
+                if (afternoon.isNotEmpty)
+                  _SlotSection(
+                    label: 'Afternoon',
+                    icon: Icons.wb_cloudy_outlined,
+                    slots: afternoon,
+                    onSlotTap: _handleSlotTap,
+                    calendarController: calendarController,
                   ),
-                ),
+                if (evening.isNotEmpty)
+                  _SlotSection(
+                    label: 'Evening',
+                    icon: Icons.nights_stay_outlined,
+                    slots: evening,
+                    onSlotTap: _handleSlotTap,
+                    calendarController: calendarController,
+                  ),
               ],
-            );
-          }),
-          const SizedBox(height: 14),
-          Obx(() {
-            final date = controller.selectedDate.value;
-            if (date == null) return const SizedBox.shrink();
-            final slots = _slotsFor(date);
-
-            return Column(
-              children: DayPeriod.values
-                  .map(
-                    (period) => _TimeSlotSection(
-                      period: period,
-                      slots: slots
-                          .where((slot) => slot.period == period)
-                          .toList(),
-                      controller: controller,
-                    ),
-                  )
-                  .toList(),
             );
           }),
           const SizedBox(height: 8),
@@ -178,9 +207,9 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed:
-                    controller.selectedDate.value != null &&
-                        controller.selectedTimeSlot.value != null
-                    ? controller.confirmDateTime
+                    calendarController.selectedSlot.value != null &&
+                        !calendarController.isLoading.value
+                    ? bookingController.confirmDateTime
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary900,
@@ -208,16 +237,118 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
   }
 }
 
+class _SlotSection extends StatelessWidget {
+  const _SlotSection({
+    required this.label,
+    required this.icon,
+    required this.slots,
+    required this.onSlotTap,
+    required this.calendarController,
+  });
+
+  final String label;
+  final IconData icon;
+  final List<CalendarSlotModel> slots;
+  final ValueChanged<CalendarSlotModel> onSlotTap;
+  final DoctorCalendarController calendarController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            children: [
+              Icon(icon, size: 14, color: AppColors.grey300),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.roboto(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.grey300,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: slots.map((slot) => _SlotChip(
+            slot: slot,
+            calendarController: calendarController,
+            onTap: () => onSlotTap(slot),
+          )).toList(),
+        ),
+        const SizedBox(height: 18),
+      ],
+    );
+  }
+}
+
+class _SlotChip extends StatelessWidget {
+  const _SlotChip({
+    required this.slot,
+    required this.calendarController,
+    required this.onTap,
+  });
+
+  final CalendarSlotModel slot;
+  final DoctorCalendarController calendarController;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBookable = slot.isBookable;
+    return InkWell(
+      onTap: isBookable ? onTap : null,
+      borderRadius: BorderRadius.circular(10),
+      child: Obx(
+        () {
+          final isSelected =
+              calendarController.selectedSlot.value?.fullDate == slot.fullDate;
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary700 : AppColors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected ? AppColors.primary700 : AppColors.neutral200,
+              ),
+            ),
+            child: Text(
+              slot.time,
+              style: GoogleFonts.roboto(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: !isBookable
+                    ? AppColors.grey100
+                    : (isSelected ? AppColors.white : AppColors.grey500),
+                decoration: !isBookable ? TextDecoration.lineThrough : null,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _MonthCalendar extends StatelessWidget {
   const _MonthCalendar({
     required this.visibleMonth,
     required this.onChangeMonth,
-    required this.controller,
+    required this.onDayTap,
+    required this.calendarController,
   });
 
   final DateTime visibleMonth;
   final ValueChanged<int> onChangeMonth;
-  final BookingController controller;
+  final ValueChanged<DateTime> onDayTap;
+  final DoctorCalendarController calendarController;
 
   static const _weekdayLabels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
@@ -234,19 +365,23 @@ class _MonthCalendar extends StatelessWidget {
 
     final today = DateTime.now();
     final currentMonthStart = DateTime(today.year, today.month);
-    final lastBookableMonth = _SelectTimeStepState._bookableDates.last;
+    final nextMonthStart = DateTime(
+      today.year,
+      today.month + 2,
+    );
     final canGoPrev = visibleMonth.isAfter(currentMonthStart);
     final canGoNext = DateTime(
       visibleMonth.year,
       visibleMonth.month,
-    ).isBefore(DateTime(lastBookableMonth.year, lastBookableMonth.month + 1));
+    ).isBefore(nextMonthStart);
 
     final cells = <Widget>[
       for (var i = 0; i < leadingBlanks; i++) const SizedBox(),
       for (var day = 1; day <= daysInMonth; day++)
         _DayCell(
           date: DateTime(visibleMonth.year, visibleMonth.month, day),
-          controller: controller,
+          onTap: onDayTap,
+          calendarController: calendarController,
         ),
     ];
 
@@ -336,25 +471,35 @@ class _MonthCalendar extends StatelessWidget {
 }
 
 class _DayCell extends StatelessWidget {
-  const _DayCell({required this.date, required this.controller});
+  const _DayCell({
+    required this.date,
+    required this.onTap,
+    required this.calendarController,
+  });
 
   final DateTime date;
-  final BookingController controller;
+  final ValueChanged<DateTime> onTap;
+  final DoctorCalendarController calendarController;
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
+    final isToday = _isSameDay(DateTime.now(), date);
+    final todayMidnight = DateTime.now();
+    final isPast = date.isBefore(
+      DateTime(todayMidnight.year, todayMidnight.month, todayMidnight.day),
+    );
+
     return Obx(() {
-      final isBookable = _SelectTimeStepState._isDateBookable(date);
-      final isSelected =
-          controller.selectedDate.value != null &&
-          _isSameDay(controller.selectedDate.value!, date);
-      final isToday = _isSameDay(DateTime.now(), date);
+      final isSelected = _isSameDay(
+        calendarController.selectedDate.value,
+        date,
+      );
 
       return InkWell(
-        onTap: isBookable ? () => controller.selectDate(date) : null,
+        onTap: isPast ? null : () => onTap(date),
         borderRadius: BorderRadius.circular(10),
         child: Container(
           alignment: Alignment.center,
@@ -371,127 +516,13 @@ class _DayCell extends StatelessWidget {
               fontWeight: isSelected || isToday
                   ? FontWeight.w700
                   : FontWeight.w400,
-              color: !isBookable
-                  ? AppColors.grey100
-                  : (isSelected ? AppColors.white : AppColors.grey500),
+              color: isSelected
+                  ? AppColors.white
+                  : (isPast ? AppColors.grey100 : AppColors.grey500),
             ),
           ),
         ),
       );
     });
-  }
-}
-
-class _TimeSlotSection extends StatelessWidget {
-  const _TimeSlotSection({
-    required this.period,
-    required this.slots,
-    required this.controller,
-  });
-
-  final DayPeriod period;
-  final List<TimeSlotModel> slots;
-  final BookingController controller;
-
-  static ({IconData icon, String label}) _headerFor(DayPeriod period) {
-    switch (period) {
-      case DayPeriod.morning:
-        return (icon: Icons.wb_sunny_outlined, label: 'MORNING');
-      case DayPeriod.afternoon:
-        return (icon: Icons.wb_cloudy_outlined, label: 'AFTERNOON');
-      case DayPeriod.evening:
-        return (icon: Icons.nightlight_round, label: 'EVENING');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (slots.isEmpty) return const SizedBox.shrink();
-
-    final header = _headerFor(period);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(header.icon, size: 16, color: AppColors.primary700),
-              const SizedBox(width: 6),
-              Text(
-                header.label,
-                style: GoogleFonts.roboto(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary700,
-                  letterSpacing: .5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 2.6,
-            children: slots.map((slot) {
-              return Obx(() {
-                final isSelected =
-                    controller.selectedTimeSlot.value == slot.time;
-                return _TimeSlotChip(
-                  slot: slot,
-                  isSelected: isSelected,
-                  onTap: () => controller.selectTimeSlot(slot.time),
-                );
-              });
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimeSlotChip extends StatelessWidget {
-  const _TimeSlotChip({
-    required this.slot,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final TimeSlotModel slot;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: slot.isAvailable ? onTap : null,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary700 : AppColors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? AppColors.primary700 : AppColors.neutral200,
-          ),
-        ),
-        child: Text(
-          slot.time,
-          style: GoogleFonts.roboto(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: !slot.isAvailable
-                ? AppColors.grey100
-                : (isSelected ? AppColors.white : AppColors.grey500),
-            decoration: !slot.isAvailable ? TextDecoration.lineThrough : null,
-          ),
-        ),
-      ),
-    );
   }
 }

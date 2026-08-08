@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "601977188816",
+    "project_id": "medora-7cd26",
+    "storage_bucket": "medora-7cd26.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601977188816:android:8cde3b2bdaefa427d189d5",
+        "android_client_info": {
+          "package_name": "com.example.medora_git"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIxPzJGLliQEh0vRlDgFU5KeFAyY6UH-g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
