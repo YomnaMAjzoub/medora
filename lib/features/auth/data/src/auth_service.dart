@@ -117,11 +117,33 @@ class AuthService {
       if (response.statusCode == 200) {
         log(response.data['message']);
         return true;
-      }else {
-      throw response.data['message'] ?? 'Something went wrong';
-    }
+      } else {
+        throw response.data['message'] ?? 'Something went wrong';
+      }
     } on DioException catch (e) {
       throw ErrorHandler.handleDioError(e);
+    }
+  }
+
+  /// Keeps the user's FCM token fresh on the server after it rotates.
+  /// Best-effort: silently ignored when not logged in or on network errors,
+  /// because the token is also attached to the login/register requests.
+  Future<void> updateFcmToken(String fcmToken) async {
+    final accessToken = storage.read<String>('access_token');
+    if (accessToken == null || accessToken.isEmpty) return;
+    try {
+      final response = await dio.post(
+        '${AppConfig.baseUrl}/updateFcmToken',
+        data: {'fcm_token': fcmToken},
+        options: Options(headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        }),
+      );
+      log('updateFcmToken status: ${response.statusCode}');
+    } on DioException catch (e) {
+      log('updateFcmToken failed: ${e.message}');
+      // Best-effort; login/register keep the token fresh as a fallback.
     }
   }
 

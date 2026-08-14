@@ -1,8 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
 import 'package:medora_git/features/patient/business_layer/controller/doctor_calendar_controller.dart';
 import 'package:medora_git/features/patient/data/models/doctor_calendar_slot_model.dart';
@@ -80,17 +81,20 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select Date & Time',
+            'select_date_time'.tr(),
             style: GoogleFonts.roboto(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.grey500,
+              color: context.appColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Choose your preferred day and time for the consultation',
-            style: GoogleFonts.roboto(fontSize: 13, color: AppColors.grey300),
+            'choose_day_time_hint'.tr(),
+            style: GoogleFonts.roboto(
+              fontSize: 13,
+              color: context.appColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 20),
           _MonthCalendar(
@@ -100,14 +104,12 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
             calendarController: calendarController,
           ),
           const SizedBox(height: 24),
-          Obx(
-            () => Text(
-              'Available Time',
-              style: GoogleFonts.roboto(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.grey500,
-              ),
+          Text(
+            'available_time'.tr(),
+            style: GoogleFonts.roboto(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: context.appColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -118,7 +120,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
               ),
               style: GoogleFonts.roboto(
                 fontSize: 13,
-                color: AppColors.grey300,
+                color: context.appColors.textSecondary,
               ),
             ),
           ),
@@ -129,10 +131,10 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: Text(
-                    'Couldn\'t load availability. Please try again.',
+                    'load_availability_error'.tr(),
                     style: GoogleFonts.roboto(
                       fontSize: 13,
-                      color: AppColors.grey300,
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                 ),
@@ -150,10 +152,10 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: Text(
-                    'No available slots for this day.',
+                    'no_slots'.tr(),
                     style: GoogleFonts.roboto(
                       fontSize: 13,
-                      color: AppColors.grey300,
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                 ),
@@ -176,7 +178,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
               children: [
                 if (morning.isNotEmpty)
                   _SlotSection(
-                    label: 'Morning',
+                    label: 'morning'.tr(),
                     icon: Icons.wb_sunny_outlined,
                     slots: morning,
                     onSlotTap: _handleSlotTap,
@@ -184,7 +186,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                   ),
                 if (afternoon.isNotEmpty)
                   _SlotSection(
-                    label: 'Afternoon',
+                    label: 'afternoon'.tr(),
                     icon: Icons.wb_cloudy_outlined,
                     slots: afternoon,
                     onSlotTap: _handleSlotTap,
@@ -192,7 +194,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                   ),
                 if (evening.isNotEmpty)
                   _SlotSection(
-                    label: 'Evening',
+                    label: 'evening'.tr(),
                     icon: Icons.nights_stay_outlined,
                     slots: evening,
                     onSlotTap: _handleSlotTap,
@@ -213,7 +215,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary900,
-                  disabledBackgroundColor: AppColors.neutral300,
+                  disabledBackgroundColor: context.appColors.border,
                   foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   elevation: 0,
@@ -222,7 +224,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                   ),
                 ),
                 child: Text(
-                  'Continue to Payment',
+                  'continue_payment'.tr(),
                   style: GoogleFonts.roboto(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -261,14 +263,14 @@ class _SlotSection extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10),
           child: Row(
             children: [
-              Icon(icon, size: 14, color: AppColors.grey300),
+              Icon(icon, size: 14, color: context.appColors.textSecondary),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: GoogleFonts.roboto(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.grey300,
+                  color: context.appColors.textSecondary,
                 ),
               ),
             ],
@@ -313,10 +315,14 @@ class _SlotChip extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary700 : AppColors.white,
+              color: isSelected
+                  ? AppColors.primary700
+                  : context.appColors.surface,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isSelected ? AppColors.primary700 : AppColors.neutral200,
+                color: isSelected
+                    ? AppColors.primary700
+                    : context.appColors.border,
               ),
             ),
             child: Text(
@@ -325,8 +331,8 @@ class _SlotChip extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: !isBookable
-                    ? AppColors.grey100
-                    : (isSelected ? AppColors.white : AppColors.grey500),
+                    ? context.appColors.border
+                    : (isSelected ? AppColors.white : context.appColors.textPrimary),
                 decoration: !isBookable ? TextDecoration.lineThrough : null,
               ),
             ),
@@ -388,11 +394,11 @@ class _MonthCalendar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowb.withValues(alpha: .5),
+            color: context.appColors.shadow.withValues(alpha: .5),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -408,7 +414,7 @@ class _MonthCalendar extends StatelessWidget {
                 style: GoogleFonts.roboto(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.grey500,
+                  color: context.appColors.textPrimary,
                 ),
               ),
               Row(
@@ -419,7 +425,9 @@ class _MonthCalendar extends StatelessWidget {
                     onPressed: canGoPrev ? () => onChangeMonth(-1) : null,
                     icon: Icon(
                       Icons.chevron_left_rounded,
-                      color: canGoPrev ? AppColors.grey500 : AppColors.grey100,
+                      color: canGoPrev
+                          ? context.appColors.textPrimary
+                          : context.appColors.border,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -429,7 +437,9 @@ class _MonthCalendar extends StatelessWidget {
                     onPressed: canGoNext ? () => onChangeMonth(1) : null,
                     icon: Icon(
                       Icons.chevron_right_rounded,
-                      color: canGoNext ? AppColors.grey500 : AppColors.grey100,
+                      color: canGoNext
+                          ? context.appColors.textPrimary
+                          : context.appColors.border,
                     ),
                   ),
                 ],
@@ -447,7 +457,7 @@ class _MonthCalendar extends StatelessWidget {
                         style: GoogleFonts.roboto(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.grey300,
+                          color: context.appColors.textSecondary,
                         ),
                       ),
                     ),
@@ -518,7 +528,9 @@ class _DayCell extends StatelessWidget {
                   : FontWeight.w400,
               color: isSelected
                   ? AppColors.white
-                  : (isPast ? AppColors.grey100 : AppColors.grey500),
+                  : (isPast
+                      ? context.appColors.border
+                      : context.appColors.textPrimary),
             ),
           ),
         ),

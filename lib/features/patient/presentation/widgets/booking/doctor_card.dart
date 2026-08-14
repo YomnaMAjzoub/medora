@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/data/models/doctor_model.dart';
 import 'package:medora_git/features/patient/presentation/widgets/booking/visit_type_row.dart';
 
@@ -18,11 +20,11 @@ class DoctorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowb.withValues(alpha: .5),
+            color: context.appColors.shadow.withValues(alpha: .5),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -42,7 +44,7 @@ class DoctorCard extends StatelessWidget {
                   style: GoogleFonts.roboto(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.grey500,
+                    color: context.appColors.textPrimary,
                   ),
                 ),
               ),
@@ -53,7 +55,10 @@ class DoctorCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${doctor.experienceYears}+ yrs exp',
+                  'yrs_exp'.tr().replaceFirst(
+                        '{count}',
+                        '${doctor.experienceYears}',
+                      ),
                   style: GoogleFonts.roboto(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -66,7 +71,10 @@ class DoctorCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             doctor.specialty,
-            style: GoogleFonts.roboto(fontSize: 13, color: AppColors.grey300),
+            style: GoogleFonts.roboto(
+              fontSize: 13,
+              color: context.appColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -91,14 +99,15 @@ class DoctorCard extends StatelessWidget {
                       style: GoogleFonts.roboto(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.grey500,
+                        color: context.appColors.textPrimary,
                       ),
                     ),
                   ],
                 )
               else
                 Text(
-                  '\$${doctor.pricePerSession.toStringAsFixed(0)}/session',
+                  '\$${doctor.pricePerSession.toStringAsFixed(0)}'
+                  '${'per_session'.tr()}',
                   style: GoogleFonts.roboto(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -113,7 +122,8 @@ class DoctorCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  '\$${doctor.pricePerSession.toStringAsFixed(0)}/session',
+                  '\$${doctor.pricePerSession.toStringAsFixed(0)}'
+                  '${'per_session'.tr()}',
                   style: GoogleFonts.roboto(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -138,7 +148,7 @@ class DoctorCard extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                'Book Appointment',
+                'book_appointment'.tr(),
                 style: GoogleFonts.roboto(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -192,7 +202,7 @@ class _Photo extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Top Rated',
+                  'top_rated'.tr(),
                   style: GoogleFonts.roboto(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -208,7 +218,7 @@ class _Photo extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: .9),
+                  color: context.appColors.surface.withValues(alpha: .9),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -242,7 +252,7 @@ class _Photo extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: .85),
+                  color: context.appColors.surface.withValues(alpha: .85),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -258,7 +268,7 @@ class _Photo extends StatelessWidget {
                         doctor.highlightNote!,
                         style: GoogleFonts.roboto(
                           fontSize: 11,
-                          color: AppColors.grey500,
+                          color: context.appColors.textPrimary,
                         ),
                       ),
                     ),

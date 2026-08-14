@@ -16,7 +16,7 @@ class DoctorCalendarController extends GetxController {
   final RxList<CalendarSlotModel> slots = <CalendarSlotModel>[].obs;
   final Rxn<CalendarSlotModel> selectedSlot = Rxn<CalendarSlotModel>();
 
-  late final int _doctorId;
+  int _doctorId = 0;
   final Map<String, List<CalendarSlotModel>> _dayCache = {};
 
   /// Slots the user is allowed to book (clinic hour + not booked + available).

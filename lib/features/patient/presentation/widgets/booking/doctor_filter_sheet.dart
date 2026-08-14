@@ -1,41 +1,42 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
+import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
 
 enum GenderFilter { any, male, female }
 
-/// Filter selection for the "Select Doctor" step. Purely local UI state
-/// for now -- once doctors are fetched from the backend, this same shape
-/// can be sent along with the request instead of being applied locally.
+/// Filter selection for the "Select Doctor" step.
+/// `gender` and `specialization` are sent to the backend
+/// (GET /filterDoctor); `maxPrice` is applied locally since the API
+/// has no price parameter.
 class DoctorFilters {
   const DoctorFilters({
     this.gender = GenderFilter.any,
+    this.specialization,
     this.maxPrice = 500,
-    this.availableTodayOnly = false,
-    this.acceptsInsuranceOnly = false,
   });
 
   final GenderFilter gender;
+  final String? specialization;
   final double maxPrice;
-  final bool availableTodayOnly;
-  final bool acceptsInsuranceOnly;
 
   DoctorFilters copyWith({
     GenderFilter? gender,
+    String? specialization,
     double? maxPrice,
-    bool? availableTodayOnly,
-    bool? acceptsInsuranceOnly,
   }) {
     return DoctorFilters(
       gender: gender ?? this.gender,
+      specialization: specialization ?? this.specialization,
       maxPrice: maxPrice ?? this.maxPrice,
-      availableTodayOnly: availableTodayOnly ?? this.availableTodayOnly,
-      acceptsInsuranceOnly: acceptsInsuranceOnly ?? this.acceptsInsuranceOnly,
     );
   }
 }
 
-/// Opens the doctor-list filter sheet (gender, price range, availability).
+/// Opens the doctor-list filter sheet (gender, specialization, price range).
 /// Returns the applied [DoctorFilters], or null if the sheet was dismissed
 /// without tapping "Apply Filters".
 Future<DoctorFilters?> showDoctorFilterSheet(
@@ -45,7 +46,7 @@ Future<DoctorFilters?> showDoctorFilterSheet(
   return showModalBottomSheet<DoctorFilters>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.white,
+    backgroundColor: context.appColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
@@ -67,6 +68,8 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final discovery = Get.find<DoctorDiscoveryController>();
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -74,173 +77,211 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
         20,
         MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Filters',
-                style: GoogleFonts.roboto(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.grey500,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'filters'.tr(),
+                  style: GoogleFonts.roboto(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: context.appColors.textPrimary,
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Doctor Gender',
-            style: GoogleFonts.roboto(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppColors.grey300,
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: GenderFilter.values.map((gender) {
-              final isSelected = _filters.gender == gender;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(
-                    gender.name[0].toUpperCase() + gender.name.substring(1),
+            const SizedBox(height: 16),
+            Text(
+              'specialization'.tr(),
+              style: GoogleFonts.roboto(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: context.appColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _chip(
+                  label: 'all'.tr(),
+                  selected: _filters.specialization == null,
+                  onTap: () => setState(
+                    () => _filters = _filters.copyWith(specialization: null),
                   ),
-                  selected: isSelected,
-                  onSelected: (_) => setState(
-                    () => _filters = _filters.copyWith(gender: gender),
+                  colors: context.appColors,
+                ),
+                ...discovery.specialties.map(
+                  (specialty) => _chip(
+                    label: specialty.name,
+                    selected: _filters.specialization == specialty.name,
+                    onTap: () => setState(
+                      () => _filters = _filters.copyWith(
+                        specialization: specialty.name,
+                      ),
+                    ),
+                    colors: context.appColors,
                   ),
-                  selectedColor: AppColors.primary900,
-                  labelStyle: TextStyle(
-                    color: isSelected ? AppColors.white : AppColors.grey400,
-                    fontSize: 12,
-                  ),
-                  backgroundColor: AppColors.mainScreen,
-                  shape: StadiumBorder(
-                    side: BorderSide(
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'doctor_gender'.tr(),
+              style: GoogleFonts.roboto(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: context.appColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: GenderFilter.values.map((gender) {
+                final isSelected = _filters.gender == gender;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(
+                      switch (gender) {
+                        GenderFilter.any => 'any'.tr(),
+                        GenderFilter.male => 'male'.tr(),
+                        GenderFilter.female => 'female'.tr(),
+                      },
+                    ),
+                    selected: isSelected,
+                    onSelected: (_) => setState(
+                      () => _filters = _filters.copyWith(gender: gender),
+                    ),
+                    selectedColor: AppColors.primary900,
+                    labelStyle: TextStyle(
                       color: isSelected
-                          ? AppColors.primary900
-                          : AppColors.neutral200,
+                          ? AppColors.white
+                          : context.appColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                    backgroundColor: context.appColors.background,
+                    shape: StadiumBorder(
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.primary900
+                            : context.appColors.border,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Price Range (Session)',
-            style: GoogleFonts.roboto(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppColors.grey300,
+                );
+              }).toList(),
             ),
-          ),
-          Slider(
-            value: _filters.maxPrice,
-            min: 0,
-            max: 500,
-            divisions: 20,
-            activeColor: AppColors.primary700,
-            onChanged: (value) =>
-                setState(() => _filters = _filters.copyWith(maxPrice: value)),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '\$0',
-                style: TextStyle(fontSize: 11, color: AppColors.grey300),
-              ),
-              Text(
-                'Up to \$${_filters.maxPrice.toStringAsFixed(0)}',
-                style: const TextStyle(fontSize: 11, color: AppColors.grey300),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Availability',
-            style: GoogleFonts.roboto(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppColors.grey300,
-            ),
-          ),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            title: const Text(
-              'Available Today',
-              style: TextStyle(fontSize: 13),
-            ),
-            value: _filters.availableTodayOnly,
-            activeColor: AppColors.primary700,
-            onChanged: (value) => setState(
-              () => _filters = _filters.copyWith(
-                availableTodayOnly: value ?? false,
+            const SizedBox(height: 20),
+            Text(
+              'price_range'.tr(),
+              style: GoogleFonts.roboto(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: context.appColors.textSecondary,
               ),
             ),
-          ),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            title: const Text(
-              'Accepts Insurance',
-              style: TextStyle(fontSize: 13),
+            Slider(
+              value: _filters.maxPrice,
+              min: 0,
+              max: 500,
+              divisions: 20,
+              activeColor: AppColors.primary700,
+              onChanged: (value) =>
+                  setState(() => _filters = _filters.copyWith(maxPrice: value)),
             ),
-            value: _filters.acceptsInsuranceOnly,
-            activeColor: AppColors.primary700,
-            onChanged: (value) => setState(
-              () => _filters = _filters.copyWith(
-                acceptsInsuranceOnly: value ?? false,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () =>
-                      setState(() => _filters = const DoctorFilters()),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: AppColors.neutral300),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '\$0',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.appColors.textSecondary,
                   ),
-                  child: const Text('Reset'),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context, _filters),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary900,
-                    foregroundColor: AppColors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                Text(
+                  'up_to'.tr().replaceFirst(
+                        '{max}',
+                        '\$${_filters.maxPrice.toStringAsFixed(0)}',
+                      ),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.appColors.textSecondary,
                   ),
-                  child: const Text('Apply Filters'),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () =>
+                        setState(() => _filters = const DoctorFilters()),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: context.appColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text('reset'.tr()),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, _filters),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary900,
+                      foregroundColor: AppColors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text('apply_filters'.tr()),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _chip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    required AppThemeColors colors,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.primary900,
+      labelStyle: TextStyle(
+        color: selected ? AppColors.white : colors.textSecondary,
+        fontSize: 12,
+      ),
+      backgroundColor: colors.background,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected ? AppColors.primary900 : colors.border,
+        ),
       ),
     );
   }

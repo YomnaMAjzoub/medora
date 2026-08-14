@@ -1,7 +1,9 @@
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
 import 'package:medora_git/features/patient/presentation/widgets/booking/booking_step_progress.dart';
 import 'package:medora_git/features/patient/presentation/widgets/booking/home_location_step.dart';
@@ -14,17 +16,17 @@ class BookingView extends GetView<BookingController> {
   const BookingView({super.key});
 
   static const _stepLabels = {
-    BookingStep.selectDoctor: 'Select Doctor',
-    BookingStep.visitType: 'Visit Type',
-    BookingStep.homeLocation: 'Home Location',
-    BookingStep.dateTime: 'Date & Time',
-    BookingStep.payment: 'Payment',
+    BookingStep.selectDoctor: 'step_select_doctor',
+    BookingStep.visitType: 'step_visit_type',
+    BookingStep.homeLocation: 'step_home_location',
+    BookingStep.dateTime: 'step_date_time',
+    BookingStep.payment: 'step_payment',
   };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.mainScreen,
+      backgroundColor: context.appColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -45,12 +47,12 @@ class BookingView extends GetView<BookingController> {
                   ),
                   Expanded(
                     child: Text(
-                      'Book Appointment',
+                      'book_appointment'.tr(),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.roboto(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.grey500,
+                        color: context.appColors.textPrimary,
                       ),
                     ),
                   ),
@@ -64,7 +66,7 @@ class BookingView extends GetView<BookingController> {
                 () => BookingStepProgress(
                   currentStep: controller.currentStep.value,
                   totalSteps: controller.steps.length,
-                  stepLabel: _stepLabels[controller.currentBookingStep]!,
+                  stepLabel: _stepLabels[controller.currentBookingStep]!.tr(),
                 ),
               ),
             ),

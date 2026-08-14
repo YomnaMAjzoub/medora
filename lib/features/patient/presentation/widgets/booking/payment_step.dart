@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
 
 class PaymentStep extends StatelessWidget {
@@ -10,6 +12,7 @@ class PaymentStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BookingController>();
+    final colors = context.appColors;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
@@ -18,11 +21,11 @@ class PaymentStep extends StatelessWidget {
         children: [
           // TITLE
           Text(
-            "Payment Summary",
+            'payment_summary'.tr(),
             style: GoogleFonts.roboto(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.grey700,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 24),
@@ -31,43 +34,49 @@ class PaymentStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.surface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(.05), blurRadius: 10),
+                BoxShadow(
+                  color: colors.shadow.withValues(alpha: .05),
+                  blurRadius: 10,
+                ),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _feeRow(
-                  "Consultation Fee",
+                  'consultation_fee'.tr(),
                   "\$${controller.consultationFee.value.toStringAsFixed(2)}",
+                  colors: colors,
                 ),
-                _feeRow("Service Charge", "\$0.00"),
+                _feeRow('service_charge'.tr(), '\$0.00', colors: colors),
                 const Divider(height: 24),
                 _feeRow(
-                  "Total Fee",
+                  'total_fee'.tr(),
                   controller.amountToPayNow.value > 0
                       ? "\$${controller.amountToPayNow.value}"
                       : "\$${controller.consultationFee.value.toStringAsFixed(2)}",
                   isBold: true,
+                  colors: colors,
                 ),
                 const SizedBox(height: 12),
                 _feeRow(
-                  "Required Deposit (50%)",
+                  'required_deposit'.tr(),
                   controller.amountToPayNow.value > 0
                       ? "\$${controller.amountToPayNow.value}"
                       : "\$${controller.depositAmount.toStringAsFixed(2)}",
                   isBold: true,
                   color: AppColors.primary700,
+                  colors: colors,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Pay now to secure your appointment.",
+                  'pay_now_secure'.tr(),
                   style: GoogleFonts.roboto(
                     fontSize: 13,
-                    color: AppColors.grey500,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -78,11 +87,11 @@ class PaymentStep extends StatelessWidget {
 
           // PAYMENT METHOD (ONE OPTION ONLY)
           Text(
-            "Payment Method",
+            'payment_method'.tr(),
             style: GoogleFonts.roboto(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.grey700,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -90,20 +99,20 @@ class PaymentStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary700.withOpacity(.3)),
+              border: Border.all(color: AppColors.primary700.withValues(alpha: .3)),
             ),
             child: Row(
               children: [
                 Icon(Icons.credit_card, color: AppColors.primary700, size: 28),
                 const SizedBox(width: 16),
                 Text(
-                  "Credit / Debit Card",
+                  'credit_debit_card'.tr(),
                   style: GoogleFonts.roboto(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.grey700,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -137,7 +146,7 @@ class PaymentStep extends StatelessWidget {
                         ),
                       )
                     : Text(
-                        "Pay Deposit & Confirm",
+                        'pay_deposit_confirm'.tr(),
                         style: GoogleFonts.roboto(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -151,8 +160,11 @@ class PaymentStep extends StatelessWidget {
           const SizedBox(height: 12),
 
           Text(
-            "By clicking confirm, you agree to our Cancellation Policy.\nDeposits are 100% refundable if cancelled 24 hours prior.",
-            style: GoogleFonts.roboto(fontSize: 12, color: AppColors.grey500),
+            'payment_terms'.tr(),
+            style: GoogleFonts.roboto(
+              fontSize: 12,
+              color: colors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -163,7 +175,8 @@ class PaymentStep extends StatelessWidget {
     String label,
     String value, {
     bool isBold = false,
-    Color color = AppColors.grey700,
+    Color? color,
+    required AppThemeColors colors,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -172,14 +185,17 @@ class PaymentStep extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.roboto(fontSize: 15, color: AppColors.grey600),
+            style: GoogleFonts.roboto(
+              fontSize: 15,
+              color: colors.textPrimary,
+            ),
           ),
           Text(
             value,
             style: GoogleFonts.roboto(
               fontSize: 15,
               fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-              color: color,
+              color: color ?? colors.textPrimary,
             ),
           ),
         ],

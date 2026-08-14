@@ -1,4 +1,4 @@
-// lib/features/authentication/ui/screens/otp_screen.dart
+﻿// lib/features/authentication/ui/screens/otp_screen.dart
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:flutter/material.dart';
@@ -7,12 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/common/widgets/elevated_button.dart';
 import 'package:medora_git/common/widgets/gradient.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
 import 'package:pin_code_fields/pin_code_fields.dart';
 
-class VerificationScreen extends StatelessWidget {
+class VerificationScreen extends StatefulWidget {
   VerificationScreen({
     super.key,
     required this.email,
@@ -22,11 +23,27 @@ class VerificationScreen extends StatelessWidget {
   final AuthController authController = Get.find();
   final TextEditingController otpController = TextEditingController();
   final String email;
-  String otp = '';
   final bool isRegister;
 
   @override
+  State<VerificationScreen> createState() => _VerificationScreenState();
+}
+
+class _VerificationScreenState extends State<VerificationScreen> {
+  String otp = '';
+
+  @override
+  void dispose() {
+    widget.otpController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authController = widget.authController;
+    final email = widget.email;
+    final isRegister = widget.isRegister;
+    final otpController = widget.otpController;
     return Scaffold(
       body: CustomGradient(
         child: SafeArea(
@@ -37,7 +54,7 @@ class VerificationScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                    icon: Icon(Icons.arrow_back, color: context.appColors.textPrimary),
                     onPressed: () {
                       Get.back();
                     },
@@ -47,8 +64,8 @@ class VerificationScreen extends StatelessWidget {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: context.appColors.surface,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -62,7 +79,7 @@ class VerificationScreen extends StatelessWidget {
                   isRegister ? "otp_title".tr() : "verify_email_title".tr(),
                   style: GoogleFonts.roboto(
                     fontSize: 22,
-                    color: AppColors.black,
+                    color: context.appColors.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -71,7 +88,7 @@ class VerificationScreen extends StatelessWidget {
                   "${isRegister ? "otp_subtitle".tr() : "verify_email_subtitle".tr()}$email",
                   textAlign: TextAlign.center,
                   maxLines: 2,
-                  style: GoogleFonts.roboto(color: AppColors.grey200),
+                  style: GoogleFonts.roboto(color: context.appColors.textSecondary),
                 ),
                 const SizedBox(height: 40),
                 Container(
@@ -81,7 +98,7 @@ class VerificationScreen extends StatelessWidget {
                     vertical: 25,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: context.appColors.surface,
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: Column(
@@ -104,12 +121,12 @@ class VerificationScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           fieldHeight: 55,
                           fieldWidth: 45,
-                          inactiveColor: AppColors.grey200,
-                          inactiveFillColor: AppColors.grey50,
+                          inactiveColor: context.appColors.border,
+                          inactiveFillColor: context.appColors.inputFill,
                           selectedColor: AppColors.primary800,
-                          selectedFillColor: AppColors.white,
+                          selectedFillColor: context.appColors.inputFill,
                           activeColor: AppColors.primary800,
-                          activeFillColor: AppColors.white,
+                          activeFillColor: context.appColors.inputFill,
                         ),
                         onChanged: (value) {
                          otp=value;
@@ -130,7 +147,7 @@ class VerificationScreen extends StatelessWidget {
                       : CustomElevated(
                           onPressed: () {
                             if (otp.length != 6) {
-                              Get.snackbar('Error', 'Enter full code');
+                              Get.snackbar('error'.tr(), 'enter_full_code'.tr());
                               return;
                             }
                             if (isRegister) {
@@ -162,15 +179,10 @@ class VerificationScreen extends StatelessWidget {
                                 email,
                                  otp,
                                 (msg) {
-                                  Get.snackbar('Success', msg);
-            
-                                  Get.toNamed(
-                                    AppRouter.resetPass,
-                                    arguments: {'email': email, 'otp_code':otp},
-                                  );
+                                  Get.snackbar('success'.tr(), msg);
                                 },
                                 (err) {
-                                  Get.snackbar('Error', err);
+                                  Get.snackbar('error'.tr(), err);
                                 },
                               );
                             }

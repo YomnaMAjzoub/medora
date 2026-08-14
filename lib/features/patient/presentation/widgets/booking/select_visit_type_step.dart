@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 
@@ -24,17 +26,20 @@ class SelectVisitTypeStep extends GetView<BookingController> {
           const _SelectedDoctorSummary(),
           const SizedBox(height: 24),
           Text(
-            'Choose Visit Type',
+            'choose_visit_type'.tr(),
             style: GoogleFonts.roboto(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.grey500,
+              color: context.appColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'How would you like to see the doctor?',
-            style: GoogleFonts.roboto(fontSize: 13, color: AppColors.grey300),
+            'visit_type_hint'.tr(),
+            style: GoogleFonts.roboto(
+              fontSize: 13,
+              color: context.appColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 20),
           Obx(
@@ -72,11 +77,11 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.appColors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowb.withValues(alpha: .5),
+              color: context.appColors.shadow.withValues(alpha: .5),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -95,7 +100,10 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
                   width: 52,
                   height: 52,
                   color: AppColors.secondary100,
-                  child: const Icon(Icons.person, color: AppColors.primary600),
+                  child: const Icon(
+                    Icons.person,
+                    color: AppColors.primary600,
+                  ),
                 ),
               ),
             ),
@@ -109,7 +117,7 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
                     style: GoogleFonts.roboto(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.grey500,
+                      color: context.appColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -117,7 +125,7 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
                     doctor.specialty,
                     style: GoogleFonts.roboto(
                       fontSize: 12,
-                      color: AppColors.grey300,
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                 ],
@@ -130,7 +138,7 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
                 minimumSize: Size.zero,
               ),
               child: Text(
-                'Change',
+                'change'.tr(),
                 style: GoogleFonts.roboto(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -163,20 +171,20 @@ class _VisitTypeOptionCard extends StatelessWidget {
       case VisitType.clinic:
         return (
           icon: Icons.medical_services_rounded,
-          title: 'Clinic Visit',
-          subtitle: 'See the doctor in person at the clinic',
+          title: 'clinic_visit'.tr(),
+          subtitle: 'clinic_visit_subtitle'.tr(),
         );
       case VisitType.home:
         return (
           icon: Icons.home_rounded,
-          title: 'Home Visit',
-          subtitle: 'The doctor comes to your address',
+          title: 'home_visit'.tr(),
+          subtitle: 'home_visit_subtitle'.tr(),
         );
       case VisitType.online:
         return (
           icon: Icons.videocam_rounded,
-          title: 'Online Visit',
-          subtitle: 'Video consultation from anywhere',
+          title: 'online_visit'.tr(),
+          subtitle: 'online_visit_subtitle'.tr(),
         );
     }
   }
@@ -192,17 +200,17 @@ class _VisitTypeOptionCard extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.secondary100 : AppColors.white,
+          color: isSelected ? AppColors.secondary100 : context.appColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary700 : AppColors.neutral200,
+            color: isSelected ? AppColors.primary700 : context.appColors.border,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
               ? []
               : [
                   BoxShadow(
-                    color: AppColors.shadowb.withValues(alpha: .4),
+                    color: context.appColors.shadow.withValues(alpha: .4),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -235,7 +243,7 @@ class _VisitTypeOptionCard extends StatelessWidget {
                     style: GoogleFonts.roboto(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.grey500,
+                      color: context.appColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -243,7 +251,7 @@ class _VisitTypeOptionCard extends StatelessWidget {
                     content.subtitle,
                     style: GoogleFonts.roboto(
                       fontSize: 12,
-                      color: AppColors.grey300,
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                 ],
@@ -253,7 +261,9 @@ class _VisitTypeOptionCard extends StatelessWidget {
               isSelected
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_off_rounded,
-              color: isSelected ? AppColors.primary700 : AppColors.grey200,
+              color: isSelected
+                  ? AppColors.primary700
+                  : context.appColors.textHint,
             ),
           ],
         ),

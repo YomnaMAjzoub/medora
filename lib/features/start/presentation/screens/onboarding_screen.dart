@@ -5,6 +5,7 @@ import 'package:get/get.dart'hide Trans;
 import 'package:medora_git/common/widgets/elevated_button.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/start/presentation/widgets/custom_build_onboarding.dart';
 
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -99,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   count: onboardingPagesData.length,
                   effect: ExpandingDotsEffect(
                     activeDotColor: AppColors.primary500,
-                    dotColor: Colors.grey.shade300,
+                    dotColor: context.appColors.border,
                     dotHeight: 8,
                     dotWidth: 8,
                     expansionFactor: 3,

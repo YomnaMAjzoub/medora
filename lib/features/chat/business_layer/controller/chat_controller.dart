@@ -1,5 +1,6 @@
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/features/chat/data/models/chat_message_model.dart';
 import 'package:medora_git/features/chat/data/models/conversation_model.dart';
@@ -13,7 +14,7 @@ class ChatController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
-  final RxString doctorId = ''.obs;
+  final RxString otherPartyId = ''.obs;
   final RxString conversationId = ''.obs;
   final RxList<ChatMessageModel> messages = <ChatMessageModel>[].obs;
   final Rx<ConversationModel?> conversation = Rx<ConversationModel?>(null);
@@ -43,15 +44,17 @@ class ChatController extends GetxController {
         );
   }
 
-  /// Attaches the message stream for a given doctor chat.
-  void openConversation({required String doctorId}) {
-    this.doctorId.value = doctorId;
+  /// Attaches the message stream for a chat with the given other party
+  /// (a doctor for patients, a patient for doctors).
+  void openConversation({required String otherPartyId}) {
+    this.otherPartyId.value = otherPartyId;
     isLoading.value = true;
     errorMessage.value = '';
     _messagesSub?.cancel();
     _conversationSub?.cancel();
 
-    _messagesSub = _chatService.streamMessages(doctorId: doctorId).listen(
+    _messagesSub =
+        _chatService.streamMessages(otherPartyId: otherPartyId).listen(
           (items) {
             messages.assignAll(items);
             isLoading.value = false;
@@ -63,7 +66,7 @@ class ChatController extends GetxController {
         );
 
     _conversationSub =
-        _chatService.streamConversation(doctorId: doctorId).listen(
+        _chatService.streamConversation(otherPartyId: otherPartyId).listen(
           (conv) {
             conversation.value = conv;
             conversationId.value = conv?.id ?? '';
@@ -77,16 +80,16 @@ class ChatController extends GetxController {
 
   Future<void> sendMessage(String text) async {
     final trimmed = text.trim();
-    if (trimmed.isEmpty || doctorId.value.isEmpty) return;
+    if (trimmed.isEmpty || otherPartyId.value.isEmpty) return;
 
     try {
       await _chatService.sendMessage(
-        doctorId: doctorId.value,
+        otherPartyId: otherPartyId.value,
         text: trimmed,
       );
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('error'.tr(), e.toString());
     }
   }
 

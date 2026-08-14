@@ -5,7 +5,11 @@ import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/common/widgets/nav_bar_painter.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
+import 'package:medora_git/features/patient/presentation/screens/appointments_screen.dart';
+import 'package:medora_git/features/patient/presentation/screens/medical_records_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/patient_home_screen.dart';
+import 'package:medora_git/features/patient/presentation/screens/profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -27,7 +31,12 @@ class _MainScreenState extends State<MainScreen> {
 
   int selectedIndex = 0;
 
-  final pages = [PatientHomeScreen(), SizedBox(), SizedBox(), SizedBox()];
+  final pages = [
+    PatientHomeScreen(),
+    MedicalRecordsScreen(),
+    AppointmentsScreen(),
+    ProfileScreen(),
+  ];
 
   void changeTab(int index) {
     setState(() {
@@ -57,7 +66,9 @@ class _MainScreenState extends State<MainScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
-                color: selected ? AppColors.primary800 : AppColors.grey200,
+                color: selected
+                    ? AppColors.primary800
+                    : context.appColors.textHint,
               ),
             ),
           ],
@@ -67,10 +78,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.mainScreen,
+      backgroundColor: colors.background,
       extendBody: true,
       body: pages[selectedIndex],
 
@@ -114,7 +125,12 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             CustomPaint(
               size: const Size(double.infinity, 69.22),
-              painter: NavBarPainter(fabRadius: 37.78),
+              painter: NavBarPainter(
+                fabRadius: 37.78,
+                fillColor: colors.surface,
+                shadowColor: colors.shadow,
+                borderColor: colors.border,
+              ),
             ),
 
             AnimatedPositioned(

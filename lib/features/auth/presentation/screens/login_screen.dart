@@ -7,6 +7,7 @@ import 'package:medora_git/common/widgets/gradient.dart';
 import 'package:medora_git/common/widgets/text_field.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 import 'package:medora_git/features/auth/presentation/screens/register_screen.dart';
 
@@ -22,8 +23,8 @@ class LoginScreen extends StatelessWidget {
     final password = passwordController.text.trim();
     if (email.isEmpty || password.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please fill all fields',
+        'error'.tr(),
+        'please_fill_all'.tr(),
         backgroundColor: Colors.red.shade100,
         colorText: AppColors.black,
         duration: Duration(seconds: 3),
@@ -33,7 +34,7 @@ class LoginScreen extends StatelessWidget {
     authController.login(
       (message) {
         Get.snackbar(
-          'Success',
+          'success'.tr(),
           message,
           dismissDirection: DismissDirection.up,
           duration: Duration(seconds: 3),
@@ -43,7 +44,7 @@ class LoginScreen extends StatelessWidget {
       },
       (error) {
         Get.snackbar(
-          'Error',
+          'error'.tr(),
           error,
           dismissDirection: DismissDirection.up,
           duration: Duration(seconds: 3),
@@ -58,6 +59,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
       body: CustomGradient(
         child: Center(
@@ -65,7 +67,7 @@ class LoginScreen extends StatelessWidget {
             width: 380,
             padding: const EdgeInsets.symmetric(vertical:20, horizontal:20),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: colors.surface,
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
@@ -102,15 +104,18 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 25),
 
-                  const Text(
-                    " Profile Setup",
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  Text(
+                    'login_title'.tr(),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Let's get the basics for your account",
+                  Text(
+                    'login_subtitle'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15, color: Colors.black54),
+                    style: TextStyle(fontSize: 15, color: colors.textSecondary),
                   ),
 
                   const SizedBox(height: 30),
@@ -238,7 +243,7 @@ class LoginScreen extends StatelessWidget {
                     child: TextButton(
                       onPressed: () {
                         if (emailController.text.isEmpty) {
-                          Get.snackbar('Error', 'Enter your email first');
+                          Get.snackbar('error'.tr(), 'enter_email_first'.tr());
                           return;
                         }
                         authController.forgetPassword(
@@ -247,7 +252,7 @@ class LoginScreen extends StatelessWidget {
                           Get.toNamed(AppRouter.otp, arguments: {'email': emailController.text});
                         },
                         (err) {
-                          Get.snackbar('Error', err);
+                          Get.snackbar('error'.tr(), err);
                         },
                         );
                       },
@@ -293,20 +298,20 @@ class LoginScreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Divider(color: AppColors.grey100, thickness: 1),
+                        child: Divider(color: colors.border, thickness: 1),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'continue'.tr(),
                         style: GoogleFonts.roboto(
-                          color: AppColors.neutral500,
+                          color: colors.textSecondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Divider(color: AppColors.grey100, thickness: 1),
+                        child: Divider(color: colors.border, thickness: 1),
                       ),
                     ],
                   ),
@@ -318,11 +323,11 @@ class LoginScreen extends StatelessWidget {
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: AppColors.neutral200),
+                            side: BorderSide(color: colors.border),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            backgroundColor: AppColors.white,
+                            backgroundColor: colors.surface,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -336,7 +341,7 @@ class LoginScreen extends StatelessWidget {
                               Text(
                                 'Google',
                                 style: TextStyle(
-                                  color: AppColors.neutral700,
+                                  color: colors.textPrimary,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -351,11 +356,11 @@ class LoginScreen extends StatelessWidget {
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: AppColors.neutral200),
+                            side: BorderSide(color: colors.border),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            backgroundColor: AppColors.white,
+                            backgroundColor: colors.surface,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -369,7 +374,7 @@ class LoginScreen extends StatelessWidget {
                               Text(
                                 'Apple',
                                 style: TextStyle(
-                                  color: AppColors.neutral700,
+                                  color: colors.textPrimary,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -389,7 +394,7 @@ class LoginScreen extends StatelessWidget {
                           style: GoogleFonts.roboto(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.grey400,
+                            color: colors.textSecondary,
                           ),
                         ),
                       
@@ -417,9 +422,9 @@ class LoginScreen extends StatelessWidget {
                           alignment: WrapAlignment.center,
                           spacing: 16,
                           children: [
-                            FooterLink(text: 'Privacy Policy'),
-                            FooterLink(text: 'Terms of Service'),
-                            FooterLink(text: 'Support'),
+                            FooterLink(text: 'privacy'.tr()),
+                            FooterLink(text: 'terms'.tr()),
+                            FooterLink(text: 'support'.tr()),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -427,7 +432,7 @@ class LoginScreen extends StatelessWidget {
                           '© 2026 Medora Clinic. All rights reserved.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: AppColors.neutral400,
+                            color: colors.textHint,
                             fontSize: 11,
                           ),
                         ),

@@ -9,6 +9,7 @@ class AppointmentModel {
     required this.date,
     required this.time,
     required this.visitType,
+    this.meetLink,
   });
 
   final String id;
@@ -16,6 +17,7 @@ class AppointmentModel {
   final DateTime date;
   final String time;
   final VisitType visitType;
+  final String? meetLink;
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
     return AppointmentModel(

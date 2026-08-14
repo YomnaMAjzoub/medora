@@ -1,4 +1,4 @@
-// lib/features/authentication/ui/screens/reset_password_screen.dart
+﻿// lib/features/authentication/ui/screens/reset_password_screen.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/common/widgets/elevated_button.dart';
 import 'package:medora_git/common/widgets/text_field.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
 
@@ -36,8 +37,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void handleResetPassword() {
     if (newPasswordController.text.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please fill all fields',
+        'error'.tr(),
+        'please_fill_all'.tr(),
         backgroundColor: AppColors.red,
         colorText: AppColors.yellow,
       );
@@ -49,7 +50,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       newPasswordController.text.trim(),
       (message) {
         Get.snackbar(
-          'Success',
+          'success'.tr(),
           message,
           backgroundColor: AppColors.primary600,
           colorText: AppColors.yellow,
@@ -57,7 +58,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       },
       (error) {
         Get.snackbar(
-          'Error',
+          'error'.tr(),
           error,
           backgroundColor: AppColors.red,
           colorText: AppColors.yellow,
@@ -83,7 +84,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   onPressed: () {
                     Get.back();
                   },
-                  icon: Icon(Icons.arrow_back, color: AppColors.grey600),
+                  icon: Icon(Icons.arrow_back, color: context.appColors.textPrimary),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 Center(
@@ -92,7 +93,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     style: GoogleFonts.roboto(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.black,
+                      color: context.appColors.textPrimary,
                     ),
                   ),
                 ),
@@ -103,63 +104,54 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.roboto(
                       fontSize: 16,
-                      color: AppColors.grey400,
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                Obx(() {
-                  if (authController.isloading.value) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary600,
-                      ),
-                    );
-                  }
-                  return CustomFormField(
-                    controller: newPasswordController,
-                    width: MediaQuery.of(context).size.width * 0.93,
-                    height: 48,
-                    hint: "new_password".tr(),
-                    inputAction: TextInputAction.next,
-                    keyboard: TextInputType.text,
-                    prefix: Icon(
-                      Icons.lock,
-                      color: AppColors.primary900,
-                      size: 20,
-                    ),
-                    suffix: IconButton(
-                      onPressed: () {
-                        authController.obscurenew.value =
-                            !authController.obscurenew.value;
-                      },
-                      icon: authController.obscurenew.value
-                          ? Icon(
-                              Icons.visibility_off,
-                              color: AppColors.primary900,
-                              size: 20,
-                            )
-                          : Icon(
-                              Icons.visibility,
-                              color: AppColors.primary900,
-                              size: 20,
-                            ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      borderSide: BorderSide(color: AppColors.grey100),
-                    ),
-                    focused: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      borderSide: BorderSide(color: AppColors.grey100),
-                    ),
-                    enabled: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      borderSide: BorderSide(color: AppColors.grey100),
-                    ),
-                    obscuretext: authController.obscurenew.value,
-                  );
-                }),
+                CustomFormField(
+                  controller: newPasswordController,
+                  width: MediaQuery.of(context).size.width * 0.93,
+                  height: 48,
+                  hint: "new_password".tr(),
+                  inputAction: TextInputAction.next,
+                  keyboard: TextInputType.text,
+                  prefix: Icon(
+                    Icons.lock,
+                    color: AppColors.primary900,
+                    size: 20,
+                  ),
+                  suffix: IconButton(
+                    onPressed: () {
+                      authController.obscurenew.value =
+                          !authController.obscurenew.value;
+                    },
+                    icon: authController.obscurenew.value
+                        ? Icon(
+                            Icons.visibility_off,
+                            color: AppColors.primary900,
+                            size: 20,
+                          )
+                        : Icon(
+                            Icons.visibility,
+                            color: AppColors.primary900,
+                            size: 20,
+                          ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderSide: BorderSide(color: context.appColors.border),
+                  ),
+                  focused: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderSide: BorderSide(color: context.appColors.border),
+                  ),
+                  enabled: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderSide: BorderSide(color: context.appColors.border),
+                  ),
+                  obscuretext: authController.obscurenew.value,
+                ),
                 SizedBox(height:40),
                 Obx(
                   () => authController.isloading.value

@@ -1,21 +1,28 @@
 
 import 'package:flutter/material.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 
 
 class NavBarPainter extends CustomPainter {
   final double fabRadius;
+  final Color fillColor;
+  final Color shadowColor;
+  final Color borderColor;
 
-  NavBarPainter({this.fabRadius = 32});
+  NavBarPainter({
+    this.fabRadius = 32,
+    required this.fillColor,
+    required this.shadowColor,
+    required this.borderColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.white
+      ..color = fillColor
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()
-      ..color = AppColors.black.withValues(alpha: .18)
+      ..color = borderColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -56,7 +63,7 @@ class NavBarPainter extends CustomPainter {
     path.close();
 
     
-    canvas.drawShadow(path, AppColors.black, 12, false);
+    canvas.drawShadow(path, shadowColor, 12, false);
 
     
     canvas.drawPath(path, paint);
@@ -66,5 +73,9 @@ class NavBarPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(CustomPainter oldDelegate) =>
+      oldDelegate is! NavBarPainter ||
+      oldDelegate.fillColor != fillColor ||
+      oldDelegate.shadowColor != shadowColor ||
+      oldDelegate.borderColor != borderColor;
 }

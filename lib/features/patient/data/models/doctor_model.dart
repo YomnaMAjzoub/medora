@@ -13,9 +13,15 @@ class DoctorModel {
     required this.supportedVisitTypes,
     this.isTopRated = false,
     this.highlightNote,
+    this.userId,
   });
 
   final String id;
+
+  /// The doctor's user id. The backend's addBooking endpoint validates
+  /// doctor_id against the users table, not the doctors table, so bookings
+  /// must send this value.
+  final int? userId;
   final String name;
   final String specialty;
   final int experienceYears;

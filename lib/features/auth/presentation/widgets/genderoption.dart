@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart'hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
 
@@ -18,12 +19,14 @@ class GenderSelector extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _genderItem(
+            context: context,
             label: "male".tr(),
             value: "male",
             icon: Icons.male,
           ),
           
           _genderItem(
+            context: context,
             label: "female".tr(),
             value: "female",
             icon: Icons.female,
@@ -34,6 +37,7 @@ class GenderSelector extends StatelessWidget {
   }
 
   Widget _genderItem({
+    required BuildContext context,
     required String label,
     required String value,
     required IconData icon,
@@ -47,7 +51,7 @@ class GenderSelector extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary900 : AppColors.grey100,
+            color: isSelected ? AppColors.primary900 : context.appColors.border,
             width: 1.4,
           ),
          // color: isSelected ? AppColors.primary500 : AppColors.white,
@@ -56,7 +60,7 @@ class GenderSelector extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary900 : AppColors.neutral500,
+              color: isSelected ? AppColors.primary900 : context.appColors.textSecondary,
               size: 22,
             ),
             const SizedBox(width: 8),
@@ -65,25 +69,25 @@ class GenderSelector extends StatelessWidget {
               style: GoogleFonts.roboto(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color:AppColors.grey300,
+                color:context.appColors.textSecondary,
               ),
             ),
             const SizedBox(width: 8),
-            _customRadio(isSelected),
+            _customRadio(context, isSelected),
           ],
         ),
       ),
     );
   }
 
-  Widget _customRadio(bool isSelected) {
+  Widget _customRadio(BuildContext context, bool isSelected) {
     return Container(
       width: 18,
       height: 18,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? AppColors.primary900 : AppColors.neutral400,
+          color: isSelected ? AppColors.primary900 : context.appColors.border,
           width: 2,
         ),
       ),

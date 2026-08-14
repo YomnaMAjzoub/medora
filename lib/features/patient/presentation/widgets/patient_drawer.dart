@@ -1,16 +1,43 @@
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart' hide Trans;
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 class PatientDrawer extends StatelessWidget {
   const PatientDrawer({super.key});
 
+  void _logout() {
+    final storage = GetStorage();
+    Get.defaultDialog(
+      title: 'logout'.tr(),
+      middleText: 'logout_confirm'.tr(),
+      textCancel: 'cancel'.tr(),
+      textConfirm: 'logout'.tr(),
+      confirmTextColor: AppColors.white,
+      buttonColor: AppColors.primary900,
+      onConfirm: () {
+        Get.back();
+        storage.remove('access_token');
+        storage.remove('user_id');
+        storage.remove('role');
+        storage.remove('user_name');
+        storage.remove('user_email');
+        Get.offAllNamed(AppRouter.onboarding);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final name = GetStorage().read<String>('user_name') ?? 'patient_account'.tr();
     return Drawer(
       width: 280,
-      backgroundColor: AppColors.mainScreen,
+      backgroundColor: colors.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -37,7 +64,9 @@ class PatientDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Yomna",
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.roboto(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -46,10 +75,10 @@ class PatientDrawer extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Patient Account",
+                      "patient_account".tr(),
                       style: GoogleFonts.roboto(
                         fontSize: 14,
-                        color: AppColors.grey600,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -61,25 +90,41 @@ class PatientDrawer extends StatelessWidget {
           const SizedBox(height: 20),
 
           // MENU ITEMS
-          _drawerItem(icon: Icons.person, label: "Profile", onTap: () {}),
-          _drawerItem(
-            icon: Icons.calendar_month,
-            label: "Appointments",
+          _drawerItem(context: context,
+            icon: Icons.person,
+            label: "profile_title".tr(),
             onTap: () {},
           ),
-          _drawerItem(icon: Icons.favorite, label: "Favorites", onTap: () {}),
-          _drawerItem(icon: Icons.settings, label: "Settings", onTap: () {}),
-          _drawerItem(icon: Icons.language, label: "Language", onTap: () {}),
+          _drawerItem(context: context,
+            icon: Icons.calendar_month,
+            label: "appointments".tr(),
+            onTap: () {},
+          ),
+          _drawerItem(context: context,icon: Icons.favorite, label: "favorites".tr(), onTap: () {}),
+          _drawerItem(context: context,
+            icon: Icons.settings,
+            label: "settings".tr(),
+            onTap: () {
+              Get.toNamed(AppRouter.settings);
+            },
+          ),
+          _drawerItem(context: context,
+            icon: Icons.language,
+            label: "language".tr(),
+            onTap: () {
+              Get.toNamed(AppRouter.settings);
+            },
+          ),
 
           const Spacer(),
 
           // LOGOUT
           Padding(
             padding: const EdgeInsets.all(20),
-            child: _drawerItem(
+            child: _drawerItem(context: context,
               icon: Icons.logout,
-              label: "Logout",
-              onTap: () {},
+              label: "logout".tr(),
+              onTap: _logout,
               color: Colors.redAccent,
             ),
           ),
@@ -89,6 +134,7 @@ class PatientDrawer extends StatelessWidget {
   }
 
   Widget _drawerItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -107,7 +153,7 @@ class PatientDrawer extends StatelessWidget {
               style: GoogleFonts.roboto(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: AppColors.grey600,
+                color: context.appColors.textPrimary,
               ),
             ),
           ],

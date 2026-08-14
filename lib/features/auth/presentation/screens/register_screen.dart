@@ -7,6 +7,7 @@ import 'package:medora_git/common/widgets/gradient.dart';
 import 'package:medora_git/common/widgets/text_field.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 import 'package:medora_git/features/auth/presentation/widgets/blood_selector.dart';
 import 'package:medora_git/features/auth/presentation/widgets/genderoption.dart';
@@ -32,8 +33,8 @@ class RegisterScreen extends StatelessWidget {
         passwordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please fill all fields',
+        'error'.tr(),
+        'please_fill_all'.tr(),
         backgroundColor: Colors.red.shade100,
         colorText: AppColors.black,
       );
@@ -41,8 +42,8 @@ class RegisterScreen extends StatelessWidget {
     }
     if (passwordController.text != confirmPasswordController.text) {
       Get.snackbar(
-        'Error',
-        'Passwords do not match',
+        'error'.tr(),
+        'passwords_not_match'.tr(),
         backgroundColor: AppColors.red,
         colorText: AppColors.yellow,
       );
@@ -61,7 +62,7 @@ class RegisterScreen extends StatelessWidget {
       illnessController.text.trim(),
       (message) {
         Get.snackbar(
-          "Success",
+          "success".tr(),
           message,
           backgroundColor: AppColors.primary100,
           colorText: AppColors.black,
@@ -70,7 +71,7 @@ class RegisterScreen extends StatelessWidget {
       },
       (error) {
         Get.snackbar(
-          "Error",
+          "error".tr(),
           error,
           backgroundColor: Colors.red.shade100,
           colorText: AppColors.black,
@@ -90,7 +91,7 @@ class RegisterScreen extends StatelessWidget {
             width: 380,
             padding: const EdgeInsets.symmetric(vertical:40, horizontal:10),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: context.appColors.surface,
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
@@ -131,7 +132,7 @@ class RegisterScreen extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.black,
+                                    color: context.appColors.textPrimary,
                                   ),
                                 ),
                                 Text(
@@ -139,7 +140,7 @@ class RegisterScreen extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
-                                    color: AppColors.grey200,
+                                    color: context.appColors.textSecondary,
                                   ),
                                 ),
                                 SizedBox(height: 25),
@@ -166,7 +167,7 @@ class RegisterScreen extends StatelessWidget {
                                           Radius.circular(16),
                                         ),
                                         borderSide: BorderSide(
-                                          color: AppColors.grey100,
+                                          color: context.appColors.border,
                                           width: 1,
                                         ),
                                       ),
@@ -175,7 +176,7 @@ class RegisterScreen extends StatelessWidget {
                                           Radius.circular(16),
                                         ),
                                         borderSide: BorderSide(
-                                          color: AppColors.grey100,
+                                          color: context.appColors.border,
                                           width: 1,
                                         ),
                                       ),
@@ -184,7 +185,7 @@ class RegisterScreen extends StatelessWidget {
                                           Radius.circular(16),
                                         ),
                                         borderSide: BorderSide(
-                                          color: AppColors.grey100,
+                                          color: context.appColors.border,
                                           width: 1,
                                         ),
                                       ),
@@ -209,7 +210,7 @@ class RegisterScreen extends StatelessWidget {
                                           Radius.circular(16),
                                         ),
                                         borderSide: BorderSide(
-                                          color: AppColors.grey100,
+                                          color: context.appColors.border,
                                           width: 1,
                                         ),
                                       ),
@@ -218,7 +219,7 @@ class RegisterScreen extends StatelessWidget {
                                           Radius.circular(16),
                                         ),
                                         borderSide: BorderSide(
-                                          color: AppColors.grey100,
+                                          color: context.appColors.border,
                                           width: 1,
                                         ),
                                       ),
@@ -227,7 +228,7 @@ class RegisterScreen extends StatelessWidget {
                                           Radius.circular(16),
                                         ),
                                         borderSide: BorderSide(
-                                          color: AppColors.grey100,
+                                          color: context.appColors.border,
                                           width: 1,
                                         ),
                                       ),
@@ -241,7 +242,7 @@ class RegisterScreen extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.neutral800,
+                                    color: context.appColors.textPrimary,
                                   ),
                                 ),
                                 SizedBox(height: 10),
@@ -272,7 +273,7 @@ class RegisterScreen extends StatelessWidget {
                                             Radius.circular(16),
                                           ),
                                           borderSide: BorderSide(
-                                            color: AppColors.grey100,
+                                            color: context.appColors.border,
                                             width: 1,
                                           ),
                                         ),
@@ -281,7 +282,7 @@ class RegisterScreen extends StatelessWidget {
                                             Radius.circular(16),
                                           ),
                                           borderSide: BorderSide(
-                                            color: AppColors.grey100,
+                                            color: context.appColors.border,
                                             width: 1,
                                           ),
                                         ),
@@ -290,7 +291,7 @@ class RegisterScreen extends StatelessWidget {
                                             Radius.circular(16),
                                           ),
                                           borderSide: BorderSide(
-                                            color: AppColors.grey100,
+                                            color: context.appColors.border,
                                             width: 1,
                                           ),
                                         ),
@@ -318,7 +319,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -327,7 +328,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -336,7 +337,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -360,7 +361,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -369,7 +370,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -378,7 +379,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -413,7 +414,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -422,7 +423,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -431,7 +432,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -467,7 +468,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -476,7 +477,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -485,7 +486,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -498,7 +499,7 @@ class RegisterScreen extends StatelessWidget {
                                   style: GoogleFonts.roboto(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.neutral800,
+                                    color: context.appColors.textPrimary,
                                   ),
                                 ),
                                 SizedBox(height:5),
@@ -521,7 +522,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -530,7 +531,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -539,7 +540,7 @@ class RegisterScreen extends StatelessWidget {
                                       Radius.circular(16),
                                     ),
                                     borderSide: BorderSide(
-                                      color: AppColors.grey100,
+                                      color: context.appColors.border,
                                       width: 1,
                                     ),
                                   ),
@@ -568,7 +569,7 @@ class RegisterScreen extends StatelessWidget {
                                     TextSpan(
                                       text: 'refering'.tr(),
                                       style: GoogleFonts.roboto(
-                                        color: AppColors.grey200,
+                                        color: context.appColors.textSecondary,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
                                       ),
@@ -584,7 +585,7 @@ class RegisterScreen extends StatelessWidget {
                                         TextSpan(
                                          text: 'and'.tr(),
                                           style: GoogleFonts.roboto(
-                                            color: AppColors.grey200,
+                                            color: context.appColors.textSecondary,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
                                           ),
@@ -606,7 +607,7 @@ class RegisterScreen extends StatelessWidget {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: Divider(color: AppColors.neutral300),
+                                    child: Divider(color: context.appColors.border),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -615,13 +616,13 @@ class RegisterScreen extends StatelessWidget {
                                     child: Text(
                                       'or'.tr(),
                                       style: GoogleFonts.roboto(
-                                        color: AppColors.neutral600,
+                                        color: context.appColors.textSecondary,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
                                   Expanded(
-                                    child: Divider(color: AppColors.neutral300),
+                                    child: Divider(color: context.appColors.border),
                                   ),
                                 ],
                               ),
@@ -635,7 +636,7 @@ class RegisterScreen extends StatelessWidget {
                                     style: GoogleFonts.roboto(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      color: AppColors.grey600,
+                                      color: context.appColors.textPrimary,
                                     ),
                                   ),
                                   TextButton(
@@ -674,7 +675,7 @@ class FooterLink extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: AppColors.neutral500,
+          color: context.appColors.textSecondary,
           fontSize: 11,
           decoration: TextDecoration.underline,
         ),

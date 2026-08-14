@@ -1,5 +1,8 @@
+﻿import 'dart:developer';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 
@@ -55,7 +58,7 @@ class AuthController extends GetxController {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Select Birthdate",
+              "select_birthdate".tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -73,8 +76,8 @@ class AuthController extends GetxController {
                 onDateChanged: (date) {
                   if (!isAdult(date)) {
                     Get.snackbar(
-                      "Error",
-                      "You must be at least 18 years old",
+                      "error".tr(),
+                      "adult_required".tr(),
                       backgroundColor: AppColors.primary50,
                       colorText: AppColors.primary900,
                     );
@@ -174,16 +177,30 @@ class AuthController extends GetxController {
         if (user.role.isNotEmpty) {
           await authService.storage.write('role', user.role);
         }
+        final fullName = '${user.firstName} ${user.lastName}'.trim();
+        if (fullName.isNotEmpty) {
+          await authService.storage.write('user_name', fullName);
+        }
+        if (user.email.isNotEmpty) {
+          await authService.storage.write('user_email', user.email);
+        }
       }
       onSuccess(result.message);
       String? role = authService.storage.read('role');
       role ??= selectedRole.value;
+      final fcmToken = authService.storage.read<String>('fcm_token') ?? '';
+      log('=== LOGIN OK ===');
+      log('user_id   : ${user?.id}');
+      log('role      : $role');
+      log('user_name : ${authService.storage.read<String>('user_name')}');
+      log('user_email: ${authService.storage.read<String>('user_email')}');
+      log('fcm_token : ${fcmToken.isEmpty ? 'NOT SET' : fcmToken}');
       if (role == "patient") {
         Get.offAllNamed(AppRouter.main);
       } else if (role == "doctor") {
-        // Get.offAllNamed(AppRouter.doctorHome);
-      } else if (role == "staff") {
-        // Get.offAllNamed(AppRouter.staffHome);
+        Get.offAllNamed(AppRouter.doctorHome);
+      } else if (role == "admin") {
+        Get.offAllNamed(AppRouter.adminHome);
       }
     } catch (e) {
       errorMessage.value = e.toString();
@@ -201,7 +218,7 @@ class AuthController extends GetxController {
     try {
       isloading.value = true;
       await authService.forgotPass(email);
-      onSuccess('Otp Code sent to your email');
+      onSuccess('otp_code_sent'.tr());
     } catch (e) {
       onError(e.toString());
     } finally {
@@ -220,12 +237,12 @@ class AuthController extends GetxController {
       await authService.verifyOtp(email, otp);
       onSuccess('Email verified successfully.');
       Get.offNamed(
-  AppRouter.resetPass,
-  arguments: {
-    'email': email,
-    'otp_code': otp,
-  },
-);
+        AppRouter.resetPass,
+        arguments: {
+          'email': email,
+          'otp_code': otp,
+        },
+      );
     } catch (e) {
       onError(e.toString());
     } finally {

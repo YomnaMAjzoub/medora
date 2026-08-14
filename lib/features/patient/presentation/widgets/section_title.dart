@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 /// A section header used across the patient home screen:
 /// a bold title on the left and an optional "See all" action on the right.
@@ -26,7 +27,7 @@ class SectionTitle extends StatelessWidget {
           style: GoogleFonts.roboto(
             fontSize: 20,
             fontWeight: FontWeight.w500,
-            color: AppColors.grey500,
+            color: context.appColors.textPrimary,
           ),
         ),
         if (actionLabel != null)

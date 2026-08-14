@@ -1,16 +1,16 @@
-import 'package:easy_localization/easy_localization.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:medora_git/common/widgets/search_field.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
+import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
+import 'package:medora_git/features/patient/business_layer/controller/patient_account_controller.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
-import 'package:medora_git/features/patient/data/models/doctor_summary_model.dart';
-import 'package:medora_git/features/patient/data/models/offer_model.dart';
-
-import 'package:medora_git/features/patient/data/models/specialty_model.dart';
 
 import 'package:medora_git/features/patient/presentation/widgets/next_appointment_card.dart';
 import 'package:medora_git/features/patient/presentation/widgets/patient_drawer.dart';
@@ -21,65 +21,16 @@ import 'package:medora_git/features/patient/presentation/widgets/specialty_item.
 class PatientHomeScreen extends StatelessWidget {
   const PatientHomeScreen({super.key});
 
-  static const _offers = <OfferModel>[
-    OfferModel(
-      id: '1',
-      title: '20% off your first checkup',
-      subtitle: 'Book any clinic visit this week',
-    ),
-    OfferModel(
-      id: '2',
-      title: 'Free home visit consultation',
-      subtitle: 'Available for new patients',
-    ),
-    OfferModel(
-      id: '3',
-      title: 'Online consultations now live',
-      subtitle: 'Talk to a doctor from home',
-    ),
-  ];
-
-  static const _specialties = <SpecialtyModel>[
-    SpecialtyModel(id: '1', name: 'Cardiology', icon: Icons.favorite_rounded),
-    SpecialtyModel(
-      id: '2',
-      name: 'Dentistry',
-      icon: Icons.medical_services_rounded,
-    ),
-    SpecialtyModel(
-      id: '3',
-      name: 'Dermatology',
-      icon: Icons.face_retouching_natural_rounded,
-    ),
-    SpecialtyModel(id: '4', name: 'Pediatrics', icon: Icons.child_care_rounded),
-    SpecialtyModel(
-      id: '5',
-      name: 'Orthopedics',
-      icon: Icons.accessibility_new_rounded,
-    ),
-    SpecialtyModel(id: '6', name: 'Eyes', icon: Icons.visibility_rounded),
-  ];
-
-  static final _nextAppointment = AppointmentModel(
-    id: '1',
-    doctor: const DoctorSummaryModel(
-      id: '1',
-      name: 'Dr. Sarah Youssef',
-      specialty: 'Cardiologist',
-      imageUrl: null,
-    ),
-    date: DateTime.now().add(const Duration(days: 2)),
-    time: '10:30 AM',
-    visitType: VisitType.clinic,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final discovery = Get.find<DoctorDiscoveryController>();
+    final account = Get.find<PatientAccountController>();
+
     return Scaffold(
       drawer: PatientDrawer(),
-      backgroundColor: AppColors.mainScreen,
+      backgroundColor: context.appColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.mainScreen,
+        backgroundColor: context.appColors.background,
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -91,9 +42,9 @@ class PatientHomeScreen extends StatelessWidget {
           },
         ),
         title: Text(
-          'Welecome, Yomna',
+          'patient_home_welecome'.tr(),
           style: GoogleFonts.roboto(
-            color: AppColors.grey600,
+            color: context.appColors.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w500,
           ),
@@ -122,68 +73,145 @@ class PatientHomeScreen extends StatelessWidget {
                 SearchField(
                   width: double.infinity,
                   height: 48,
-                  hint: 'Search doctors, specialties...',
+                  hint: 'search_hint'.tr(),
                   prefix: const Icon(Icons.search, color: AppColors.primary700),
                   suffix: const Icon(
                     Icons.tune_rounded,
                     color: AppColors.primary700,
                   ),
-                  onTap: _noop,
+                  onTap: () => Get.toNamed(AppRouter.doctorsList),
                 ),
                 const SizedBox(height: 24),
 
                 SectionTitle(title: 'offers'.tr()),
                 const SizedBox(height: 12),
-                SliderComponent(
-                  offers: _offers,
-                  onOfferTap: (offer) {
-                    if (offer.id == '3') {
-                      Get.toNamed(AppRouter.conversations);
-                    }
+                Obx(
+                  () {
+                    final offers = account.offerModels;
+                    if (offers.isEmpty) return const SizedBox.shrink();
+                    return SliderComponent(
+                      offers: offers,
+                      onOfferTap: (offer) {
+                        if (offer.id == '3') {
+                          Get.toNamed(AppRouter.conversations);
+                        }
+                      },
+                    );
                   },
                 ),
 
                 const SizedBox(height: 24),
 
-                SectionTitle(
-                  title: 'next_title'.tr(),
-                  actionLabel: 'view_all'.tr(),
-                  onActionTap: _noop,
-                ),
-                const SizedBox(height: 12),
-                NextAppointmentCard(
-                  appointment: _nextAppointment,
-                  onTap: _noop,
-                ),
+                Obx(() {
+                  final next = account.nextAppointment;
+                  if (next == null) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SectionTitle(
+                        title: 'next_title'.tr(),
+                        actionLabel: 'view_all'.tr(),
+                        onActionTap: () => Get.toNamed(AppRouter.doctorsList),
+                      ),
+                      const SizedBox(height: 12),
+                      NextAppointmentCard(
+                        appointment: next,
+                        onTap: () => Get.toNamed(AppRouter.doctorsList),
+                        onActionTap: next.visitType == VisitType.online
+                            ? () => _joinMeeting(next)
+                            : null,
+                      ),
+                    ],
+                  );
+                }),
 
                 const SizedBox(height: 24),
 
                 SectionTitle(
                   title: 'specialists'.tr(),
-                  actionLabel: 'See all',
-                  onActionTap: _noop,
+                  actionLabel: 'see_all'.tr(),
+                  onActionTap: () => Get.toNamed(AppRouter.doctorsList),
                 ),
                 const SizedBox(height: 14),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.75,
-                  width: MediaQuery.of(context).size.width * 0.91,
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 2.5,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 8,
-                    ),
-                    itemCount: _specialties.length,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return SpecialtyItem(
-                        specialty: _specialties[index],
-                        onTap: _noop,
+                Obx(
+                  () {
+                    if (discovery.isLoadingSpecializations.value) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary700,
+                          ),
+                        ),
                       );
-                    },
-                  ),
+                    }
+                    if (discovery.specializationsError.value.isNotEmpty &&
+                        discovery.specialties.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                discovery.specializationsError.value,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.roboto(
+                                  fontSize: 13,
+                                  color: context.appColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: discovery.fetchSpecializations,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary900,
+                                  foregroundColor: AppColors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Text('retry'.tr()),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    final specialties = discovery.specialties;
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.75,
+                      width: MediaQuery.of(context).size.width * 0.91,
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 2.5,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                        ),
+                        itemCount: specialties.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final specialty = specialties[index];
+                          return SpecialtyItem(
+                            specialty: specialty,
+                            onTap: () {
+                              discovery.applyFilter(
+                                specialization: specialty.name,
+                              );
+                              Get.toNamed(
+                                AppRouter.doctorsList,
+                                arguments: {
+                                  'specialization': specialty.name,
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
               ],
@@ -194,5 +222,23 @@ class PatientHomeScreen extends StatelessWidget {
     );
   }
 
-  static void _noop() {}
+  void _joinMeeting(AppointmentModel appointment) {
+    final link = appointment.meetLink;
+    if (link == null || link.isEmpty) {
+      Get.snackbar('Warning', 'No meeting link for this appointment.');
+      return;
+    }
+    Get.defaultDialog(
+      title: 'join_online_visit'.tr(),
+      middleText: link,
+      textCancel: 'cancel'.tr(),
+      textConfirm: 'join'.tr(),
+      confirmTextColor: AppColors.white,
+      buttonColor: AppColors.primary900,
+      onConfirm: () {
+        Get.back();
+        launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication);
+      },
+    );
+  }
 }

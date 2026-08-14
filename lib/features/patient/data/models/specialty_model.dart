@@ -13,12 +13,12 @@ class SpecialtyModel {
     return SpecialtyModel(
       id: json['id'].toString(),
       name: json['name'] as String,
-      icon: _iconFromKey(json['icon'] as String?),
+      icon: iconFor(json['name'] as String? ?? ''),
     );
   }
 
-  static IconData _iconFromKey(String? key) {
-    switch (key) {
+  static IconData iconFor(String name) {
+    switch (name.toLowerCase()) {
       case 'cardiology':
         return Icons.favorite_rounded;
       case 'dentistry':

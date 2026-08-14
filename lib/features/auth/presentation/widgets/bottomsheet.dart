@@ -1,6 +1,8 @@
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
 
@@ -10,14 +12,14 @@ void showBirthDatePicker(BuildContext context) {
     Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.appColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Select Birthdate",
+            "select_birthdate".tr(),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -35,8 +37,8 @@ void showBirthDatePicker(BuildContext context) {
               onDateChanged: (date) {
                 if (!controller.isAdult(date)) {
                   Get.snackbar(
-                    "Error",
-                    "You must be at least 18 years old",
+                    "error".tr(),
+                    "adult_required".tr(),
                     backgroundColor: AppColors.primary50,
                     colorText: AppColors.primary900,
                   );

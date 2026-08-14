@@ -1,7 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/chat/business_layer/controller/chat_controller.dart';
 import 'package:medora_git/features/chat/data/models/chat_message_model.dart';
 
@@ -19,8 +20,8 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     final args = Get.arguments as Map<String, dynamic>;
-    final doctorId = args['doctorId'] as String;
-    Get.find<ChatController>().openConversation(doctorId: doctorId);
+    final otherPartyId = args['otherPartyId'] as String;
+    Get.find<ChatController>().openConversation(otherPartyId: otherPartyId);
   }
 
   @override
@@ -39,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final args = Get.arguments as Map<String, dynamic>;
-    final title = args['title'] as String? ?? 'Chat';
+    final title = args['title'] as String? ?? 'chat_title'.tr();
 
     return Scaffold(
       appBar: AppBar(
@@ -53,7 +54,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Obx(() {
               final controller = Get.find<ChatController>();
               if (controller.messages.isEmpty) {
-                return const Center(child: Text('No messages yet.'));
+                return Center(child: Text('no_data'.tr()));
               }
               return ListView.builder(
                 reverse: true,
@@ -78,9 +79,9 @@ class _ChatScreenState extends State<ChatScreen> {
       top: false,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          border: Border(top: BorderSide(color: AppColors.neutral200)),
+        decoration: BoxDecoration(
+          color: context.appColors.surface,
+          border: Border(top: BorderSide(color: context.appColors.border)),
         ),
         child: Row(
           children: [
@@ -90,9 +91,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _send(),
                 decoration: InputDecoration(
-                  hintText: 'Type a message...',
+                  hintText: 'message_hint'.tr(),
                   filled: true,
-                  fillColor: AppColors.neutral100,
+                  fillColor: context.appColors.inputFill,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 10,
@@ -138,7 +139,7 @@ class _MessageBubble extends GetView<ChatController> {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: isMine ? AppColors.primary900 : AppColors.neutral200,
+          color: isMine ? AppColors.primary900 : context.appColors.border,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -153,7 +154,7 @@ class _MessageBubble extends GetView<ChatController> {
             Text(
               message.text,
               style: TextStyle(
-                color: isMine ? AppColors.white : AppColors.neutral900,
+                color: isMine ? AppColors.white : context.appColors.textPrimary,
                 fontSize: 15,
               ),
             ),
@@ -166,7 +167,7 @@ class _MessageBubble extends GetView<ChatController> {
                     fontSize: 11,
                     color: isMine
                         ? AppColors.white.withValues(alpha: 0.7)
-                        : AppColors.neutral500,
+                        : context.appColors.textSecondary,
                   ),
                 ),
               ),

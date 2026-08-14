@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 class CustomFormField extends StatelessWidget {
   const CustomFormField({
@@ -66,7 +66,7 @@ class CustomFormField extends StatelessWidget {
           hintStyle: GoogleFonts.roboto(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: AppColors.grey200,
+            color: context.appColors.textHint,
           ),
           contentPadding: contentpadding,
           prefixIconConstraints: prefixConstraints,

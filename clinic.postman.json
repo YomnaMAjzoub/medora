@@ -1,0 +1,2645 @@
+{
+  "info": {
+    "_postman_id": "8fe00fae-6b0b-44df-b7dd-0360362c75fd",
+    "name": "clinic",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50161166",
+    "_collection_link": "https://go.postman.co/collection/50161166-8fe00fae-6b0b-44df-b7dd-0360362c75fd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "log in super admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "superadmin@gmail.com",
+              "type": "text",
+              "uuid": "70770bb2-6c63-472d-bf1d-e975e225de12"
+            },
+            {
+              "key": "password",
+              "value": "password123",
+              "type": "text",
+              "uuid": "d15297cd-c1dd-444a-869c-b7095d904e13"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add admin1",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "1|ZEiisikbHDyuJYcCvW68IqZWhYrnupWEdVITo7X5795405fd",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "value": "admin",
+              "type": "text",
+              "uuid": "1e4aaeb3-6087-4335-8024-b8506ee006b0"
+            },
+            {
+              "key": "last_name",
+              "value": "1",
+              "type": "text",
+              "uuid": "b783951c-ec5d-4c12-a28a-bcc5a907235b"
+            },
+            {
+              "key": "email",
+              "value": "admin@gmail.com",
+              "type": "text",
+              "uuid": "004eaa21-5ef8-41f5-ad9f-39ac73f90c36"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "8a9178c8-05bd-4b4e-94cf-849058aee1b0"
+            },
+            {
+              "key": "phone",
+              "value": "0996833977",
+              "type": "text",
+              "uuid": "84b85c68-19c6-4f2d-80ef-038ea2846c3d"
+            },
+            {
+              "key": "gender",
+              "value": "male",
+              "type": "text",
+              "uuid": "d756db64-35ff-4a64-b2ce-a3ab6ba21763"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addAdmin",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addAdmin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add admin2",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "1|ZEiisikbHDyuJYcCvW68IqZWhYrnupWEdVITo7X5795405fd",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "value": "admin",
+              "type": "text",
+              "uuid": "1e4aaeb3-6087-4335-8024-b8506ee006b0"
+            },
+            {
+              "key": "last_name",
+              "value": "2",
+              "type": "text",
+              "uuid": "b783951c-ec5d-4c12-a28a-bcc5a907235b"
+            },
+            {
+              "key": "email",
+              "value": "admin2@gmail.com",
+              "type": "text",
+              "uuid": "004eaa21-5ef8-41f5-ad9f-39ac73f90c36"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "8a9178c8-05bd-4b4e-94cf-849058aee1b0"
+            },
+            {
+              "key": "phone",
+              "value": "0937464322",
+              "type": "text",
+              "uuid": "84b85c68-19c6-4f2d-80ef-038ea2846c3d"
+            },
+            {
+              "key": "gender",
+              "value": "male",
+              "type": "text",
+              "uuid": "d756db64-35ff-4a64-b2ce-a3ab6ba21763"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addAdmin",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addAdmin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add admin3",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "1|ZEiisikbHDyuJYcCvW68IqZWhYrnupWEdVITo7X5795405fd",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "value": "admin",
+              "type": "text",
+              "uuid": "1e4aaeb3-6087-4335-8024-b8506ee006b0"
+            },
+            {
+              "key": "last_name",
+              "value": "3",
+              "type": "text",
+              "uuid": "b783951c-ec5d-4c12-a28a-bcc5a907235b"
+            },
+            {
+              "key": "email",
+              "value": "admin3@gmail.com",
+              "type": "text",
+              "uuid": "004eaa21-5ef8-41f5-ad9f-39ac73f90c36"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "8a9178c8-05bd-4b4e-94cf-849058aee1b0"
+            },
+            {
+              "key": "phone",
+              "value": "0937464323",
+              "type": "text",
+              "uuid": "84b85c68-19c6-4f2d-80ef-038ea2846c3d"
+            },
+            {
+              "key": "gender",
+              "value": "male",
+              "type": "text",
+              "uuid": "d756db64-35ff-4a64-b2ce-a3ab6ba21763"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addAdmin",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addAdmin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete admin",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "1|cZvnYqcJeP9VyMdZ7LBENh7xfVEBszKgSAv5S8eHfb3570ef",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/deleteAdmin?id=2",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "deleteAdmin"
+          ],
+          "query": [
+            {
+              "key": "id",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "show all admins",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "1|VK7eHDx8YvCKvIyOW8EKWCMk46YHJxB6VAK4PFCy88cebad1",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getAllAdmins",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getAllAdmins"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Users By Role(doctor\\admin)",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "6|zegwtVBvXtGMiklIolln52U0YiAtDO28yb9RoXiY48f31ef3",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getUsersByRole?role=doctor",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getUsersByRole"
+          ],
+          "query": [
+            {
+              "key": "role",
+              "value": "doctor"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "log in admin 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "admin2@gmail.com",
+              "type": "text",
+              "uuid": "fc90f7ed-5b26-41ed-92c0-5a6faace2f8b"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "85eaa9c5-047f-4b60-91f3-7f711ecb1a4d"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add doctor 1",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2|YHw6xoiG06Tio9qtbSJypr43w5441cbgpaDSjwG8a6d35a0c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "type": "text",
+              "uuid": "e4839024-c0cd-45e1-b9a1-103591a3f4f9",
+              "value": "doctor"
+            },
+            {
+              "key": "last_name",
+              "type": "text",
+              "uuid": "8638ba42-7a77-4eb2-8063-92169bdf306e",
+              "value": "1"
+            },
+            {
+              "key": "email",
+              "type": "text",
+              "uuid": "2a424987-0c2e-4058-8c9d-d55be41dbbca",
+              "value": "talajoumani000@gmail.com"
+            },
+            {
+              "key": "password",
+              "type": "text",
+              "uuid": "75d657c6-1dbd-4f31-a6b3-f89ed2559482",
+              "value": "12345678"
+            },
+            {
+              "key": "specialization",
+              "type": "text",
+              "uuid": "ecaf05d3-777e-455c-a6a5-49c4914f5726",
+              "value": "Dermatology"
+            },
+            {
+              "key": "home_visit",
+              "type": "text",
+              "uuid": "4d8440f6-be06-4d84-89f7-0e2483ff05ec",
+              "value": "1"
+            },
+            {
+              "key": "phone",
+              "type": "text",
+              "uuid": "9b6f0751-9ae5-4c87-b31b-80b7c84317c6",
+              "value": "0998888888"
+            },
+            {
+              "key": "password_confirmation",
+              "type": "text",
+              "uuid": "f44e1912-1d47-4e2e-abff-41a24fdf1bdc",
+              "value": "12345678"
+            },
+            {
+              "key": "day",
+              "type": "text",
+              "uuid": "51d331d0-bb9a-4495-b9b0-2602d8af9dee",
+              "value": "All"
+            },
+            {
+              "key": "start_time",
+              "type": "text",
+              "uuid": "364cc65e-5690-4a23-9ef7-6fe09c82829f",
+              "value": "08:00"
+            },
+            {
+              "key": "end_time",
+              "type": "text",
+              "uuid": "395339c2-8a17-4bc0-86c1-8c023ece081f",
+              "value": "17:00"
+            },
+            {
+              "key": "gender",
+              "type": "text",
+              "uuid": "17483307-a503-4620-9729-dbad110028e7",
+              "value": "male"
+            },
+            {
+              "key": "price",
+              "type": "text",
+              "uuid": "9c21d279-2495-44f9-80bd-80734446be95",
+              "value": "10.00"
+            },
+            {
+              "key": "profile_photo",
+              "type": "file",
+              "uuid": "3adf3a80-6bce-4aab-b3ee-5474b1f02528",
+              "src": "/C:/Users/Tala/OneDrive/Pictures/WhatsApp Image 2025-07-01 at 13.40.27_87e03e7e.jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addDoctor",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addDoctor"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "log in admin3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "admin3@gmail.com",
+              "type": "text",
+              "uuid": "70770bb2-6c63-472d-bf1d-e975e225de12"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "d15297cd-c1dd-444a-869c-b7095d904e13"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add doctor2",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2|YHw6xoiG06Tio9qtbSJypr43w5441cbgpaDSjwG8a6d35a0c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "value": "doctor",
+              "type": "text",
+              "uuid": "e4839024-c0cd-45e1-b9a1-103591a3f4f9"
+            },
+            {
+              "key": "last_name",
+              "value": "2",
+              "type": "text",
+              "uuid": "8638ba42-7a77-4eb2-8063-92169bdf306e"
+            },
+            {
+              "key": "email",
+              "value": "doctor2@gmail.com",
+              "type": "text",
+              "uuid": "2a424987-0c2e-4058-8c9d-d55be41dbbca"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "75d657c6-1dbd-4f31-a6b3-f89ed2559482"
+            },
+            {
+              "key": "specialization",
+              "value": "Dermatology",
+              "type": "text",
+              "uuid": "ecaf05d3-777e-455c-a6a5-49c4914f5726"
+            },
+            {
+              "key": "home_visit",
+              "value": "0",
+              "type": "text",
+              "uuid": "4d8440f6-be06-4d84-89f7-0e2483ff05ec"
+            },
+            {
+              "key": "phone",
+              "value": "0999999912",
+              "type": "text",
+              "uuid": "9b6f0751-9ae5-4c87-b31b-80b7c84317c6"
+            },
+            {
+              "key": "password_confirmation",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "f44e1912-1d47-4e2e-abff-41a24fdf1bdc"
+            },
+            {
+              "key": "day",
+              "value": "All",
+              "type": "text",
+              "uuid": "51d331d0-bb9a-4495-b9b0-2602d8af9dee"
+            },
+            {
+              "key": "start_time",
+              "value": "08:00",
+              "type": "text",
+              "uuid": "364cc65e-5690-4a23-9ef7-6fe09c82829f"
+            },
+            {
+              "key": "end_time",
+              "value": "17:00",
+              "type": "text",
+              "uuid": "395339c2-8a17-4bc0-86c1-8c023ece081f"
+            },
+            {
+              "key": "gender",
+              "value": "male",
+              "type": "text",
+              "uuid": "17483307-a503-4620-9729-dbad110028e7"
+            },
+            {
+              "key": "price",
+              "value": "80.00",
+              "type": "text",
+              "uuid": "0fb05ff6-f79d-49d0-8749-c8f715d0a58b"
+            },
+            {
+              "key": "profile_photo",
+              "type": "file",
+              "uuid": "d8add08c-4851-452a-b699-ea47a5387548",
+              "src": "/C:/Users/Tala/OneDrive/Pictures/WhatsApp Image 2025-07-01 at 13.42.35_de09b34e.jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addDoctor",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addDoctor"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add doctor3",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2|YHw6xoiG06Tio9qtbSJypr43w5441cbgpaDSjwG8a6d35a0c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "value": "doctor",
+              "type": "text",
+              "uuid": "e4839024-c0cd-45e1-b9a1-103591a3f4f9"
+            },
+            {
+              "key": "last_name",
+              "value": "3",
+              "type": "text",
+              "uuid": "8638ba42-7a77-4eb2-8063-92169bdf306e"
+            },
+            {
+              "key": "email",
+              "value": "doctor3@gmail.com",
+              "type": "text",
+              "uuid": "2a424987-0c2e-4058-8c9d-d55be41dbbca"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "75d657c6-1dbd-4f31-a6b3-f89ed2559482"
+            },
+            {
+              "key": "specialization",
+              "value": "Pediatrics",
+              "type": "text",
+              "uuid": "ecaf05d3-777e-455c-a6a5-49c4914f5726"
+            },
+            {
+              "key": "home_visit",
+              "value": "0",
+              "type": "text",
+              "uuid": "4d8440f6-be06-4d84-89f7-0e2483ff05ec"
+            },
+            {
+              "key": "phone",
+              "value": "0999999922",
+              "type": "text",
+              "uuid": "9b6f0751-9ae5-4c87-b31b-80b7c84317c6"
+            },
+            {
+              "key": "password_confirmation",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "f44e1912-1d47-4e2e-abff-41a24fdf1bdc"
+            },
+            {
+              "key": "day",
+              "value": "All",
+              "type": "text",
+              "uuid": "51d331d0-bb9a-4495-b9b0-2602d8af9dee"
+            },
+            {
+              "key": "start_time",
+              "value": "08:00",
+              "type": "text",
+              "uuid": "364cc65e-5690-4a23-9ef7-6fe09c82829f"
+            },
+            {
+              "key": "end_time",
+              "value": "17:00",
+              "type": "text",
+              "uuid": "395339c2-8a17-4bc0-86c1-8c023ece081f"
+            },
+            {
+              "key": "gender",
+              "value": "male",
+              "type": "text",
+              "uuid": "17483307-a503-4620-9729-dbad110028e7"
+            },
+            {
+              "key": "price",
+              "value": "90.00",
+              "type": "text",
+              "uuid": "056511de-a4f6-497f-85da-75fe2e59e161"
+            },
+            {
+              "key": "profile_photo",
+              "type": "file",
+              "uuid": "d321baa5-e53e-489d-8a29-62b614ebabca",
+              "src": "/C:/Users/Tala/OneDrive/Pictures/WhatsApp Image 2025-07-01 at 13.42.35_de09b34e.jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addDoctor",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addDoctor"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "show image for doctor",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/storage/doctor_photo/4a1c3e78-f4a1-48cc-bbf2-11944b74ad2c.jpg",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "storage",
+            "doctor_photo",
+            "4a1c3e78-f4a1-48cc-bbf2-11944b74ad2c.jpg"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete doctor",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2|YHw6xoiG06Tio9qtbSJypr43w5441cbgpaDSjwG8a6d35a0c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "doctorId",
+              "value": "",
+              "type": "text",
+              "uuid": "91eb3f73-62d2-41b0-82c9-c5edad3cfbd1",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/deleteDoctor?doctorId=7",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "deleteDoctor"
+          ],
+          "query": [
+            {
+              "key": "doctorId",
+              "value": "7"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "show doctors for admin",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2|YHw6xoiG06Tio9qtbSJypr43w5441cbgpaDSjwG8a6d35a0c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getAllDoctors",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getAllDoctors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update Doctor",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2|YHw6xoiG06Tio9qtbSJypr43w5441cbgpaDSjwG8a6d35a0c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "_method",
+              "value": "Put",
+              "type": "text",
+              "uuid": "8e338b18-c2b0-47fd-88ea-1ea3810710b0"
+            },
+            {
+              "key": "first_name",
+              "value": ";kljkhjghgf",
+              "type": "text",
+              "uuid": "96bd2d2e-0410-4b99-9fcf-773efa07e018",
+              "disabled": true
+            },
+            {
+              "key": "day",
+              "value": "Tuesday",
+              "type": "text",
+              "uuid": "c4326d95-ee6e-4a73-873c-14d6e0e17f24",
+              "disabled": true
+            },
+            {
+              "key": "price",
+              "value": "1000",
+              "type": "text",
+              "uuid": "1074c89e-1eb4-4d95-932f-66c9df34082c"
+            },
+            {
+              "key": "password",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "f7eac919-98f6-4cf0-9afb-9c771b58ddfb"
+            },
+            {
+              "key": "password_confirmation",
+              "value": "12345678",
+              "type": "text",
+              "uuid": "800c2d3f-4b70-4013-96d4-baa01d1ba04c"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/updateDoctor?doctorId=1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "updateDoctor"
+          ],
+          "query": [
+            {
+              "key": "doctorId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "register patient",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "first_name",
+              "value": "manal",
+              "type": "text",
+              "uuid": "24a1c540-b5b3-4ad2-8a47-79432397c0f5"
+            },
+            {
+              "key": "last_name",
+              "value": "alali",
+              "type": "text",
+              "uuid": "a6d948c5-dd76-418d-a503-b71ad9f08ccc"
+            },
+            {
+              "key": "email",
+              "value": "manal0931404805@gmail.com",
+              "type": "text",
+              "uuid": "6a28fc9f-fdbf-4268-9666-d4c23112701c"
+            },
+            {
+              "key": "password",
+              "value": "12345679",
+              "type": "text",
+              "uuid": "e3cc351e-6759-4987-b265-23b984d1314d"
+            },
+            {
+              "key": "gender",
+              "value": "female",
+              "type": "text",
+              "uuid": "796e7f00-c8f3-4481-98a2-0d9d6bb74150"
+            },
+            {
+              "key": "phone",
+              "value": "093140480",
+              "type": "text",
+              "uuid": "bcbe37db-0933-4630-854c-824800ff5c22"
+            },
+            {
+              "key": "birth",
+              "value": "1975-6-1",
+              "type": "text",
+              "uuid": "de3367a3-a314-4df3-a048-0a26537d395f"
+            },
+            {
+              "key": "password_confirmation",
+              "value": "12345679",
+              "type": "text",
+              "uuid": "332c9036-ed5c-41b7-b177-88b27e6d64f4"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/register",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verify-otp",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "manal0931404805@gmail.com",
+              "type": "text",
+              "uuid": "f486a49e-9c15-4212-a79f-9e66aa190aee"
+            },
+            {
+              "key": "otp_code",
+              "value": "175811",
+              "type": "text",
+              "uuid": "4b0bab10-5f7b-4c33-8f15-eac3512cadd6"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/verify-otp",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "verify-otp"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login patient1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "manal0931404805@gmail.com",
+              "type": "text",
+              "uuid": "fc90f7ed-5b26-41ed-92c0-5a6faace2f8b"
+            },
+            {
+              "key": "password",
+              "value": "12345679",
+              "type": "text",
+              "uuid": "85eaa9c5-047f-4b60-91f3-7f711ecb1a4d"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "forgot Password",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "manal0931404805@gmail.com",
+              "type": "text",
+              "uuid": "3a85e38c-a06c-4ec9-8b78-715081e1182f"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/forgotPassword",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "forgotPassword"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verify Reset Otp",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "manal0931404805@gmail.com",
+              "type": "text",
+              "uuid": "576a5378-6039-43d8-9640-6c109882784e"
+            },
+            {
+              "key": "otp_code",
+              "value": "957521",
+              "type": "text",
+              "uuid": "c369ffdb-3b0e-4aec-b846-ec1e332451c6"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/verifyResetOtp",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "verifyResetOtp"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "reset Password",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "manal0931404805@gmail.com",
+              "type": "text",
+              "uuid": "672d101d-59c7-47e1-b9ef-3e709cd60a08"
+            },
+            {
+              "key": "new_password",
+              "value": "123456789",
+              "type": "text",
+              "uuid": "38c60d1d-78c3-45b8-84e5-829fa013fa1b"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/resetPassword",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "resetPassword"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "show day and times for appointment",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getDoctorMonthlyCalendar?doctor_id=1&date=2026-08-08",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getDoctorMonthlyCalendar"
+          ],
+          "query": [
+            {
+              "key": "doctor_id",
+              "value": "1"
+            },
+            {
+              "key": "date",
+              "value": "2026-08-08"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add clinic booking",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "api_key",
+            "value": " E4B73FEE-F492-4607-A38D-852B0EBC91C9",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "doctor_id",
+              "type": "text",
+              "uuid": "5a44d457-071d-4210-ace1-87542474754c",
+              "value": "5"
+            },
+            {
+              "key": "type",
+              "type": "text",
+              "uuid": "f7d0dec2-045b-41c2-a7a6-3078ad790fcf",
+              "value": "clinic"
+            },
+            {
+              "key": "appointment_time",
+              "type": "text",
+              "uuid": "8069bd4c-a6eb-4e21-860d-57e366708397",
+              "value": "2026-08-09 17:00"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addBooking",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addBooking"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "payment Success clinic",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/paymentSuccess?appointment_id=5",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "paymentSuccess"
+          ],
+          "query": [
+            {
+              "key": "appointment_id",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "payment Cancel",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/paymentCancel?appointment_id=1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "paymentCancel"
+          ],
+          "query": [
+            {
+              "key": "appointment_id",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add online book",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "api_key",
+            "value": " E4B73FEE-F492-4607-A38D-852B0EBC91C9",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "doctor_id",
+              "type": "text",
+              "uuid": "63e98ffc-7a5f-40d6-b631-139876bcd0e1",
+              "value": "5"
+            },
+            {
+              "key": "appointment_time",
+              "type": "text",
+              "uuid": "f09a61ff-fbca-4083-b8f6-59bd6bd2bed2",
+              "value": "2026-08-08 17:30"
+            },
+            {
+              "key": "type",
+              "type": "text",
+              "uuid": "049a9ecb-f5fa-461a-b57e-5d245e8fd40e",
+              "value": "online"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addBooking",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addBooking"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "payment Success online",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/paymentSuccess?appointment_id=3",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "paymentSuccess"
+          ],
+          "query": [
+            {
+              "key": "appointment_id",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add Location",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "address",
+              "value": "damascus",
+              "type": "text",
+              "uuid": "2f0e6a3a-4667-4966-8d2c-9e5f1b663263"
+            },
+            {
+              "key": "latitude",
+              "value": "33.513",
+              "type": "text",
+              "uuid": "512fb4b5-c557-4f2b-9e2a-91d8161b48c0"
+            },
+            {
+              "key": "longitude",
+              "value": "36.276",
+              "type": "text",
+              "uuid": "649b5847-58d4-417f-ba10-d7bc83cc3015"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addLocation",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addLocation"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add home Booking",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "doctor_id",
+              "value": "5",
+              "type": "text",
+              "uuid": "34b2ff6e-3f72-43de-8b43-2b7c268e2908"
+            },
+            {
+              "key": "appointment_time",
+              "value": "2026-08-08 18:00",
+              "type": "text",
+              "uuid": "e3205849-044f-41a1-ac4d-231827c4ef66"
+            },
+            {
+              "key": "type",
+              "value": "home",
+              "type": "text",
+              "uuid": "6608728a-3c20-4176-b6c9-552df86e5fe9"
+            },
+            {
+              "key": "location_id",
+              "value": "1",
+              "type": "text",
+              "uuid": "f1c89f48-47c1-447a-915b-ff6885ceecd5"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addBooking",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addBooking"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "payment Success home",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/paymentSuccess?appointment_id=4",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "paymentSuccess"
+          ],
+          "query": [
+            {
+              "key": "appointment_id",
+              "value": "4"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "confirm book after reminder",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/appointments/4/app-confirm",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "appointments",
+            "4",
+            "app-confirm"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login doctor1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "talajoumani000@gmail.com",
+              "type": "text",
+              "uuid": "e82ff8af-581b-4a27-ad1e-955432cfa229"
+            },
+            {
+              "key": "password",
+              "value": "12345981",
+              "type": "text",
+              "uuid": "da3cb385-41cf-45f1-b569-45c6c556a73a"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "complete Final Payment and create medical record",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "3|qFAwUiKtIJvh8Z6KOs0rIYr0vcsMCupAv0ACWYR13837d7a0",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/completeFinalPayment?appointment_id=5",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "completeFinalPayment"
+          ],
+          "query": [
+            {
+              "key": "appointment_id",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get daily appointment for doctor",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "4|Ewlk2ZT1fYCPNxlRvatnxdA9lsF8DodSVkagSzVVf661ed62",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/appointmentForDoctor",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "appointmentForDoctor"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Medical Record",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "4|Ewlk2ZT1fYCPNxlRvatnxdA9lsF8DodSVkagSzVVf661ed62",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getMedicalRecord/9",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getMedicalRecord",
+            "9"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update medical record for lest appointment",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "6|cSMsnHimLufsOLuFicGxeYjsMvf6qPoOyIr4n32a6004fc70",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "diagnosis",
+              "value": "lkjhgfdeنمتالبي",
+              "type": "text",
+              "uuid": "f445114a-7380-4f6e-b19e-f9eff5982754"
+            },
+            {
+              "key": "prescription",
+              "value": ".lkjhgfds",
+              "type": "text",
+              "uuid": "af24df87-0dc5-47de-8722-698c45f1ee71"
+            },
+            {
+              "key": "notes",
+              "value": ";olikujyhtgrte",
+              "type": "text",
+              "uuid": "882419b8-2737-491e-9220-4447c7fbb766"
+            },
+            {
+              "key": "images\n",
+              "type": "file",
+              "uuid": "5a35cca6-be4c-4fc3-9185-5f0551ae18ba",
+              "src": "postman-cloud:///1f129d58-3835-4070-bc84-50a8982c5746"
+            },
+            {
+              "key": "appointment_id",
+              "value": "5",
+              "type": "text",
+              "uuid": "9beabcf9-ae29-4af4-89c9-d1fbf3971458"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/updateMedicalRecord",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "updateMedicalRecord"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get available Doctors For Patient",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getAllDoctorsForPatient",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getAllDoctorsForPatient"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Spcializations for patient",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getSpcialization",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getSpcialization"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "filter Doctor as specialization or gender or bath",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": []
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/filterDoctor?specialization=Dermatology",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "filterDoctor"
+          ],
+          "query": [
+            {
+              "key": "specialization",
+              "value": "Dermatology"
+            },
+            {
+              "key": "gender",
+              "value": "female",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "show  Patient his  medical record",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getMedicaleRecord",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getMedicaleRecord"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "export pdf",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/exportMedicalRecords",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "exportMedicalRecords"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Appointment for Patient",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getAppointmentPatient",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getAppointmentPatient"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add Offer from admin",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "8|TUADQsRZM0oGF4Sp1QYSiEla0WoSUwxFm5FuPPsded53352f",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "p;olijuhytgrew",
+              "type": "text",
+              "uuid": "1471ce47-ed9b-4e9f-acac-cc766b64bde0"
+            },
+            {
+              "key": "description",
+              "value": "bhjfvyjtfdjrutj",
+              "type": "text",
+              "uuid": "1bd2a2bd-178e-4d0d-b140-85f7df349c28"
+            },
+            {
+              "key": "discount_percentage",
+              "value": "20.00",
+              "type": "text",
+              "uuid": "46db1a83-f8d0-44ea-9655-6da71257f826"
+            },
+            {
+              "key": "valid_from",
+              "value": "2025-08-08",
+              "type": "text",
+              "uuid": "815fee10-f221-4da2-8cb3-49b95b4d8c04"
+            },
+            {
+              "key": "valid_until",
+              "value": "2025-08-09",
+              "type": "text",
+              "uuid": "9b25dbab-1775-4247-b351-73f1fde46389"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/addOffer",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "addOffer"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Active Offers for patient",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7|ercyXVVU7Ap5Rd4UpIgMqg5ewWnxNyWhbOstFQhTb0e28332",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/getActiveOffers",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "getActiveOffers"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_secret_0xdy",
+      "secret": true
+    },
+    {
+      "key": "auth_secret_0tff",
+      "secret": true
+    },
+    {
+      "key": "auth_secret_04c1",
+      "secret": true
+    }
+  ]
+}

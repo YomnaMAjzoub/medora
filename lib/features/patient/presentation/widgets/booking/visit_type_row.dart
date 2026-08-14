@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 
 /// Shows the three visit-type icons (home / clinic / online), dimming out
@@ -15,21 +17,27 @@ class VisitTypeRow extends StatelessWidget {
   final bool showLabels;
 
   static const _items = [
-    (type: VisitType.home, icon: Icons.home_rounded, label: 'Home'),
-    (
-      type: VisitType.clinic,
-      icon: Icons.medical_services_rounded,
-      label: 'Clinic',
-    ),
-    (type: VisitType.online, icon: Icons.videocam_rounded, label: 'Online'),
+    (type: VisitType.home, icon: Icons.home_rounded),
+    (type: VisitType.clinic, icon: Icons.medical_services_rounded),
+    (type: VisitType.online, icon: Icons.videocam_rounded),
   ];
+
+  String _labelFor(VisitType type) {
+    return switch (type) {
+      VisitType.home => 'home'.tr(),
+      VisitType.clinic => 'clinic'.tr(),
+      VisitType.online => 'online'.tr(),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: _items.map((item) {
         final isSupported = supportedTypes.contains(item.type);
-        final color = isSupported ? AppColors.primary600 : AppColors.grey200;
+        final color = isSupported
+            ? AppColors.primary600
+            : context.appColors.textHint;
 
         return Padding(
           padding: const EdgeInsets.only(right: 14),
@@ -39,7 +47,7 @@ class VisitTypeRow extends StatelessWidget {
                     Icon(item.icon, size: 18, color: color),
                     const SizedBox(width: 4),
                     Text(
-                      item.label,
+                      _labelFor(item.type),
                       style: TextStyle(fontSize: 11, color: color),
                     ),
                   ],

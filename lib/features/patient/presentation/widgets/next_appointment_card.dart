@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 
@@ -51,6 +52,7 @@ class NextAppointmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final doctor = appointment.doctor;
+    final hasDoctor = doctor.name.isNotEmpty;
     final formattedDate = DateFormat('EEE, d MMM').format(appointment.date);
 
     return GestureDetector(
@@ -124,13 +126,14 @@ class NextAppointmentCard extends StatelessWidget {
                             backgroundImage: doctor.imageUrl != null
                                 ? NetworkImage(doctor.imageUrl!)
                                 : null,
-                            child: doctor.imageUrl == null
-                                ? Icon(
-                                    Icons.person,
-                                    color: AppColors.primary800,
-                                    size: 26,
-                                  )
+                            onBackgroundImageError: doctor.imageUrl != null
+                                ? (_, __) {}
                                 : null,
+                            child: const Icon(
+                              Icons.person,
+                              color: AppColors.primary800,
+                              size: 26,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -139,7 +142,10 @@ class NextAppointmentCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                doctor.name,
+                                hasDoctor
+                                    ? doctor.name
+                                    : appointment.visitType.name
+                                        .capitalizeFirst!,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.roboto(
@@ -150,7 +156,9 @@ class NextAppointmentCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                doctor.specialty,
+                                hasDoctor
+                                    ? doctor.specialty
+                                    : 'next_title'.tr(),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.roboto(

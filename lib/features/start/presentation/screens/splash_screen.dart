@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/services/firebase_service.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,10 +42,11 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    // TODO: add doctor/staff home routes when ready.
     final role = storage.read<String>('role');
-    if (role == 'doctor' || role == 'staff') {
-      Get.offNamed(AppRouter.onboarding);
+    if (role == 'doctor') {
+      Get.offNamed(AppRouter.doctorHome);
+    } else if (role == 'admin') {
+      Get.offNamed(AppRouter.adminHome);
     } else {
       Get.offNamed(AppRouter.main);
     }
@@ -54,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.appColors.background,
       body: Center(
         child: AnimatedOpacity(
           opacity: _opacity,

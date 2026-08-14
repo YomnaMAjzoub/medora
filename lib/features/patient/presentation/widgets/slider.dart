@@ -1,7 +1,8 @@
-import 'package:carousel_slider/carousel_slider.dart';
+﻿import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/data/models/offer_model.dart';
 
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -100,7 +101,7 @@ class _SliderComponentState extends State<SliderComponent> {
           count: itemCount,
           effect: ColorTransitionEffect(
             activeDotColor: AppColors.primary500,
-            dotColor: Colors.grey.shade300,
+            dotColor: context.appColors.border,
             dotHeight: 10,
             dotWidth: 10,
             spacing: 5,

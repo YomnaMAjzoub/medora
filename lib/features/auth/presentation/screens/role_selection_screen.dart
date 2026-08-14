@@ -1,10 +1,11 @@
-import 'package:easy_localization/easy_localization.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/common/widgets/gradient.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
 
@@ -14,6 +15,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
       body: CustomGradient(
         child: Center(
@@ -21,7 +23,7 @@ class RoleSelectionScreen extends StatelessWidget {
             width: 380,
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: colors.surface,
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
@@ -53,23 +55,30 @@ class RoleSelectionScreen extends StatelessWidget {
 
                 const SizedBox(height: 25),
 
-                const Text(
-                  "Welcome aboard",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                Text(
+                  "welcome_aboard".tr(),
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  "Tell us who you are to personalize your experience",
+                Text(
+                  "tell_us_who".tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: colors.textSecondary,
+                  ),
                 ),
 
                 const SizedBox(height: 30),
 
                 // Roles
-                roleItem(
-                  title: "Patient",
-                  subtitle: "Book appointments and track records.",
+                roleItem(context: context,
+                  title: "role_patient".tr(),
+                  subtitle: "role_patient_sub".tr(),
                   icon: Icons.person,
                   onTap: () {
                     controller.selectRole("patient");
@@ -78,9 +87,9 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                roleItem(
-                  title: "Doctor",
-                  subtitle: "Manage patients and digital prescriptions.",
+                roleItem(context: context,
+                  title: "role_doctor".tr(),
+                  subtitle: "role_doctor_sub".tr(),
                   icon: Icons.medical_services,
                   onTap: () {
                     controller.selectRole("doctor");
@@ -89,25 +98,25 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                roleItem(
-                  title: "Clinic Staff",
-                  subtitle: "Administrative controls and scheduling.",
+                roleItem(context: context,
+                  title: "role_admin".tr(),
+                  subtitle: "role_admin_sub".tr(),
                   icon: Icons.admin_panel_settings,
                   onTap: () {
-                    controller.selectRole("staff");
+                    controller.selectRole("admin");
                     Get.toNamed(AppRouter.login);
                   },
                 ),
 
                 const SizedBox(height: 25),
-                const Text(
-                  "© 2024 MediFlow Clinic",
-                  style: TextStyle(color: Colors.black45, fontSize: 12),
+                Text(
+                  "Â© 2024 MediFlow Clinic",
+                  style: TextStyle(color: colors.textHint, fontSize: 12),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  "Privacy Policy • Support",
-                  style: TextStyle(color: Colors.black45, fontSize: 12),
+                Text(
+                  '${"privacy".tr()} • ${"support".tr()}',
+                  style: TextStyle(color: colors.textHint, fontSize: 12),
                 ),
               ],
             ),
@@ -118,18 +127,20 @@ class RoleSelectionScreen extends StatelessWidget {
   }
 
   Widget roleItem({
+    required BuildContext context,
     required String title,
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
   }) {
+    final colors = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black12),
+          border: Border.all(color: colors.border),
         ),
         child: Row(
           children: [
@@ -141,20 +152,24 @@ class RoleSelectionScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: colors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             ),
-           Icon(Icons.arrow_forward,color: AppColors.grey200,)
+           Icon(Icons.arrow_forward,color: colors.textHint,)
           ],
         ),
       ),

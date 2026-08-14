@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 
 class BuildOnboardingPage extends StatelessWidget {
@@ -14,6 +15,7 @@ class BuildOnboardingPage extends StatelessWidget {
   final String description;
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -54,7 +56,7 @@ class BuildOnboardingPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w500,
-              color: AppColors.black,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 15),
@@ -64,7 +66,7 @@ class BuildOnboardingPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
-              color: AppColors.black,
+              color: colors.textPrimary,
             ),
           ),
         ],

@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/data/models/specialty_model.dart';
 
 class SpecialtyItem extends StatelessWidget {
@@ -21,11 +22,11 @@ class SpecialtyItem extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.55,
         height: 30,
         decoration: BoxDecoration(
-          color: AppColors.neutral200,
+          color: context.appColors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowb.withValues(alpha: 0.5),
+              color: context.appColors.shadow.withValues(alpha: 0.5),
               blurRadius: 18,
               offset: const Offset(0, 4),
             ),
@@ -52,7 +53,7 @@ class SpecialtyItem extends StatelessWidget {
               style: GoogleFonts.roboto(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.grey500,
+                color: context.appColors.textPrimary,
               ),
             ),
           ],

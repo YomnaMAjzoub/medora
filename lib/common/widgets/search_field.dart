@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 
 
@@ -22,6 +22,7 @@ class SearchField extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return SizedBox(
       width:width,
       height: height,
@@ -34,19 +35,19 @@ class SearchField extends StatelessWidget {
           hintStyle: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: AppColors.grey200,
+            color: colors.textHint,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            borderSide: BorderSide(color: AppColors.grey200, width: 1),
+            borderSide: BorderSide(color: colors.border, width: 1),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            borderSide: BorderSide(color: AppColors.grey200, width: 1),
+            borderSide: BorderSide(color: colors.border, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            borderSide: BorderSide(color: AppColors.grey200, width: 1),
+            borderSide: BorderSide(color: colors.border, width: 1),
           ),
         ),
       ),

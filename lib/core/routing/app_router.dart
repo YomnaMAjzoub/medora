@@ -11,4 +11,12 @@ class AppRouter {
   static const role = '/role';
   static const conversations = '/conversations';
   static const chat = '/chat';
+  static const doctorsList = '/doctorsList';
+  static const adminHome = '/adminHome';
+  static const addDoctor = '/addDoctor';
+  static const editDoctor = '/editDoctor';
+  static const addOffer = '/addOffer';
+  static const doctorHome = '/doctorHome';
+  static const medicalRecord = '/medicalRecord';
+  static const settings = '/settings';
 }
