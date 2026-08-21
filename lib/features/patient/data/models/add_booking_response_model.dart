@@ -1,3 +1,5 @@
+import 'package:medora_git/core/services/meet_link.dart';
+
 class AddBookingResponseModel {
   const AddBookingResponseModel({
     required this.appointment,
@@ -38,6 +40,7 @@ class BookingAppointmentModel {
     required this.appointmentTime,
     required this.status,
     this.locationId,
+    this.meetLink,
   });
 
   final int id;
@@ -47,6 +50,10 @@ class BookingAppointmentModel {
   final String appointmentTime;
   final String status;
   final int? locationId;
+
+  /// Google Meet link the backend generates for online appointments when
+  /// the final payment completes them (returned inside /completeFinalPayment).
+  final String? meetLink;
 
   factory BookingAppointmentModel.fromJson(Map<String, dynamic> json) {
     return BookingAppointmentModel(
@@ -59,6 +66,7 @@ class BookingAppointmentModel {
       locationId: json['location_id'] != null
           ? int.tryParse('${json['location_id']}')
           : null,
+      meetLink: MeetLink.fromJson(json),
     );
   }
 }

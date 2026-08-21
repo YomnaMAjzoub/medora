@@ -141,6 +141,31 @@ class DoctorController extends GetxController {
     return null;
   }
 
+  /// The most recent appointment between THIS doctor and the given patient,
+  /// derived from this doctor's own appointments (GET /appointmentForDoctor
+  /// returns every appointment of the logged-in doctor with the patient_id
+  /// and status), sorted by appointment time — newest first, id as tiebreak.
+  DoctorAppointmentModel? lastAppointmentForPatient(int patientId) {
+    final items =
+        appointments.where((a) => a.patientId == patientId).toList()
+          ..sort((a, b) {
+            final byTime = b.appointmentTime.compareTo(a.appointmentTime);
+            if (byTime != 0) return byTime;
+            return b.id.compareTo(a.id);
+          });
+    return items.isEmpty ? null : items.first;
+  }
+
+  /// Medical-record editing is only allowed on the LAST appointment between
+  /// this doctor and the patient, and only while its status is 'completed'
+  /// (the backend creates the editable record when the final payment marks
+  /// the appointment completed; it also rejects older appointments
+  /// server-side). If that last visit is not completed, nothing is editable.
+  bool canEditMedicalRecord(int patientId) {
+    final last = lastAppointmentForPatient(patientId);
+    return last != null && last.status == AppointmentStatus.completed;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -365,9 +390,6 @@ class DoctorController extends GetxController {
       isUpdatingRecord.value = false;
     }
   }
-
-  /// Google Meet room for a new consultation.
-  String newConsultationMeetLink() => _service.newConsultationMeetLink();
 
   List<T> _today<T>(List<T> items) {
     final now = DateTime.now();

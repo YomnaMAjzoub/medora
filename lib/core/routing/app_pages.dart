@@ -37,7 +37,9 @@ import 'package:medora_git/features/notifications/presentation/screens/notificat
 import 'package:medora_git/features/patient/presentation/screens/medical_file_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/fatora_payment_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/mock_payment_screen.dart';
+import 'package:medora_git/features/patient/presentation/screens/payment_failure_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/payment_result_screen.dart';
+import 'package:medora_git/features/patient/presentation/screens/payment_success_screen.dart';
 import 'package:medora_git/features/patient/presentation/bindings/booking_bindings.dart';
 import 'package:medora_git/features/patient/presentation/bindings/doctor_discovery_bindings.dart';
 import 'package:medora_git/features/patient/presentation/bindings/patient_account_bindings.dart';
@@ -226,6 +228,14 @@ class AppPages {
     GetPage(
       name: AppRouter.mockPayment,
       page: () => const MockPaymentScreen(),
+    ),
+    GetPage(
+      name: AppRouter.paymentSuccessScreen,
+      page: () => const PaymentSuccessScreen(),
+    ),
+    GetPage(
+      name: AppRouter.paymentFailureScreen,
+      page: () => const PaymentFailureScreen(),
     ),
     GetPage(
       name: AppRouter.fatoraPayment,

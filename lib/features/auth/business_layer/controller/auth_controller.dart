@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/services/firebase_service.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 
 import 'package:medora_git/features/auth/data/src/auth_service.dart';
@@ -192,6 +193,12 @@ class AuthController extends GetxController {
       onSuccess(result.message);
       String? role = authService.storage.read('role');
       role ??= selectedRole.value;
+
+      // Guarantee the device FCM token reaches the backend: on a first run
+      // the splash-time Firebase init may not have produced a token yet, so
+      // fetch it now (awaiting init) and push it via POST /updateFcmToken.
+      // Best-effort — never blocks or fails the login.
+      await FirebaseService.ensureFcmTokenSent();
       final fcmToken = authService.storage.read<String>('fcm_token') ?? '';
       log('=== LOGIN OK ===');
       log('user_id   : ${user?.id}');
@@ -199,13 +206,6 @@ class AuthController extends GetxController {
       log('user_name : ${authService.storage.read<String>('user_name')}');
       log('user_email: ${authService.storage.read<String>('user_email')}');
       log('fcm_token : ${fcmToken.isEmpty ? 'NOT SET' : fcmToken}');
-
-      // The login body already carries the token; pushing it explicitly too
-      // guarantees the server is up to date even when the login payload was
-      // built before the token existed.
-      if (fcmToken.isNotEmpty) {
-        authService.updateFcmToken(fcmToken);
-      }
 
       if (role == "patient") {
         Get.offAllNamed(AppRouter.main);

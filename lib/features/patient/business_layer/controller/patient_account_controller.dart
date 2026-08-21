@@ -2,7 +2,9 @@
 import 'dart:io';
 
 import 'package:get/get.dart' hide Trans;
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
 import 'package:medora_git/features/patient/data/models/active_offer_model.dart';
@@ -11,6 +13,7 @@ import 'package:medora_git/features/patient/data/models/appointment_record_model
 import 'package:medora_git/features/patient/data/models/doctor_summary_model.dart';
 import 'package:medora_git/features/patient/data/models/medical_record_model.dart';
 import 'package:medora_git/features/patient/data/models/offer_model.dart';
+import 'package:medora_git/features/patient/data/models/payment_success_response_model.dart';
 import 'package:medora_git/features/patient/data/models/patient_profile_model.dart';
 import 'package:medora_git/features/patient/data/src/patient_service.dart';
 
@@ -145,29 +148,58 @@ final RxBool isExportingPdf = false.obs;
 
   /// Confirms a visit after the patient tapped an appointment-reminder
   /// notification (app-confirm). The backend sets the appointment to
-  /// 'confirmed' and returns a payment_url for the remaining balance; with
-  /// the mock flow the patient completes that remaining payment in-app,
-  /// which is what moves the appointment to 'completed' server-side
-  /// (GET /completeFinalPayment).
+  /// 'confirmed' and returns a payment_url for the remaining balance.
+  /// With a checkout URL the patient completes that remaining payment in
+  /// the Fatora WebView, whose redirect opens the success screen where
+  /// GET /completeFinalPayment moves the appointment to 'completed'
+  /// server-side. Without a checkout URL the in-app mock payment screen is
+  /// used as a fallback (same backend endpoints).
   Future<void> confirmReminderAppointment(
       {required int appointmentId}) async {
     processingAppointmentId.value = appointmentId;
     try {
-      await _service.confirmAfterReminder(appointmentId: appointmentId);
-      Get.toNamed(
-        AppRouter.mockPayment,
-        arguments: {
-          'appointmentId': appointmentId,
-          'doctorName': '',
-          'mode': 'final',
-        },
-      );
+      final result =
+          await _service.confirmAfterReminder(appointmentId: appointmentId);
+      final paymentUrl = result.paymentUrl ?? '';
+      if (paymentUrl.isNotEmpty) {
+        Get.toNamed(
+          AppRouter.fatoraPayment,
+          arguments: {
+            'paymentUrl': paymentUrl,
+            'appointmentId': appointmentId,
+            'flow': 'reminder',
+          },
+        );
+      } else {
+        Get.toNamed(
+          AppRouter.mockPayment,
+          arguments: {
+            'appointmentId': appointmentId,
+            'doctorName': '',
+            'mode': 'final',
+          },
+        );
+      }
       await fetchAppointments();
     } catch (e) {
-      Get.snackbar('error'.tr(), e.toString());
+      // app-confirm also asks the backend to generate a Fatora checkout
+      // link; gateway failures surface as raw exception text — show a
+      // friendly message instead.
+      Get.snackbar('error'.tr(), ErrorHandler.friendly(e.toString()));
     } finally {
       processingAppointmentId.value = 0;
     }
+  }
+
+  /// Finalises the remaining payment on the backend
+  /// (GET /completeFinalPayment — marks the payment fully_paid, the
+  /// appointment 'completed' and generates the Google Meet link for online
+  /// visits) without any navigation. Used by the payment success screen
+  /// that the Fatora WebView redirect opens.
+  Future<PaymentSuccessResponseModel> finalizeReminderPayment(
+    {required int appointmentId}
+  ) {
+    return _service.completeFinalPayment(appointmentId: appointmentId);
   }
 
   /// Called by the mock payment screen after the reminder-flow payment is
@@ -187,19 +219,6 @@ final RxBool isExportingPdf = false.obs;
       return false;
     } finally {
       processingAppointmentId.value = 0;
-    }
-  }
-
-  /// Called by the Fatora WebView when the reminder-flow checkout redirected
-  /// to /paymentCancel. The appointment stays confirmed server-side, so the
-  /// patient just returns to the appointments tab to pay later.
-  Future<void> cancelReminderPayment({required int appointmentId}) async {
-    try {
-      Get.snackbar('info'.tr(), 'payment_cancelled'.tr());
-      await fetchAppointments();
-      Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
-    } catch (e) {
-      Get.snackbar('error'.tr(), e.toString());
     }
   }
 
@@ -242,18 +261,25 @@ final RxBool isExportingPdf = false.obs;
     }
   }
 
-  /// Downloads the patient profile PDF, stores it in the system temp
-  /// directory and opens the share sheet so it can be saved/shared.
+  /// Downloads the medical records PDF (GET /exportMedicalRecords — the
+  /// backend streams the generated PDF binary) and opens the share sheet so
+  /// it can be saved/shared.
   Future<void> exportMedicalRecordsPdf() async {
     isExportingPdf.value = true;
     try {
       final bytes = await _service.exportMedicalRecords();
-      if (bytes.isEmpty) {
+      final isPdf = bytes.length >= 4 &&
+          bytes[0] == 0x25 && // %
+          bytes[1] == 0x50 && // P
+          bytes[2] == 0x44 && // D
+          bytes[3] == 0x46; // F
+      if (!isPdf) {
         Get.snackbar('error'.tr(), 'empty_pdf_response'.tr());
         return;
       }
+      final dir = await getTemporaryDirectory();
       final file = File(
-        '${Directory.systemTemp.path}/medical_records_'
+        '${dir.path}/medical_records_'
         '${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
       await file.writeAsBytes(bytes);

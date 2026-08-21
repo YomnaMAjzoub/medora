@@ -2,9 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:medora_git/common/widgets/step_indicator.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
+import 'package:medora_git/features/admin/data/models/admin_offer_model.dart';
 
 /// Admin screen for creating a discount offer (addOffer). Dates are sent
 /// as "yyyy-MM-dd" as expected by the API.
@@ -66,8 +68,10 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
       Get.snackbar('Warning', 'invalid_dates'.tr());
       return;
     }
-    // Wait for the backend to confirm the offer was created before
-    // leaving the form, so failures keep the user here to retry.
+    // Wait for the backend to confirm the offer was created. On success the
+    // form stays open (cleared) so the confirmed offer card and the grown
+    // step indicator are visible; failures keep the entered values for
+    // retry.
     final added = await controller.addOffer(
       title: title,
       description: description,
@@ -75,7 +79,15 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
       validFrom: _validFrom!,
       validUntil: _validUntil!,
     );
-    if (added) Get.back();
+    if (added) {
+      _title.clear();
+      _description.clear();
+      _discount.clear();
+      setState(() {
+        _validFrom = null;
+        _validUntil = null;
+      });
+    }
   }
 
   @override
@@ -102,6 +114,16 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // One step per offer added so far — grows with every
+              // successful save.
+              Obx(() {
+                final count = controller.createdOffers.length;
+                if (count == 0) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: StepIndicator(currentStep: count, totalSteps: count),
+                );
+              }),
               _field(context, 'offer_title'.tr(), _title),
               const SizedBox(height: 14),
               _field(context, 'offer_description'.tr(), _description,
@@ -165,9 +187,110 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
                         ),
                 ),
               ),
+              // Confirmed offers (backend-verified) with their discount.
+              Obx(() {
+                final offers = controller.createdOffers;
+                if (offers.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 28),
+                    Text(
+                      'added_offers'.tr(),
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: context.appColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    for (final offer in offers) ...[
+                      _offerCard(context, offer),
+                      const SizedBox(height: 10),
+                    ],
+                  ],
+                );
+              }),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _offerCard(BuildContext context, AdminOfferModel offer) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.appColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: context.appColors.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.appColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '-${offer.discountPercentage.toStringAsFixed(0)}%',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: context.appColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  offer.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: context.appColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  offer.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: context.appColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  '${offer.validFrom} → ${offer.validUntil}',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: context.appColors.textHint,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.check_circle_rounded,
+            size: 20,
+            color: context.appColors.success,
+          ),
+        ],
       ),
     );
   }

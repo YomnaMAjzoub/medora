@@ -56,23 +56,31 @@ class SettingsScreen extends GetView<SettingsController> {
           const SizedBox(height: 24),
           _sectionLabel(context, 'language'.tr()),
           const SizedBox(height: 8),
-          _optionTile(context, 
-            icon: Icons.language,
-            label: 'english'.tr(),
-            selected: context.locale.languageCode == 'en',
-            onTap: () {
-              controller.setLocale('en');
-              context.setLocale(const Locale('en'));
-            },
+          Obx(
+            () => _optionTile(
+              context,
+              icon: Icons.language,
+              label: 'english'.tr(),
+              selected: controller.locale.value.languageCode == 'en',
+              onTap: () {
+                // Rx + Get.locale (rebuilds GetMaterialApp) and
+                // easy_localization's own state (.tr() + persistence).
+                controller.setLocale('en');
+                context.setLocale(const Locale('en'));
+              },
+            ),
           ),
-          _optionTile(context, 
-            icon: Icons.language,
-            label: 'arabic'.tr(),
-            selected: context.locale.languageCode == 'ar',
-            onTap: () {
-              controller.setLocale('ar');
-              context.setLocale(const Locale('ar'));
-            },
+          Obx(
+            () => _optionTile(
+              context,
+              icon: Icons.language,
+              label: 'arabic'.tr(),
+              selected: controller.locale.value.languageCode == 'ar',
+              onTap: () {
+                controller.setLocale('ar');
+                context.setLocale(const Locale('ar'));
+              },
+            ),
           ),
         ],
       ),

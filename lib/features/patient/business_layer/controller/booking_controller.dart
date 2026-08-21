@@ -1,6 +1,7 @@
 ﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
@@ -202,18 +203,22 @@ class BookingController extends GetxController {
         Get.snackbar('error'.tr(), 'booking_failed'.tr());
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
+      // Backend gateway failures (e.g. cURL/SSL timeouts reaching Fatora)
+      // surface as raw exception text — show a friendly message instead.
+      errorMessage.value = ErrorHandler.friendly(e.toString());
+      Get.snackbar('error'.tr(), errorMessage.value);
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Creates the booking if needed, then opens the in-app MOCK payment
-  /// screen for the deposit. The backend has no redirect-URL parameter on
-  /// its payment endpoints, so the mock flow is synchronous: the screen
-  /// calls GET /paymentSuccess?appointment_id=... when the patient confirms,
-  /// which is what moves the appointment to 'confirmed' server-side.
+  /// Creates the booking if needed, then opens the payment step for the
+  /// deposit. When the backend returned a Fatora checkout URL
+  /// (`payment_url` from POST /addBooking) it is loaded in the in-app
+  /// WebView, which routes the gateway's post-payment redirect to the
+  /// success/failure screens. Without a checkout URL (gateway link
+  /// generation failed server-side) the flow falls back to the in-app mock
+  /// payment screen, which calls the same backend endpoints.
   Future<void> payNow() async {
     if (appointmentId.value == null) {
       await submitBooking();
@@ -226,6 +231,27 @@ class BookingController extends GetxController {
       return;
     }
 
+    final url = paymentUrl.value ?? '';
+    if (url.isNotEmpty) {
+      Get.toNamed(
+        AppRouter.fatoraPayment,
+        arguments: {
+          'paymentUrl': url,
+          'appointmentId': id,
+          'flow': 'booking',
+          'doctorName': selectedDoctor.value?.name ?? '',
+          'amount': amountToPayNow.value > 0
+              ? amountToPayNow.value.toStringAsFixed(2)
+              : depositAmount.toStringAsFixed(2),
+        },
+      );
+      return;
+    }
+
+    // The booking exists but the backend could not produce a Fatora
+    // checkout URL (gateway unreachable). Tell the user, then keep the
+    // flow usable through the in-app payment screen.
+    Get.snackbar('warning'.tr(), 'payment_service_unavailable'.tr());
     Get.toNamed(
       AppRouter.mockPayment,
       arguments: {
@@ -237,6 +263,16 @@ class BookingController extends GetxController {
         'mode': 'deposit',
       },
     );
+  }
+
+  /// Confirms the deposit on the backend (GET /paymentSuccess) without any
+  /// navigation. Used by the payment success screen that the Fatora WebView
+  /// redirect opens: GET /paymentSuccess marks the payment partially_paid
+  /// and moves the appointment to 'confirmed' server-side.
+  Future<PaymentSuccessResponseModel> finalizeDepositPayment(
+    {required int appointmentId}
+  ) {
+    return _bookingService.paymentSuccess(appointmentId: appointmentId);
   }
 
   /// Called by the mock payment screen after the patient confirms the
@@ -263,58 +299,6 @@ class BookingController extends GetxController {
       return false;
     } finally {
       isLoading.value = false;
-    }
-  }
-
-  /// Called by the Fatora WebView when the checkout redirected to
-  /// /paymentSuccess. Confirms the booking on the backend and shows the
-  /// in-app result screen.
-  Future<void> confirmPaymentAfterWebview({int? appointmentId}) async {
-    final id = appointmentId ?? this.appointmentId.value;
-    if (id == null || id == 0) {
-      Get.snackbar('warning'.tr(), 'unable_start_payment'.tr());
-      return;
-    }
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      final result = await _bookingService.paymentSuccess(appointmentId: id);
-      paymentResult.value = result;
-      final doctorName = selectedDoctor.value?.name ?? '';
-      resetBooking();
-      Get.toNamed(
-        AppRouter.paymentResult,
-        arguments: {'result': result, 'doctorName': doctorName},
-      );
-    } catch (e) {
-      errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Called by the Fatora WebView when the checkout redirected to
-  /// /paymentCancel. Cancels the booking on the backend and returns to the
-  /// main screen's appointments tab.
-  Future<void> cancelPaymentAfterWebview({int? appointmentId}) async {
-    final id = appointmentId ?? this.appointmentId.value;
-    if (id == null || id == 0) {
-      Get.snackbar('warning'.tr(), 'unable_start_payment'.tr());
-      return;
-    }
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      await _bookingService.paymentCancel(appointmentId: id);
-      Get.snackbar('info'.tr(), 'payment_cancelled'.tr());
-    } catch (e) {
-      errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      isLoading.value = false;
-      resetBooking();
-      Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
     }
   }
 

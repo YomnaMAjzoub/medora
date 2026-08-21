@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/network/api_client.dart';
+import 'package:medora_git/features/admin/data/models/admin_offer_model.dart';
 import 'package:medora_git/features/admin/data/models/item_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_profile_model.dart';
 
@@ -135,8 +136,10 @@ class AdminService {
   }
 
   /// Creates a discount offer (addOffer). Dates use the "yyyy-MM-dd"
-  /// format expected by the API.
-  Future<void> addOffer({
+  /// format expected by the API. Returns the created offer exactly as the
+  /// backend confirms it (HTTP 200 `{"message": {...offer...}}`), so the
+  /// caller can display it immediately.
+  Future<AdminOfferModel> addOffer({
     required String title,
     required String description,
     required double discountPercentage,
@@ -151,7 +154,17 @@ class AdminService {
         'valid_from': DateFormat('yyyy-MM-dd').format(validFrom),
         'valid_until': DateFormat('yyyy-MM-dd').format(validUntil),
       });
-      await ApiClient.dio.post('/addOffer', data: formData);
+      final response = await ApiClient.dio.post('/addOffer', data: formData);
+      final data = response.data;
+      final offerJson = data is Map
+          ? (data['message'] is Map<String, dynamic>
+              ? data['message'] as Map<String, dynamic>
+              : null)
+          : null;
+      if (offerJson == null) {
+        throw Exception('offer_add_failed'.tr());
+      }
+      return AdminOfferModel.fromJson(offerJson);
     } on DioException catch (e) {
       throw Exception(ErrorHandler.handleDioError(e));
     }

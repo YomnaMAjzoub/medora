@@ -113,4 +113,29 @@ switch(e.type) {
       return 'validation_error'.tr();
     }
   }
+
+  /// True when the raw message is a low-level gateway/server failure
+  /// (Laravel surfaces its own cURL/SSL exceptions verbatim in debug mode,
+  /// e.g. "Exception: cURL error 28: SSL connection timeout ... for
+  /// https://api.fatora.io/v1/payments/checkout"). Such text must never be
+  /// shown to end users.
+  static bool isGatewayFailure(String rawMessage) {
+    final lower = rawMessage.toLowerCase();
+    return lower.contains('curl error') ||
+        lower.contains('ssl') ||
+        lower.contains('timed out') ||
+        lower.contains('connection refused') ||
+        lower.contains('could not resolve') ||
+        lower.contains('guzzle');
+  }
+
+  /// Maps a raw error into a user-safe message: known gateway/SSL failures
+  /// become a friendly translated notice; anything else passes through.
+  static String friendly(String rawMessage,
+      {String friendlyKey = 'payment_service_unavailable'}) {
+    if (isGatewayFailure(rawMessage)) {
+      return friendlyKey.tr();
+    }
+    return rawMessage;
+  }
 }

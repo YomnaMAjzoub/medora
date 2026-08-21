@@ -19,10 +19,16 @@ import 'package:medora_git/features/patient/data/src/booking_service.dart';
 
 class _FakeBookingService extends BookingService {
   int paymentSuccessCalls = 0;
-  int paymentCancelCalls = 0;
 
   static const fatoraUrl =
       'https://maktapp.credit/pay/MCPaymentPage?paymentID=XQI79Z5ZYO3D51729566XQ';
+
+  /// When false, addBooking returns no payment_url (gateway link
+  /// generation failed server-side), so the flow must fall back to the
+  /// in-app mock payment.
+  final bool returnPaymentUrl;
+
+  _FakeBookingService({this.returnPaymentUrl = true});
 
   @override
   Future<AddLocationResponseModel> addLocation({
@@ -63,7 +69,7 @@ class _FakeBookingService extends BookingService {
         status: 'pending_deposit',
         locationId: locationId,
       ),
-      paymentUrl: fatoraUrl,
+      paymentUrl: returnPaymentUrl ? fatoraUrl : '',
       amountToPayNow: 5,
     );
   }
@@ -94,11 +100,6 @@ class _FakeBookingService extends BookingService {
         status: 'paid',
       ),
     );
-  }
-
-  @override
-  Future<void> paymentCancel({required int appointmentId}) async {
-    paymentCancelCalls++;
   }
 }
 
@@ -217,40 +218,43 @@ void main() {
       expect(find.text('fatora-checkout-stub'), findsOneWidget);
     });
 
-    testWidgets('confirmPaymentAfterWebview fetches the result and resets booking',
+    testWidgets(
+        'payNow falls back to the mock payment when no payment_url exists',
+        (tester) async {
+      final service = _FakeBookingService(returnPaymentUrl: false);
+      final controller = await pumpApp(tester, service: service);
+      fillBooking(controller);
+
+      await controller.submitBooking();
+      await controller.payNow();
+      // Let the gateway-unavailable snackbar expire (3s timer) before
+      // settling, otherwise its timer stays pending.
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+
+      expect(service.paymentSuccessCalls, 0,
+          reason: 'the mock screen must not confirm the payment by itself');
+      expect(Get.currentRoute, AppRouter.mockPayment,
+          reason: 'without a checkout URL the in-app mock payment is used');
+    });
+
+    testWidgets(
+        'finalizeDepositPayment calls paymentSuccess without navigating',
         (tester) async {
       final service = _FakeBookingService();
       final controller = await pumpApp(tester, service: service);
       fillBooking(controller);
       await controller.submitBooking();
 
-      await controller.confirmPaymentAfterWebview(appointmentId: 19);
+      final result =
+          await controller.finalizeDepositPayment(appointmentId: 19);
       await tester.pump(const Duration(seconds: 4));
 
       expect(service.paymentSuccessCalls, 1);
-      expect(controller.appointmentId.value, isNull,
-          reason: 'booking state must be reset after a completed payment');
-    });
-
-    testWidgets('cancelPaymentAfterWebview calls paymentCancel and resets booking',
-        (tester) async {
-      final service = _FakeBookingService();
-      final controller = await pumpApp(tester, service: service);
-      fillBooking(controller);
-      await controller.submitBooking();
-
-      await controller.cancelPaymentAfterWebview(appointmentId: 19);
-      await tester.pumpAndSettle();
-      // Let the snackbar timer expire and its dismiss animation finish.
-      await tester.pump(const Duration(seconds: 4));
-      await tester.pumpAndSettle();
-
-      expect(service.paymentCancelCalls, 1);
-      expect(controller.appointmentId.value, isNull,
-          reason: 'booking state must be reset after cancellation');
-      expect(Get.currentRoute, AppRouter.main,
-          reason: 'cancelled payments return to the appointments tab');
-      expect(find.text('main-stub'), findsOneWidget);
+      expect(result.appointment?.status, 'confirmed',
+          reason: 'the backend response carries the confirmed appointment');
+      expect(controller.appointmentId.value, 19,
+          reason: 'finalize must not reset the booking state by itself');
     });
   });
 }

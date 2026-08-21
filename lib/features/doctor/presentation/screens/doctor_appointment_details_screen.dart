@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -214,13 +215,14 @@ class DoctorAppointmentDetailsScreen extends StatelessWidget {
             _statusLabel(appointment.status),
             valueColor: _statusColor(context, appointment.status),
           ),
-          if (appointment.isOnline) ...[
+          if (appointment.isOnline &&
+              appointment.resolvedMeetLink != null) ...[
             const SizedBox(height: 12),
             _infoRow(
               context,
               Icons.videocam_rounded,
               'meeting_link'.tr(),
-              appointment.resolvedMeetLink,
+              appointment.resolvedMeetLink!,
               valueColor: context.appColors.primary,
             ),
           ],
@@ -310,6 +312,7 @@ class DoctorAppointmentDetailsScreen extends StatelessWidget {
       ));
     }
     if (appointment.isOnline &&
+        appointment.resolvedMeetLink != null &&
         appointment.status != AppointmentStatus.cancelled) {
       actions.add((
         Icons.videocam_rounded,
@@ -387,11 +390,17 @@ class DoctorAppointmentDetailsScreen extends StatelessWidget {
     );
   }
 
+  /// Starts the online consultation using the Google Meet link the backend
+  /// generated for this appointment (available once it is completed).
   void _startConsultation(
     BuildContext context,
     DoctorAppointmentModel appointment,
   ) {
     final link = appointment.resolvedMeetLink;
+    if (link == null || link.isEmpty) {
+      Get.snackbar('info'.tr(), 'no_meeting_link'.tr());
+      return;
+    }
     Get.defaultDialog(
       title: 'start_consultation'.tr(),
       middleText: link,
@@ -403,6 +412,17 @@ class DoctorAppointmentDetailsScreen extends StatelessWidget {
         Get.back();
         launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication);
       },
+      actions: [
+        TextButton.icon(
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: link));
+            Get.back();
+            Get.snackbar('info'.tr(), 'link_copied'.tr());
+          },
+          icon: const Icon(Icons.copy_rounded, size: 16),
+          label: Text('copy'.tr()),
+        ),
+      ],
     );
   }
 

@@ -46,11 +46,16 @@ class _ConsultationChatScreenState extends State<ConsultationChatScreen> {
     _inputController.clear();
   }
 
+  /// Opens the Google Meet link the backend generated for this appointment
+  /// (available once the final payment completes it).
   void _startVideoCall() {
     final appointment =
         Get.find<DoctorController>().appointmentById(_appointmentId);
-    final link = appointment?.resolvedMeetLink ??
-        Get.find<DoctorController>().newConsultationMeetLink();
+    final link = appointment?.resolvedMeetLink;
+    if (link == null || link.isEmpty) {
+      Get.snackbar('info'.tr(), 'no_meeting_link'.tr());
+      return;
+    }
     Get.defaultDialog(
       title: 'start_video_call'.tr(),
       middleText: link,

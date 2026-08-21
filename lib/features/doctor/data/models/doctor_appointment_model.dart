@@ -28,11 +28,10 @@ class DoctorAppointmentModel {
   final String? locationAddress;
   final String? meetLink;
 
-  /// Online consultations have no backend meeting link, so a deterministic
-  /// link is derived from the appointment (stable across devices/roles).
-  String get resolvedMeetLink =>
-      meetLink ??
-      MeetLink.forAppointment(appointmentId: id, seed: patientId);
+  /// Google Meet link for online consultations. The backend generates it
+  /// (appointments.meet_link) when the final payment completes an online
+  /// appointment; null before that. No link is fabricated client-side.
+  String? get resolvedMeetLink => meetLink;
 
   bool get isOnline => type == 'online';
 

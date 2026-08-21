@@ -39,17 +39,14 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     orElse: () => AppointmentStatus.unknown,
   );
 
-  /// When the screen is opened outside an appointment context (from the
-  /// patients list), record updates attach to the patient's most recent
-  /// appointment instead.
-  int get _resolvedAppointmentId {
-    if (_appointmentId > 0) return _appointmentId;
-    final patient = controller.patientById(_patientId);
-    if (patient != null && patient.lastAppointmentId != null) {
-      return patient.lastAppointmentId!;
-    }
-    return 0;
-  }
+  /// Editing is allowed only on the LAST appointment between this doctor
+  /// and the patient, and only while it is 'completed' (see
+  /// DoctorController.canEditMedicalRecord). The appointment whose id is
+  /// passed to this screen must be that last one.
+  bool get _canEdit =>
+      _appointmentId > 0 &&
+      controller.canEditMedicalRecord(_patientId) &&
+      controller.lastAppointmentForPatient(_patientId)?.id == _appointmentId;
 
   @override
   void initState() {
@@ -131,8 +128,13 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               ],
               _patientHeader(context, record),
               const SizedBox(height: 16),
-              _quickAddSection(context),
-              const SizedBox(height: 16),
+              if (_canEdit) ...[
+                _quickAddSection(context),
+                const SizedBox(height: 16),
+              ] else ...[
+                _editLockedCard(context),
+                const SizedBox(height: 16),
+              ],
               _sectionTitle('history'.tr()),
               const SizedBox(height: 10),
               if (record.records.isEmpty)
@@ -145,13 +147,49 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 )
               else
                 ...record.records.map((r) => _recordCard(context, r)),
-              const SizedBox(height: 24),
-              _sectionTitle('update_record'.tr()),
-              const SizedBox(height: 10),
-              _editForm(context, record),
+              if (_canEdit) ...[
+                const SizedBox(height: 24),
+                _sectionTitle('update_record'.tr()),
+                const SizedBox(height: 10),
+                _editForm(context, record),
+              ],
             ],
           );
         }),
+      ),
+    );
+  }
+
+  /// Shown instead of the edit form when the last appointment between this
+  /// doctor and the patient is not completed yet: nothing is editable.
+  Widget _editLockedCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.appColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: context.appColors.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.lock_outline_rounded,
+            size: 22,
+            color: context.appColors.primary,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'record_edit_locked'.tr(),
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: context.appColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -286,14 +324,35 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            '${record.email}'
-            '${record.previousIllnesses != null && record.previousIllnesses!.isNotEmpty ? '  |  ${'illnesses'.tr()}: ${record.previousIllnesses}' : ''}',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: context.appColors.textSecondary,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.bloodtype_rounded,
+                size: 18,
+                color: context.appColors.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${'blood_type'.tr()}: ${record.bloodType ?? '-'}',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: context.appColors.textPrimary,
+                ),
+              ),
+            ],
           ),
+          if (record.previousIllnesses != null &&
+              record.previousIllnesses!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '${'illnesses'.tr()}: ${record.previousIllnesses}',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: context.appColors.textSecondary,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -438,12 +497,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   Future<void> _pickAndUploadFile(BuildContext context) async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked == null) return;
-    if (_resolvedAppointmentId == 0) {
-      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
+    if (!_canEdit) {
+      Get.snackbar('error'.tr(), 'record_edit_locked'.tr());
       return;
     }
     controller.updateMedicalRecord(
-      appointmentId: _resolvedAppointmentId,
+      appointmentId: _appointmentId,
       patientId: _patientId,
       imagePath: picked.path,
     );
@@ -451,12 +510,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   void _submitQuickAdd(QuickAddKind kind, String text) {
-    if (_resolvedAppointmentId == 0) {
-      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
+    if (!_canEdit) {
+      Get.snackbar('error'.tr(), 'record_edit_locked'.tr());
       return;
     }
     controller.updateMedicalRecord(
-      appointmentId: _resolvedAppointmentId,
+      appointmentId: _appointmentId,
       patientId: _patientId,
       diagnosis: kind == QuickAddKind.diagnosis ? text : null,
       prescription: kind == QuickAddKind.prescription ? text : null,
@@ -652,6 +711,10 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   void _submit(PatientMedicalRecordModel record) {
+    if (!_canEdit) {
+      Get.snackbar('error'.tr(), 'record_edit_locked'.tr());
+      return;
+    }
     controller.updateMedicalRecord(
       appointmentId: _appointmentId,
       patientId: _patientId,

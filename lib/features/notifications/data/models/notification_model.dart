@@ -25,6 +25,7 @@ class AppNotificationModel {
     required this.createdAt,
     this.isRead = false,
     this.data = const {},
+    this.rawType = '',
   });
 
   final String id;
@@ -34,6 +35,11 @@ class AppNotificationModel {
   final DateTime createdAt;
   final bool isRead;
   final Map<String, dynamic> data;
+
+  /// The backend's original `type` string
+  /// ('appointment_reminder', 'appointment_cancelled', 'payment_completed',
+  /// 'low_stock', 'item_restocked', ...).
+  final String rawType;
 
   /// Extra payload keys used for navigation (appointment_id, item_id, ...).
   int? get appointmentId => _intValue('appointment_id');
@@ -55,6 +61,7 @@ class AppNotificationModel {
       createdAt: createdAt,
       isRead: isRead ?? this.isRead,
       data: data,
+      rawType: rawType,
     );
   }
 
@@ -63,9 +70,10 @@ class AppNotificationModel {
     final data = rawData is Map<String, dynamic>
         ? rawData
         : (rawData is Map ? Map<String, dynamic>.from(rawData) : <String, dynamic>{});
+    final rawType = json['type'] as String? ?? '';
     return AppNotificationModel(
       id: json['id'].toString(),
-      type: _typeFrom(json['type'] as String? ?? ''),
+      type: _typeFrom(rawType),
       title: json['title'] as String? ?? '',
       body: json['body'] as String? ?? '',
       createdAt:
@@ -73,6 +81,7 @@ class AppNotificationModel {
               DateTime.now(),
       isRead: json['read_at'] != null,
       data: data,
+      rawType: rawType,
     );
   }
 

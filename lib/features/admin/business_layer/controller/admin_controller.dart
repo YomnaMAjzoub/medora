@@ -1,5 +1,6 @@
 ﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:get/get.dart' hide Trans;
+import 'package:medora_git/features/admin/data/models/admin_offer_model.dart';
 import 'package:medora_git/features/admin/data/models/item_model.dart';
 import 'package:medora_git/features/admin/data/src/admin_service.dart';
 import 'package:medora_git/features/patient/data/models/doctor_model.dart';
@@ -23,6 +24,11 @@ class AdminController extends GetxController {
   final RxString itemsError = ''.obs;
   final RxList<ItemModel> items = <ItemModel>[].obs;
   final RxSet<int> usingItemIds = <int>{}.obs;
+
+  /// Offers created during this session (POST /addOffer responses), newest
+  /// first. Shown on the add-offer screen as confirmation cards; the step
+  /// indicator grows with this list.
+  final RxList<AdminOfferModel> createdOffers = <AdminOfferModel>[].obs;
 
   @override
   void onInit() {
@@ -180,8 +186,9 @@ class AdminController extends GetxController {
   }
 
   /// Creates a discount offer (addOffer). Returns true only after the
-  /// backend confirms the offer was created, so the caller can navigate
-  /// away on success and stay on the form on failure.
+  /// backend confirms the offer was created (HTTP 200 with the offer
+  /// object); the confirmed offer is kept for the success card + step
+  /// indicator on the form.
   Future<bool> addOffer({
     required String title,
     required String description,
@@ -191,13 +198,14 @@ class AdminController extends GetxController {
   }) async {
     isSubmitting.value = true;
     try {
-      await _service.addOffer(
+      final offer = await _service.addOffer(
         title: title,
         description: description,
         discountPercentage: discountPercentage,
         validFrom: validFrom,
         validUntil: validUntil,
       );
+      createdOffers.insert(0, offer);
       Get.snackbar('success'.tr(), 'offer_added'.tr());
       return true;
     } catch (e) {

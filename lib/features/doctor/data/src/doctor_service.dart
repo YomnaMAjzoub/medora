@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/network/api_client.dart';
-import 'package:medora_git/core/services/meet_link.dart';
 import 'package:medora_git/features/doctor/data/models/doctor_appointment_model.dart';
 import 'package:medora_git/features/doctor/data/models/doctor_invoice_model.dart';
 import 'package:medora_git/features/doctor/data/models/doctor_patient_model.dart';
@@ -377,14 +376,6 @@ class DoctorService {
     await completeFinalPayment(appointmentId: appointmentId);
   }
 
-  /// A Google Meet room for a brand-new consultation (not tied to an
-  /// appointment): deterministic code derived from the current time.
-  String newConsultationMeetLink() {
-    final userId = GetStorage().read<int>('user_id') ?? 0;
-    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    return MeetLink.forAppointment(appointmentId: timestamp, seed: userId);
-  }
-
   /// Medical records of a patient (the path id is the patient's user id).
   Future<PatientMedicalRecordModel> getPatientMedicalRecords(
     int patientId,
@@ -403,6 +394,17 @@ class DoctorService {
     }
   }
 
+  /// Updates a medical record (POST /updateMedicalRecord).
+  ///
+  /// The endpoint returns HTTP 200 even when it rejects the update, so all
+  /// known response shapes are inspected:
+  ///  - success: {"data": {"status": "success", ...}}
+  ///  - not a doctor / record missing:
+  ///      {"data": {"status": "error"|"absent", "message": "..."}} or
+  ///      {"data": {"message": "this account not doctor"}}
+  ///  - rule violation ("this old appointment can not edite" — the backend
+  ///    only allows editing the latest appointment of the doctor+patient
+  ///    pair): top-level {"message": "..."} with no `data` at all.
   Future<void> updateMedicalRecord({
     required int appointmentId,
     String? diagnosis,
@@ -425,15 +427,24 @@ class DoctorService {
       });
       final response =
           await ApiClient.dio.post('/updateMedicalRecord', data: formData);
-      final data = response.data as Map<String, dynamic>;
-      final inner = data['data'];
-      if (inner is Map<String, dynamic>) {
-        final status = inner['status']?.toString();
-        if (status != null && status != 'success') {
-          throw Exception(inner['message']?.toString() ?? 'update_failed'.tr());
-        }
-        if (status == null && inner['message'] != null) {
-          throw Exception(inner['message'].toString());
+      final data = response.data;
+      if (data is Map) {
+        final inner = data['data'];
+        if (inner is Map<String, dynamic>) {
+          final status = inner['status']?.toString();
+          if (status != null && status != 'success') {
+            throw Exception(
+              inner['message']?.toString() ?? 'update_failed'.tr(),
+            );
+          }
+          if (status == null && inner['message'] != null) {
+            // Shape: {"data": {"message": "..."}} — a rejection without
+            // status (e.g. "this account not doctor").
+            throw Exception(inner['message'].toString());
+          }
+        } else if (data['message'] != null) {
+          // Top-level-only message: the backend refused the edit.
+          throw Exception(data['message'].toString());
         }
       }
     } on DioException catch (e) {

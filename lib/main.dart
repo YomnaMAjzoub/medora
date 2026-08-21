@@ -35,15 +35,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = Get.find<SettingsController>();
     return Obx(
       () => GetMaterialApp(
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
-        locale: context.locale,
+        // Driven by the settings controller's Rx locale so a language
+        // switch rebuilds the whole app (easy_localization's own
+        // inherited-widget update alone does not refresh GetMaterialApp).
+        locale: settings.locale.value,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: Get.find<SettingsController>().themeMode.value,
+        themeMode: settings.themeMode.value,
         initialRoute: AppRouter.splash,
         getPages: AppPages.pages,
       ),

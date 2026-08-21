@@ -1,8 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/services/notification_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/notifications/business_layer/controller/notifications_controller.dart';
 import 'package:medora_git/features/notifications/data/models/notification_model.dart';
@@ -12,6 +13,19 @@ import 'package:medora_git/features/notifications/data/models/notification_model
 /// from the doctor's bell icon.
 class NotificationsScreen extends GetView<NotificationsController> {
   const NotificationsScreen({super.key});
+
+  /// Marks the notification as read and, like a tapped push, routes to the
+  /// screen relevant to its backend type (reminder -> confirm & pay,
+  /// cancellation/payment -> appointments, stock -> inventory).
+  void _handleTap(NotificationsController controller, AppNotificationModel item) {
+    controller.markAsRead(item.id);
+    NotificationRouter.route(
+      payload: PushNotificationPayload.fromData({
+        'notification_type': item.rawType,
+        ...item.data,
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +77,14 @@ class NotificationsScreen extends GetView<NotificationsController> {
             return _EmptyState();
           }
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
             itemCount: controller.notifications.length,
             separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final item = controller.notifications[index];
               return _NotificationCard(
                 notification: item,
-                onTap: () => controller.markAsRead(item.id),
+                onTap: () => _handleTap(controller, item),
               );
             },
           );

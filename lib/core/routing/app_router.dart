@@ -11,6 +11,8 @@ class AppRouter {
   static const paymentResult = '/paymentResult';
   static const fatoraPayment = '/fatoraPayment';
   static const mockPayment = '/mockPayment';
+  static const paymentSuccessScreen = '/paymentSuccessScreen';
+  static const paymentFailureScreen = '/paymentFailureScreen';
   static const role = '/role';
   static const conversations = '/conversations';
   static const chat = '/chat';

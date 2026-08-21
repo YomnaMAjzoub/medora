@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/core/services/local_notifications_service.dart';
 import 'package:medora_git/core/services/notification_router.dart';
 import 'package:medora_git/features/auth/data/src/auth_service.dart';
+import 'package:medora_git/features/notifications/business_layer/controller/notifications_controller.dart';
 
 /// Background isolate handler -- must be a top-level function. Runs when the
 /// app is in the background (or terminated) and a data-only push arrives.
@@ -87,7 +88,9 @@ class FirebaseService extends GetxService {
       messaging.onTokenRefresh.listen((token) => _saveToken(messaging));
 
       // Foreground: the system does not show pushes by default, so render
-      // them through the local notification banner.
+      // them through the local notification banner. The in-app notifications
+      // list (bell icon / unread badge) is refreshed so it reflects the
+      // event immediately.
       FirebaseMessaging.onMessage.listen((message) {
         final payload = PushNotificationPayload.fromMessage(message);
         LocalNotificationsService.show(
@@ -96,6 +99,9 @@ class FirebaseService extends GetxService {
           body: message.notification?.body ?? payload.body ?? '',
           payload: message.data.isEmpty ? null : payload.encode(),
         );
+        if (Get.isRegistered<NotificationsController>()) {
+          Get.find<NotificationsController>().fetchNotifications();
+        }
       });
 
       // Tapped while the app is in the background: route by role + type.
@@ -132,6 +138,34 @@ class FirebaseService extends GetxService {
       // Sanctum Bearer auth). No-op when the user is not logged in; the
       // token is also attached to login/register as a fallback.
       AuthService().updateFcmToken(token);
+    }
+  }
+
+  /// Guarantees a current FCM token is stored locally AND pushed to the
+  /// backend (POST /updateFcmToken). Used right after a successful login
+  /// (the splash-time init may not have produced a token yet on first run)
+  /// and whenever the session must be re-registered. Best-effort: failures
+  /// are logged, never thrown into the login flow.
+  static Future<void> ensureFcmTokenSent() async {
+    try {
+      await init();
+      final messaging = FirebaseMessaging.instance;
+      var token = await messaging.getToken().timeout(
+            const Duration(seconds: 10),
+          );
+      token ??= await messaging.getAPNSToken();
+      if (token != null && token.isNotEmpty) {
+        final storage = GetStorage();
+        await storage.write('fcm_token', token);
+        await AuthService().updateFcmToken(token);
+        log('ensureFcmTokenSent: token delivered (${token.length} chars)');
+      } else {
+        log('ensureFcmTokenSent: no token available from Firebase');
+      }
+    } catch (e) {
+      // Firebase not configured / offline: notifications stay disabled but
+      // login must not break.
+      log('ensureFcmTokenSent failed: $e');
     }
   }
 

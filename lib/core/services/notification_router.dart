@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
+import 'package:medora_git/features/notifications/business_layer/controller/notifications_controller.dart';
 
 /// The kind of push a notification represents. Classified from the backend
 /// `notification_type` value, which the Laravel source sends as:
@@ -121,6 +122,12 @@ class NotificationRouter {
       return true;
     }
     storage.write(_lastHandledKey, signature);
+
+    // The tapped push is already stored server-side (GET /notifications);
+    // refresh the in-app list so the unread badge stays accurate.
+    if (Get.isRegistered<NotificationsController>()) {
+      Get.find<NotificationsController>().fetchNotifications();
+    }
 
     final role = storage.read<String>('role') ?? '';
     final appointmentId = payload.appointmentId;
