@@ -218,7 +218,7 @@ class ProfileScreen extends GetView<PatientAccountController> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Icon(icon, size: 18, color: context.appColors.primary),
+                Icon(icon, size: 18, color:AppColors.primary),
                 const SizedBox(width: 10),
                 Text(
                   '$label: ',

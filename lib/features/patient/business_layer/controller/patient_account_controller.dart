@@ -47,6 +47,9 @@ final RxBool isExportingPdf = false.obs;
   void onInit() {
     super.onInit();
     fetchProfile();
+    fetchAppointments();
+    fetchMedicalRecords();
+    fetchOffers();
   }
 
   /// Loads the logged-in user's full profile (getMyProfile) so the profile
@@ -215,15 +218,6 @@ final RxBool isExportingPdf = false.obs;
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
     }
-  }
-
-@override
-  void onInit() {
-    super.onInit();
-    fetchProfile();
-    fetchAppointments();
-    fetchMedicalRecords();
-    fetchOffers();
   }
 
   Future<void> fetchAppointments() async {
