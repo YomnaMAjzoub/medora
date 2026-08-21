@@ -82,7 +82,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
         children: [
           Text(
             'select_date_time'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 22,
               fontWeight: FontWeight.w700,
               color: context.appColors.textPrimary,
@@ -91,7 +91,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
           const SizedBox(height: 4),
           Text(
             'choose_day_time_hint'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: context.appColors.textSecondary,
             ),
@@ -106,7 +106,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
           const SizedBox(height: 24),
           Text(
             'available_time'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: context.appColors.textPrimary,
@@ -118,7 +118,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
               DateFormat('EEEE, MMMM d').format(
                 calendarController.selectedDate.value,
               ),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: context.appColors.textSecondary,
               ),
@@ -132,7 +132,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                 child: Center(
                   child: Text(
                     'load_availability_error'.tr(),
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       color: context.appColors.textSecondary,
                     ),
@@ -153,7 +153,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                 child: Center(
                   child: Text(
                     'no_slots'.tr(),
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       color: context.appColors.textSecondary,
                     ),
@@ -214,7 +214,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                     ? bookingController.confirmDateTime
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary900,
+                  backgroundColor: context.appColors.primaryContainer,
                   disabledBackgroundColor: context.appColors.border,
                   foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -225,7 +225,7 @@ class _SelectTimeStepState extends State<SelectTimeStep> {
                 ),
                 child: Text(
                   'continue_payment'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -267,7 +267,7 @@ class _SlotSection extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: context.appColors.textSecondary,
@@ -304,30 +304,32 @@ class _SlotChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBookable = slot.isBookable;
     return InkWell(
-      onTap: isBookable ? onTap : null,
+      onTap: () {
+        if (calendarController.isSlotBookable(slot)) onTap();
+      },
       borderRadius: BorderRadius.circular(10),
       child: Obx(
         () {
+          final isBookable = calendarController.isSlotBookable(slot);
           final isSelected =
               calendarController.selectedSlot.value?.fullDate == slot.fullDate;
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.primary700
+                  ? context.appColors.primary
                   : context.appColors.surface,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: isSelected
-                    ? AppColors.primary700
+                    ? context.appColors.primary
                     : context.appColors.border,
               ),
             ),
             child: Text(
               slot.time,
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: !isBookable
@@ -411,7 +413,7 @@ class _MonthCalendar extends StatelessWidget {
             children: [
               Text(
                 DateFormat('MMMM yyyy').format(visibleMonth),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: context.appColors.textPrimary,
@@ -454,7 +456,7 @@ class _MonthCalendar extends StatelessWidget {
                     child: Center(
                       child: Text(
                         label,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: context.appColors.textSecondary,
@@ -515,13 +517,13 @@ class _DayCell extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary700
+                ? context.appColors.primary
                 : (isToday ? AppColors.secondary100 : null),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             '${date.day}',
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: isSelected || isToday
                   ? FontWeight.w700

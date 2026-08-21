@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
 
@@ -22,7 +21,7 @@ class PaymentStep extends StatelessWidget {
           // TITLE
           Text(
             'payment_summary'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: colors.textPrimary,
@@ -48,7 +47,7 @@ class PaymentStep extends StatelessWidget {
               children: [
                 _feeRow(
                   'consultation_fee'.tr(),
-                  "\$${controller.consultationFee.value.toStringAsFixed(2)}",
+                  "\$${controller.consultationFee.toStringAsFixed(2)}",
                   colors: colors,
                 ),
                 _feeRow('service_charge'.tr(), '\$0.00', colors: colors),
@@ -57,7 +56,7 @@ class PaymentStep extends StatelessWidget {
                   'total_fee'.tr(),
                   controller.amountToPayNow.value > 0
                       ? "\$${controller.amountToPayNow.value}"
-                      : "\$${controller.consultationFee.value.toStringAsFixed(2)}",
+                      : "\$${controller.consultationFee.toStringAsFixed(2)}",
                   isBold: true,
                   colors: colors,
                 ),
@@ -68,13 +67,13 @@ class PaymentStep extends StatelessWidget {
                       ? "\$${controller.amountToPayNow.value}"
                       : "\$${controller.depositAmount.toStringAsFixed(2)}",
                   isBold: true,
-                  color: AppColors.primary700,
+                  color: context.appColors.primary,
                   colors: colors,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'pay_now_secure'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: colors.textPrimary,
                   ),
@@ -88,7 +87,7 @@ class PaymentStep extends StatelessWidget {
           // PAYMENT METHOD (ONE OPTION ONLY)
           Text(
             'payment_method'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: colors.textPrimary,
@@ -101,15 +100,15 @@ class PaymentStep extends StatelessWidget {
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary700.withValues(alpha: .3)),
+              border: Border.all(color: context.appColors.primary.withValues(alpha: .3)),
             ),
             child: Row(
               children: [
-                Icon(Icons.credit_card, color: AppColors.primary700, size: 28),
+                Icon(Icons.credit_card, color: context.appColors.primary, size: 28),
                 const SizedBox(width: 16),
                 Text(
                   'credit_debit_card'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: colors.textPrimary,
@@ -127,7 +126,7 @@ class PaymentStep extends StatelessWidget {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary700,
+                backgroundColor: context.appColors.primaryContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -147,7 +146,7 @@ class PaymentStep extends StatelessWidget {
                       )
                     : Text(
                         'pay_deposit_confirm'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -160,8 +159,19 @@ class PaymentStep extends StatelessWidget {
           const SizedBox(height: 12),
 
           Text(
+            'simulated_payment_hint'.tr(),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: colors.textSecondary,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
             'payment_terms'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: colors.textPrimary,
             ),
@@ -183,16 +193,21 @@ class PaymentStep extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.roboto(
-              fontSize: 15,
-              color: colors.textPrimary,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: colors.textPrimary,
+              ),
             ),
           ),
+          const SizedBox(width: 12),
           Text(
             value,
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
               color: color ?? colors.textPrimary,

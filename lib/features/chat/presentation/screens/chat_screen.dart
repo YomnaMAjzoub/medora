@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
+import 'package:medora_git/common/widgets/chat/chat_input_bar.dart';
+import 'package:medora_git/common/widgets/chat/message_bubble.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/chat/business_layer/controller/chat_controller.dart';
-import 'package:medora_git/features/chat/data/models/chat_message_model.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -31,9 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _send() {
-    final text = _inputController.text;
-    if (text.trim().isEmpty) return;
-    Get.find<ChatController>().sendMessage(text);
+    Get.find<ChatController>().sendMessage(_inputController.text);
     _inputController.clear();
   }
 
@@ -44,7 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.primary900,
+        backgroundColor: context.appColors.primaryContainer,
         foregroundColor: AppColors.white,
         title: Text(title),
       ),
@@ -53,6 +52,15 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: Obx(() {
               final controller = Get.find<ChatController>();
+              if (controller.isLoading.value && controller.messages.isEmpty) {
+                return Center(
+                  child: CircularProgressIndicator(color: context.appColors.primary),
+                );
+              }
+              if (controller.errorMessage.value.isNotEmpty &&
+                  controller.messages.isEmpty) {
+                return Center(child: Text(controller.errorMessage.value));
+              }
               if (controller.messages.isEmpty) {
                 return Center(child: Text('no_data'.tr()));
               }
@@ -63,116 +71,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 itemBuilder: (context, index) {
                   final message =
                       controller.messages[controller.messages.length - 1 - index];
-                  return _MessageBubble(message: message);
+                  return MessageBubble(message: message);
                 },
               );
             }),
           ),
-          _buildInputBar(),
+          ChatInputBar(controller: _inputController, onSend: _send),
         ],
-      ),
-    );
-  }
-
-  Widget _buildInputBar() {
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border(top: BorderSide(color: context.appColors.border)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _inputController,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _send(),
-                decoration: InputDecoration(
-                  hintText: 'message_hint'.tr(),
-                  filled: true,
-                  fillColor: context.appColors.inputFill,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton.filled(
-              onPressed: _send,
-              icon: const Icon(Icons.send),
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.primary900,
-                foregroundColor: AppColors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MessageBubble extends GetView<ChatController> {
-  const _MessageBubble({required this.message});
-
-  final ChatMessageModel message;
-
-  @override
-  Widget build(BuildContext context) {
-    final isMine = message.senderId == controller.currentUserId;
-
-    return Align(
-      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        decoration: BoxDecoration(
-          color: isMine ? AppColors.primary900 : context.appColors.border,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMine ? 16 : 4),
-            bottomRight: Radius.circular(isMine ? 4 : 16),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message.text,
-              style: TextStyle(
-                color: isMine ? AppColors.white : context.appColors.textPrimary,
-                fontSize: 15,
-              ),
-            ),
-            if (message.createdAt != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  DateFormat('HH:mm').format(message.createdAt!),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isMine
-                        ? AppColors.white.withValues(alpha: 0.7)
-                        : context.appColors.textSecondary,
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

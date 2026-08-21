@@ -61,6 +61,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   String? _locationError;
   String _address = '';
   bool _permissionDeniedForever = false;
+  bool _serviceDisabled = false;
 
   @override
   void initState() {
@@ -84,6 +85,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       _isLocating = true;
       _locationError = null;
       _permissionDeniedForever = false;
+      _serviceDisabled = false;
     });
     try {
       final permissionResult = await _ensureLocationPermission();
@@ -92,6 +94,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           _locationError = permissionResult.message;
           _permissionDeniedForever =
               permissionResult == _PermissionResult.deniedForever;
+          _serviceDisabled =
+              permissionResult == _PermissionResult.serviceDisabled;
         });
         return;
       }
@@ -238,10 +242,10 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             child: Center(
               child: Transform.translate(
                 offset: const Offset(0, -24),
-                child: const Icon(
+                child: Icon(
                   Icons.location_pin,
                   size: 48,
-                  color: AppColors.primary700,
+                  color: context.appColors.primary,
                   shadows: [
                     Shadow(color: Colors.white70, blurRadius: 6),
                   ],
@@ -258,9 +262,9 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back_rounded,
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                         style: IconButton.styleFrom(
                           backgroundColor: colors.surface,
@@ -272,27 +276,27 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                           controller: _searchController,
                           textInputAction: TextInputAction.search,
                           onSubmitted: (_) => _searchAddress(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             color: colors.textPrimary,
                           ),
                           decoration: InputDecoration(
                             hintText: 'search_address_hint'.tr(),
-                            hintStyle: GoogleFonts.roboto(
+                            hintStyle: GoogleFonts.inter(
                               fontSize: 13,
                               color: colors.textHint,
                             ),
                             prefixIcon: _isSearching
-                                ? const Padding(
+                                ? Padding(
                                     padding: EdgeInsets.all(13),
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: AppColors.primary700,
+                                      color: context.appColors.primary,
                                     ),
                                   )
-                                : const Icon(
+                                : Icon(
                                     Icons.search_rounded,
-                                    color: AppColors.primary700,
+                                    color: context.appColors.primary,
                                   ),
                             filled: true,
                             fillColor: colors.surface,
@@ -313,7 +317,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide:
-                                  const BorderSide(color: AppColors.primary700),
+                                  BorderSide(color: context.appColors.primary),
                             ),
                           ),
                         ),
@@ -333,34 +337,36 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.info_outline_rounded,
                             size: 16,
-                            color: AppColors.primary700,
+                            color: context.appColors.primary,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _locationError!,
-                              style: GoogleFonts.roboto(
+                              style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: colors.textSecondary,
                               ),
                             ),
                           ),
-                          if (_permissionDeniedForever)
+                          if (_permissionDeniedForever || _serviceDisabled)
                             TextButton(
-                              onPressed: Geolocator.openAppSettings,
+                              onPressed: _serviceDisabled
+                                  ? Geolocator.openLocationSettings
+                                  : Geolocator.openAppSettings,
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
                               ),
                               child: Text(
                                 'settings'.tr(),
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primary700,
+                                  color: context.appColors.primary,
                                 ),
                               ),
                             ),
@@ -377,16 +383,16 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             child: FloatingActionButton.small(
               heroTag: 'map-picker-locate-me',
               backgroundColor: colors.surface,
-              foregroundColor: AppColors.primary700,
+              foregroundColor: context.appColors.primary,
               elevation: 2,
               onPressed: _isLocating ? null : () => _useCurrentLocation(),
               child: _isLocating
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary700,
+                        color: context.appColors.primary,
                       ),
                     )
                   : const Icon(Icons.my_location_rounded),
@@ -405,7 +411,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     const BorderRadius.vertical(top: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary900.withValues(alpha: 0.1),
+                    color: context.appColors.primary.withValues(alpha: 0.1),
                     blurRadius: 16,
                     offset: const Offset(0, -4),
                   ),
@@ -418,11 +424,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   Row(
                     children: [
                       Icon(Icons.place_outlined,
-                          size: 18, color: AppColors.primary700),
+                          size: 18, color: context.appColors.primary),
                       const SizedBox(width: 6),
                       Text(
                         'selected_address'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: colors.textSecondary,
@@ -436,7 +442,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     onChanged: (_) => setState(() {}),
                     minLines: 1,
                     maxLines: 3,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       color: colors.textPrimary,
                     ),
@@ -444,7 +450,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       hintText: _isResolvingAddress
                           ? 'finding_address'.tr()
                           : 'address_hint'.tr(),
-                      hintStyle: GoogleFonts.roboto(
+                      hintStyle: GoogleFonts.inter(
                         fontSize: 13,
                         color: colors.textHint,
                       ),
@@ -465,7 +471,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide:
-                            const BorderSide(color: AppColors.primary700),
+                            BorderSide(color: context.appColors.primary),
                       ),
                     ),
                   ),
@@ -477,7 +483,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                           ? null
                           : _confirm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary900,
+                        backgroundColor: context.appColors.primaryContainer,
                         disabledBackgroundColor: colors.border,
                         foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -488,7 +494,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       ),
                       child: Text(
                         'confirm_location'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),

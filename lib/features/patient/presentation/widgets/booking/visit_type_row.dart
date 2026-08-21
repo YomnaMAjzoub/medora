@@ -39,20 +39,27 @@ class VisitTypeRow extends StatelessWidget {
             ? AppColors.primary600
             : context.appColors.textHint;
 
-        return Padding(
-          padding: const EdgeInsets.only(right: 14),
-          child: showLabels
-              ? Row(
-                  children: [
-                    Icon(item.icon, size: 18, color: color),
-                    const SizedBox(width: 4),
-                    Text(
-                      _labelFor(item.type),
-                      style: TextStyle(fontSize: 11, color: color),
-                    ),
-                  ],
-                )
-              : Icon(item.icon, size: 20, color: color),
+        return Flexible(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: showLabels
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(item.icon, size: 18, color: color),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          _labelFor(item.type),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 11, color: color),
+                        ),
+                      ),
+                    ],
+                  )
+                : Icon(item.icon, size: 20, color: color),
+          ),
         );
       }).toList(),
     );

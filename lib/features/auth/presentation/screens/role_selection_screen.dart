@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
@@ -16,11 +16,15 @@ class RoleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final screenWidth = MediaQuery.of(context).size.width;
+    // The card never exceeds 380px and always leaves 24px of breathing
+    // room, so it fits small phones and scales up on tablets.
+    final cardWidth = (screenWidth - 24).clamp(0.0, 380.0);
     return Scaffold(
       body: CustomGradient(
         child: Center(
           child: Container(
-            width: 380,
+            width: cardWidth,
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
             decoration: BoxDecoration(
               color: colors.surface,
@@ -33,9 +37,10 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                     Image.asset(
                       'assets/images/medora_logo.png',
                       width: 90,
@@ -46,10 +51,10 @@ class RoleSelectionScreen extends StatelessWidget {
                     // const SizedBox(height: 12),
                     Text(
                       'medora'.tr(),
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 34,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.primary900,
+                        color: context.appColors.primary,
                       ),
                     ),
 
@@ -119,6 +124,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   style: TextStyle(color: colors.textHint, fontSize: 12),
                 ),
               ],
+              ),
             ),
           ),
         ),

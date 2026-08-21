@@ -25,8 +25,8 @@ class LoginScreen extends StatelessWidget {
       Get.snackbar(
         'error'.tr(),
         'please_fill_all'.tr(),
-        backgroundColor: Colors.red.shade100,
-        colorText: AppColors.black,
+        backgroundColor: Get.context!.appColors.danger.withValues(alpha: 0.15),
+        colorText: Get.context!.appColors.textPrimary,
         duration: Duration(seconds: 3),
       );
       return;
@@ -38,8 +38,9 @@ class LoginScreen extends StatelessWidget {
           message,
           dismissDirection: DismissDirection.up,
           duration: Duration(seconds: 3),
-          backgroundColor: AppColors.primary100,
-          colorText: AppColors.black,
+          backgroundColor:
+              Get.context!.appColors.success.withValues(alpha: 0.15),
+          colorText: Get.context!.appColors.textPrimary,
         );
       },
       (error) {
@@ -48,8 +49,9 @@ class LoginScreen extends StatelessWidget {
           error,
           dismissDirection: DismissDirection.up,
           duration: Duration(seconds: 3),
-          backgroundColor: Colors.red.shade100,
-          colorText: AppColors.black,
+          backgroundColor:
+              Get.context!.appColors.danger.withValues(alpha: 0.15),
+          colorText: Get.context!.appColors.textPrimary,
         );
       },
       email,
@@ -64,7 +66,9 @@ class LoginScreen extends StatelessWidget {
       body: CustomGradient(
         child: Center(
           child: Container(
-            width: 380,
+            width: MediaQuery.of(context).size.width > 420
+                ? 380
+                : MediaQuery.of(context).size.width,
             padding: const EdgeInsets.symmetric(vertical:20, horizontal:20),
             decoration: BoxDecoration(
               color: colors.surface,
@@ -94,10 +98,10 @@ class LoginScreen extends StatelessWidget {
                       ),
                       Text(
                         'medora'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 34,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.primary900,
+                          color: context.appColors.primary,
                         ),
                       ),
                     ],
@@ -121,8 +125,8 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 30),
                   Text(
                     'email'.tr(),
-                    style: GoogleFonts.roboto(
-                      color: AppColors.primary900,
+                    style: GoogleFonts.inter(
+                      color: context.appColors.primary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -130,12 +134,12 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 8),
                   CustomFormField(
                     controller: emailController,
-                    width: MediaQuery.of(context).size.width * 0.93,
+                    width: double.infinity,
                     height: 48,
                     hint: 'email'.tr(),
                     prefix: Icon(
                       Icons.email,
-                      color: AppColors.primary900,
+                      color: context.appColors.primary,
                       size: 20,
                     ),
                     inputAction: TextInputAction.next,
@@ -167,29 +171,22 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 20),
                   Text(
                     'pass'.tr(),
-                    style: GoogleFonts.roboto(
-                      color: AppColors.primary900,
+                    style: GoogleFonts.inter(
+                      color: context.appColors.primary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   SizedBox(height: 8),
                   Obx(() {
-                    if (authController.isloading.value) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary600,
-                        ),
-                      );
-                    }
                     return CustomFormField(
                       controller: passwordController,
-                      width: MediaQuery.of(context).size.width * 0.93,
+                      width: double.infinity,
                       height: 48,
                       hint: 'pass'.tr(),
                       prefix: Icon(
                         Icons.lock,
-                        color: AppColors.primary900,
+                        color: context.appColors.primary,
                         size: 20,
                       ),
                       suffix: IconButton(
@@ -200,12 +197,12 @@ class LoginScreen extends StatelessWidget {
                         icon: authController.logPass.value
                             ? Icon(
                                 Icons.visibility_off,
-                                color: AppColors.primary900,
+                                color: context.appColors.primary,
                                 size: 20,
                               )
                             : Icon(
                                 Icons.visibility,
-                                color: AppColors.primary900,
+                                color: context.appColors.primary,
                                 size: 20,
                               ),
                       ),
@@ -263,10 +260,10 @@ class LoginScreen extends StatelessWidget {
                       ),
                       child: Text(
                         'forgot'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                       ),
                     ),
@@ -285,11 +282,11 @@ class LoginScreen extends StatelessWidget {
                       return CustomElevated(
                         text: 'login'.tr(),
                         height: 48,
-                        width: MediaQuery.of(context).size.width * 0.75,
+                        width: double.infinity,
                         onPressed: () {
                           handleLogin();
                         },
-                        background: AppColors.primary900,
+                        background: context.appColors.primary,
                         textColor: AppColors.yellow,
                       );
                     }),
@@ -303,7 +300,7 @@ class LoginScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         'continue'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           color: colors.textSecondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -391,7 +388,7 @@ class LoginScreen extends StatelessWidget {
                     children: [
                        Text(
                           'ques-login'.tr(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: colors.textSecondary,
@@ -404,10 +401,10 @@ class LoginScreen extends StatelessWidget {
                           },
                           child: Text(
                             'create'.tr(),
-                            style: GoogleFonts.roboto(
+                            style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.primary700,
+                              color: context.appColors.primary,
                             ),
                           ),
                         ),

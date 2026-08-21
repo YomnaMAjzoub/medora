@@ -15,7 +15,7 @@ class ConversationsScreen extends GetView<ChatController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.primary900,
+        backgroundColor: context.appColors.primaryContainer,
         foregroundColor: AppColors.white,
         title: Text('conversations'.tr()),
       ),

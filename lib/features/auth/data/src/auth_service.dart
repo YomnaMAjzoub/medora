@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/storage/appconfig.dart';
@@ -118,7 +119,7 @@ class AuthService {
         log(response.data['message']);
         return true;
       } else {
-        throw response.data['message'] ?? 'Something went wrong';
+        throw response.data['message'] ?? 'something_went_wrong'.tr();
       }
     } on DioException catch (e) {
       throw ErrorHandler.handleDioError(e);
@@ -126,15 +127,17 @@ class AuthService {
   }
 
   /// Keeps the user's FCM token fresh on the server after it rotates.
-  /// Best-effort: silently ignored when not logged in or on network errors,
-  /// because the token is also attached to the login/register requests.
+  /// Sent as form-data with the `fcm_token` field (Postman contract) using
+  /// Bearer authentication. Best-effort: silently ignored when not logged in
+  /// or on network errors, because the token is also attached to the
+  /// login/register requests.
   Future<void> updateFcmToken(String fcmToken) async {
     final accessToken = storage.read<String>('access_token');
     if (accessToken == null || accessToken.isEmpty) return;
     try {
       final response = await dio.post(
         '${AppConfig.baseUrl}/updateFcmToken',
-        data: {'fcm_token': fcmToken},
+        data: FormData.fromMap({'fcm_token': fcmToken}),
         options: Options(headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -145,6 +148,38 @@ class AuthService {
       log('updateFcmToken failed: ${e.message}');
       // Best-effort; login/register keep the token fresh as a fallback.
     }
+  }
+
+  /// Logs the user out on the backend (POST /logout with the api_key header)
+  /// so the server can drop the session. Best-effort: local cleanup always
+  /// happens even when the request fails (offline logout).
+  Future<void> logout() async {
+    final accessToken = storage.read<String>('access_token');
+    if (accessToken == null || accessToken.isEmpty) return;
+    try {
+      final response = await dio.post(
+        '${AppConfig.baseUrl}/logout',
+        options: Options(headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+          'api_key': AppConfig.apiKey,
+        }),
+      );
+      log('logout status: ${response.statusCode}');
+    } on DioException catch (e) {
+      log('logout failed: ${e.message}');
+    }
+  }
+
+  /// Clears the local session (token, role, user data and the FCM token, so
+  /// the next login registers a fresh one).
+  Future<void> clearSession() async {
+    await storage.remove('access_token');
+    await storage.remove('user_id');
+    await storage.remove('role');
+    await storage.remove('user_name');
+    await storage.remove('user_email');
+    await storage.remove('fcm_token');
   }
 
   Future<bool> verifyOtp(String email, String otp) async {
@@ -158,7 +193,7 @@ class AuthService {
       log(response.data['message']);
       return true;
     } else {
-      throw response.data['message'] ?? 'OTP verification failed';
+      throw response.data['message'] ?? 'otp_verification_failed'.tr();
     }
     } on DioException catch (e) {
       throw ErrorHandler.handleDioError(e);
@@ -176,7 +211,7 @@ class AuthService {
       log(response.data['message']);
       return true;
     } else {
-      throw response.data['message'] ?? 'Password reset failed';
+      throw response.data['message'] ?? 'password_reset_failed'.tr();
     }
     } on DioException catch (e) {
       throw ErrorHandler.handleDioError(e);

@@ -6,8 +6,9 @@ import 'package:medora_git/common/widgets/nav_bar_painter.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
+import 'package:medora_git/features/notifications/business_layer/controller/notifications_controller.dart';
+import 'package:medora_git/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/appointments_screen.dart';
-import 'package:medora_git/features/patient/presentation/screens/medical_records_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/patient_home_screen.dart';
 import 'package:medora_git/features/patient/presentation/screens/profile_screen.dart';
 
@@ -29,14 +30,25 @@ class _MainScreenState extends State<MainScreen> {
     return itemWidth * positionIndex + (itemWidth / 2) - 26.36;
   }
 
-  int selectedIndex = 0;
+  late int selectedIndex;
 
   final pages = [
     PatientHomeScreen(),
-    MedicalRecordsScreen(),
+    NotificationsScreen(),
     AppointmentsScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Notification taps can open the shell directly on a specific tab
+    // (e.g. the appointments tab after a payment/reminder push).
+    final tab = (Get.arguments as Map<String, dynamic>?)?['tab'] as int?;
+    selectedIndex = (tab != null && tab >= 0 && tab < pages.length)
+        ? tab
+        : 0;
+  }
 
   void changeTab(int index) {
     setState(() {
@@ -53,10 +65,28 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(
-              selected ? selectedIcon : icon,
-              width: 24.81,
-              height: 24,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SvgPicture.asset(
+                  selected ? selectedIcon : icon,
+                  width: 24.81,
+                  height: 24,
+                ),
+                if (index == 1 && _hasUnreadNotifications)
+                  Positioned(
+                    top: -2,
+                    right: -6,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             const SizedBox(height: 4),
@@ -67,7 +97,7 @@ class _MainScreenState extends State<MainScreen> {
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
                 color: selected
-                    ? AppColors.primary800
+                    ? context.appColors.primary
                     : context.appColors.textHint,
               ),
             ),
@@ -76,6 +106,10 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+
+  bool get _hasUnreadNotifications =>
+      Get.isRegistered<NotificationsController>() &&
+      Get.find<NotificationsController>().unreadCount > 0;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +132,7 @@ class _MainScreenState extends State<MainScreen> {
             width: 62.01,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary700,
+              color: context.appColors.primary,
               boxShadow: [
                 BoxShadow(
                   color: AppColors.black.withValues(alpha: .25),
@@ -162,9 +196,9 @@ class _MainScreenState extends State<MainScreen> {
 
                 navItem(
                   1,
-                  "records".tr(),
-                  "assets/icons/records.svg",
-                  "assets/icons/records2.svg",
+                  "notifications".tr(),
+                  "assets/icons/notify.svg",
+                  "assets/icons/notification2.svg",
                 ),
 
                 Spacer(),

@@ -12,7 +12,7 @@ class PatientHomeAppBar extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 16, 16, 28),
       decoration: const BoxDecoration(
-        // color: AppColors.primary700,
+        // color: context.appColors.primary,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(28),
           bottomRight: Radius.circular(28),
@@ -27,7 +27,7 @@ class PatientHomeAppBar extends StatelessWidget {
               children: [
                 Text(
                   'patient_home_welecome'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,
@@ -36,7 +36,7 @@ class PatientHomeAppBar extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   'patient_home_welecome2'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
                     color: AppColors.white.withValues(alpha: .85),

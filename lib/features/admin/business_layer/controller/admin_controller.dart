@@ -1,12 +1,12 @@
 ﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:get/get.dart' hide Trans;
+import 'package:medora_git/features/admin/data/models/item_model.dart';
 import 'package:medora_git/features/admin/data/src/admin_service.dart';
 import 'package:medora_git/features/patient/data/models/doctor_model.dart';
-import 'package:medora_git/features/patient/data/models/specialization_model.dart';
-import 'package:medora_git/features/patient/data/src/patient_service.dart';
+import 'package:medora_git/features/patient/data/models/doctor_profile_model.dart';
 
-/// Admin panel state: the doctors managed by the logged-in admin and the
-/// specializations available for the add/edit doctor forms.
+/// Admin (Staff) panel state: the doctors managed by the logged-in admin
+/// and the full doctor profiles (working hours, availability).
 class AdminController extends GetxController {
   AdminController({AdminService? service})
       : _service = service ?? AdminService();
@@ -16,17 +16,18 @@ class AdminController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxList<DoctorModel> doctors = <DoctorModel>[].obs;
+  final RxList<DoctorProfileModel> doctorProfiles = <DoctorProfileModel>[].obs;
 
   final RxBool isSubmitting = false.obs;
-
-  final RxBool isLoadingSpecializations = false.obs;
-  final RxList<SpecializationModel> specialties = <SpecializationModel>[].obs;
+  final RxBool isLoadingItems = false.obs;
+  final RxString itemsError = ''.obs;
+  final RxList<ItemModel> items = <ItemModel>[].obs;
+  final RxSet<int> usingItemIds = <int>{}.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchDoctors();
-    fetchSpecializations();
   }
 
   Future<void> fetchDoctors() async {
@@ -34,6 +35,7 @@ class AdminController extends GetxController {
     errorMessage.value = '';
     try {
       final result = await _service.getAllDoctors();
+      doctorProfiles.assignAll(result);
       doctors.assignAll(result.map((profile) => profile.toDoctorModel()));
     } catch (e) {
       errorMessage.value = e.toString();
@@ -43,19 +45,7 @@ class AdminController extends GetxController {
     }
   }
 
-  Future<void> fetchSpecializations() async {
-    isLoadingSpecializations.value = true;
-    try {
-      final result = await PatientService().getSpecializations();
-      specialties.assignAll(result);
-    } catch (e) {
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      isLoadingSpecializations.value = false;
-    }
-  }
-
-  Future<void> addDoctor({
+  Future<bool> addDoctor({
     required String firstName,
     required String lastName,
     required String email,
@@ -68,7 +58,7 @@ class AdminController extends GetxController {
     required String endTime,
     required bool homeVisit,
     required double price,
-    required String photoPath,
+    String? photoPath,
   }) async {
     isSubmitting.value = true;
     try {
@@ -89,27 +79,32 @@ class AdminController extends GetxController {
       );
       Get.snackbar('success'.tr(), 'doctor_added'.tr());
       await fetchDoctors();
+      return true;
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
+      return false;
     } finally {
       isSubmitting.value = false;
     }
   }
 
-  Future<void> updateDoctor({
+  Future<bool> updateDoctor({
     required DoctorModel doctor,
     double? price,
     bool? homeVisit,
     String? specialization,
     String? photoPath,
     String? password,
+    String? day,
+    String? startTime,
+    String? endTime,
   }) async {
     isSubmitting.value = true;
     try {
       final id = int.tryParse(doctor.id);
       if (id == null) {
-        Get.snackbar('error'.tr(), 'Invalid doctor id.');
-        return;
+        Get.snackbar('error'.tr(), 'invalid_doctor_id'.tr());
+        return false;
       }
       await _service.updateDoctor(
         doctorId: id,
@@ -118,28 +113,69 @@ class AdminController extends GetxController {
         specialization: specialization,
         photoPath: photoPath,
         password: password,
+        day: day,
+        startTime: startTime,
+        endTime: endTime,
       );
       Get.snackbar('success'.tr(), 'doctor_updated'.tr());
       await fetchDoctors();
+      return true;
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
+      return false;
     } finally {
       isSubmitting.value = false;
     }
   }
 
-  Future<void> deleteDoctor(DoctorModel doctor) async {
-    final id = int.tryParse(doctor.id);
+  Future<bool> deleteDoctor(DoctorModel doctor) async {
+    // The backend deleteDoctor endpoint expects the doctor's USER id
+    // (appointments and tokens reference users), not the doctors row id.
+    final id = doctor.userId ?? int.tryParse(doctor.id);
     if (id == null) {
-      Get.snackbar('error'.tr(), 'Invalid doctor id.');
-      return;
+      Get.snackbar('error'.tr(), 'invalid_doctor_id'.tr());
+      return false;
     }
     try {
       await _service.deleteDoctor(id);
       Get.snackbar('success'.tr(), 'doctor_deleted'.tr());
       await fetchDoctors();
+      return true;
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
+      return false;
+    }
+  }
+
+  Future<void> fetchItems() async {
+    isLoadingItems.value = true;
+    itemsError.value = '';
+    try {
+      final result = await _service.getItems();
+      items.assignAll(result);
+    } catch (e) {
+      itemsError.value = e.toString();
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      isLoadingItems.value = false;
+    }
+  }
+
+  /// Consumes one unit of an item (useItem) and refreshes the list.
+  Future<void> useItem(ItemModel item) async {
+    usingItemIds.add(item.id);
+    try {
+      final used = await _service.useItem(item.id);
+      if (!used) {
+        Get.snackbar('error'.tr(), 'item_unavailable'.tr());
+      } else {
+        Get.snackbar('success'.tr(), 'item_used'.tr());
+      }
+      await fetchItems();
+    } catch (e) {
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      usingItemIds.remove(item.id);
     }
   }
 

@@ -52,7 +52,6 @@ class AppColors {
   static const Color white = Color(0xffFFFFFF);
   static const Color yellow = Color(0xffFEFAED);
   static const Color black = Color(0xff000000);
-  static const Color secondary = Color(0xffDEDEDE);
   static const Color grey50 = Color(0xffebebeb);
   static const Color grey100 = Color(0xffc0c0c0);
   static const Color grey200 = Color(0xffa1a1a1);
@@ -73,5 +72,84 @@ class AppColors {
   static const Color shadowb = Color(0xffD9DDE5);
   static const Color shadowb1 = Color(0xffB0B0B0);
 
-  
+  // =========================================================================
+  // Dark theme tokens (Material 3 dark scheme) — source of truth for dark UI.
+  // Screens read these via `Theme.of(context).colorScheme` / `context.appColors`;
+  // the constants below are for direct use where a scheme token doesn't cover
+  // the case. When in doubt, prefer the theme extension over these constants.
+  // =========================================================================
+
+  // Surfaces
+  static const Color surface = Color(0xFF11131C);
+  static const Color surfaceDim = Color(0xFF11131C);
+  static const Color surfaceBright = Color(0xFF373942);
+  static const Color surfaceContainerLowest = Color(0xFF0C0E16);
+  static const Color surfaceContainerLow = Color(0xFF191B24);
+  static const Color surfaceContainer = Color(0xFF1D1F28);
+  static const Color surfaceContainerHigh = Color(0xFF282933);
+  static const Color surfaceContainerHighest = Color(0xFF33343E);
+
+  // On-surface text/icons
+  static const Color onSurface = Color(0xFFE2E1EE);
+  static const Color onSurfaceVariant = Color(0xFFC3C5D8);
+
+  // Inverse surfaces
+  static const Color inverseSurface = Color(0xFFE2E1EE);
+  static const Color inverseOnSurface = Color(0xFF2E3039);
+
+  // Outlines / borders
+  static const Color outline = Color(0xFF8D90A1);
+  static const Color outlineVariant = Color(0xFF434655);
+
+  // Tint
+  static const Color surfaceTint = Color(0xFFB7C4FF);
+
+  // Primary
+  static const Color primary = Color(0xFFB7C4FF);
+  static const Color onPrimary = Color(0xFF002680);
+  static const Color primaryContainer = Color(0xFF3366FF);
+  static const Color onPrimaryContainer = Color(0xFFFDFBFF);
+  static const Color inversePrimary = Color(0xFF054DE9);
+
+  // Secondary
+  static const Color secondary = Color(0xFFB1C6FC);
+  static const Color onSecondary = Color(0xFF182F5C);
+  static const Color secondaryContainer = Color(0xFF334876);
+  static const Color onSecondaryContainer = Color(0xFFA3B8ED);
+
+  // Tertiary
+  static const Color tertiary = Color(0xFFFFB598);
+  static const Color onTertiary = Color(0xFF591D00);
+  static const Color tertiaryContainer = Color(0xFFC94B00);
+  static const Color onTertiaryContainer = Color(0xFFFFFAFF);
+
+  // Error
+  static const Color error = Color(0xFFFFB4AB);
+  static const Color onError = Color(0xFF690005);
+  static const Color errorContainer = Color(0xFF93000A);
+  static const Color onErrorContainer = Color(0xFFFFDAD6);
+
+  // Fixed tones
+  static const Color primaryFixed = Color(0xFFDCE1FF);
+  static const Color primaryFixedDim = Color(0xFFB7C4FF);
+  static const Color onPrimaryFixed = Color(0xFF001551);
+  static const Color onPrimaryFixedVariant = Color(0xFF0039B4);
+  static const Color secondaryFixed = Color(0xFFD9E2FF);
+  static const Color secondaryFixedDim = Color(0xFFB1C6FC);
+  static const Color onSecondaryFixed = Color(0xFF001944);
+  static const Color onSecondaryFixedVariant = Color(0xFF314674);
+  static const Color tertiaryFixed = Color(0xFFFFDBCE);
+  static const Color tertiaryFixedDim = Color(0xFFFFB598);
+  static const Color onTertiaryFixed = Color(0xFF370E00);
+  static const Color onTertiaryFixedVariant = Color(0xFF7E2C00);
+
+  // Background
+  static const Color background = Color(0xFF11131C);
+  static const Color onBackground = Color(0xFFE2E1EE);
+  static const Color surfaceVariant = Color(0xFF33343E);
+
+  // Status semantics (used by chips/badges at ~15% opacity + solid text)
+  static const Color success = Color(0xFF66BB6A);
+  static const Color warning = Color(0xFFFFB800);
+  static const Color info = Color(0xFFB7C4FF);
 }

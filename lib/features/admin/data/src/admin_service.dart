@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/network/api_client.dart';
+import 'package:medora_git/features/admin/data/models/item_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_profile_model.dart';
 
 /// Admin-facing endpoints (doctor management).
@@ -35,7 +36,7 @@ class AdminService {
     required String endTime,
     required bool homeVisit,
     required double price,
-    required String photoPath,
+    String? photoPath,
   }) async {
     try {
       final formData = FormData.fromMap({
@@ -52,7 +53,8 @@ class AdminService {
         'end_time': endTime,
         'home_visit': homeVisit ? '1' : '0',
         'price': price.toStringAsFixed(2),
-        'profile_photo': await MultipartFile.fromFile(photoPath),
+        if (photoPath != null && photoPath.isNotEmpty)
+          'profile_photo': await MultipartFile.fromFile(photoPath),
       });
       final response = await ApiClient.dio.post('/addDoctor', data: formData);
       final data = response.data as Map<String, dynamic>;
@@ -61,7 +63,7 @@ class AdminService {
           ? doctor['doctor']
           : null;
       if (inner is! Map<String, dynamic>) {
-        throw Exception(data['message']?.toString() ?? 'Failed to add doctor');
+        throw Exception(data['message']?.toString() ?? 'failed_to_add_doctor'.tr());
       }
       // addDoctor nests the user fields at the top level, so rebuild the
       // DoctorProfileModel shape ({...doctorRow, user:{...}}).
@@ -85,6 +87,9 @@ class AdminService {
     String? specialization,
     String? photoPath,
     String? password,
+    String? day,
+    String? startTime,
+    String? endTime,
   }) async {
     try {
       final formData = FormData.fromMap({
@@ -96,6 +101,9 @@ class AdminService {
         if (password != null && password.isNotEmpty) 'password': password,
         if (password != null && password.isNotEmpty)
           'password_confirmation': password,
+        if (day != null && day.isNotEmpty) 'day': day,
+        if (startTime != null && startTime.isNotEmpty) 'start_time': startTime,
+        if (endTime != null && endTime.isNotEmpty) 'end_time': endTime,
         if (photoPath != null)
           'profile_photo': await MultipartFile.fromFile(photoPath),
       });
@@ -107,7 +115,7 @@ class AdminService {
       final data = response.data as Map<String, dynamic>;
       final doctor = data['doctor'];
       if (doctor is! Map<String, dynamic>) {
-        throw Exception(data['message']?.toString() ?? 'Failed to update doctor');
+        throw Exception(data['message']?.toString() ?? 'failed_to_update_doctor'.tr());
       }
       return DoctorProfileModel.fromJson(doctor);
     } on DioException catch (e) {
@@ -144,6 +152,35 @@ class AdminService {
         'valid_until': DateFormat('yyyy-MM-dd').format(validUntil),
       });
       await ApiClient.dio.post('/addOffer', data: formData);
+    } on DioException catch (e) {
+      throw Exception(ErrorHandler.handleDioError(e));
+    }
+  }
+
+  /// Inventory items (getItems).
+  Future<List<ItemModel>> getItems() async {
+    try {
+      final response = await ApiClient.dio.get('/getItems');
+      final data = response.data as Map<String, dynamic>;
+      final list = data['items'];
+      if (list is! List) return const [];
+      return list
+          .whereType<Map<String, dynamic>>()
+          .map(ItemModel.fromJson)
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(ErrorHandler.handleDioError(e));
+    }
+  }
+
+  /// Consumes one unit of an item (useItem). Returns false when the backend
+  /// reports the item is missing or out of stock (item payload is null).
+  Future<bool> useItem(int itemId) async {
+    try {
+      final response =
+          await ApiClient.dio.post('/useItem/$itemId');
+      final data = response.data as Map<String, dynamic>;
+      return data['item'] is Map<String, dynamic>;
     } on DioException catch (e) {
       throw Exception(ErrorHandler.handleDioError(e));
     }

@@ -43,7 +43,7 @@ class HomeLocationStep extends StatelessWidget {
         children: [
           Text(
             'home_visit_location'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 22,
               fontWeight: FontWeight.w700,
               color: context.appColors.textPrimary,
@@ -52,7 +52,7 @@ class HomeLocationStep extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'home_location_hint'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: context.appColors.textSecondary,
             ),
@@ -76,7 +76,7 @@ class HomeLocationStep extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.primary700.withValues(alpha: 0.35),
+                          color: context.appColors.primary.withValues(alpha: 0.35),
                         ),
                       ),
                       child: Row(
@@ -88,9 +88,9 @@ class HomeLocationStep extends StatelessWidget {
                               color: AppColors.secondary100,
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.map_rounded,
-                              color: AppColors.primary700,
+                              color: context.appColors.primary,
                               size: 24,
                             ),
                           ),
@@ -101,7 +101,7 @@ class HomeLocationStep extends StatelessWidget {
                               children: [
                                 Text(
                                   hasPick ? 'picked_address' : 'pick_on_map',
-                                  style: GoogleFonts.roboto(
+                                  style: GoogleFonts.inter(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: context.appColors.textPrimary,
@@ -114,7 +114,7 @@ class HomeLocationStep extends StatelessWidget {
                                       : 'open_map_hint'.tr(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.roboto(
+                                  style: GoogleFonts.inter(
                                     fontSize: 12,
                                     color: context.appColors.textSecondary,
                                   ),
@@ -145,17 +145,18 @@ class HomeLocationStep extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.my_location_rounded,
+                        Icon(
+                          Icons.place_rounded,
                           size: 16,
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '${latLng.latitude.toStringAsFixed(5)}, '
-                            '${latLng.longitude.toStringAsFixed(5)}',
-                            style: GoogleFonts.roboto(
+                            address,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
                               fontSize: 12,
                               color: context.appColors.textSecondary,
                             ),
@@ -177,7 +178,7 @@ class HomeLocationStep extends StatelessWidget {
                     ? null
                     : () => _openPicker(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary900,
+                  backgroundColor: context.appColors.primaryContainer,
                   disabledBackgroundColor: context.appColors.border,
                   foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -198,7 +199,7 @@ class HomeLocationStep extends StatelessWidget {
                         )
                       : Text(
                           'pick_location'.tr(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),

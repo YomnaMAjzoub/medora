@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart' hide Trans;
@@ -34,7 +34,7 @@ class PatientHomeScreen extends StatelessWidget {
         leading: Builder(
           builder: (context) {
             return IconButton(
-              icon: const Icon(Icons.menu, color: AppColors.primary700),
+              icon: Icon(Icons.menu, color: context.appColors.primary),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -43,7 +43,7 @@ class PatientHomeScreen extends StatelessWidget {
         ),
         title: Text(
           'patient_home_welecome'.tr(),
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             color: context.appColors.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w500,
@@ -55,7 +55,7 @@ class PatientHomeScreen extends StatelessWidget {
             width: 24,
             height: 24,
             colorFilter: ColorFilter.mode(
-              AppColors.primary700,
+              context.appColors.primary,
               BlendMode.srcIn,
             ),
           ),
@@ -74,10 +74,10 @@ class PatientHomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 48,
                   hint: 'search_hint'.tr(),
-                  prefix: const Icon(Icons.search, color: AppColors.primary700),
-                  suffix: const Icon(
+                  prefix: Icon(Icons.search, color: context.appColors.primary),
+                  suffix: Icon(
                     Icons.tune_rounded,
-                    color: AppColors.primary700,
+                    color: context.appColors.primary,
                   ),
                   onTap: () => Get.toNamed(AppRouter.doctorsList),
                 ),
@@ -136,11 +136,11 @@ class PatientHomeScreen extends StatelessWidget {
                 Obx(
                   () {
                     if (discovery.isLoadingSpecializations.value) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
                         child: Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary700,
+                            color: context.appColors.primary,
                           ),
                         ),
                       );
@@ -155,7 +155,7 @@ class PatientHomeScreen extends StatelessWidget {
                               Text(
                                 discovery.specializationsError.value,
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 13,
                                   color: context.appColors.textSecondary,
                                 ),
@@ -164,7 +164,7 @@ class PatientHomeScreen extends StatelessWidget {
                               ElevatedButton(
                                 onPressed: discovery.fetchSpecializations,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary900,
+                                  backgroundColor: context.appColors.primaryContainer,
                                   foregroundColor: AppColors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
@@ -180,8 +180,7 @@ class PatientHomeScreen extends StatelessWidget {
                     }
                     final specialties = discovery.specialties;
                     return SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.75,
-                      width: MediaQuery.of(context).size.width * 0.91,
+                      width: double.infinity,
                       child: GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
@@ -225,7 +224,7 @@ class PatientHomeScreen extends StatelessWidget {
   void _joinMeeting(AppointmentModel appointment) {
     final link = appointment.meetLink;
     if (link == null || link.isEmpty) {
-      Get.snackbar('Warning', 'No meeting link for this appointment.');
+      Get.snackbar('warning'.tr(), 'no_meeting_link'.tr());
       return;
     }
     Get.defaultDialog(
@@ -234,7 +233,7 @@ class PatientHomeScreen extends StatelessWidget {
       textCancel: 'cancel'.tr(),
       textConfirm: 'join'.tr(),
       confirmTextColor: AppColors.white,
-      buttonColor: AppColors.primary900,
+      buttonColor: Get.context!.appColors.primaryContainer,
       onConfirm: () {
         Get.back();
         launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication);

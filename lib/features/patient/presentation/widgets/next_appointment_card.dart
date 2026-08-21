@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 
@@ -63,7 +64,7 @@ class NextAppointmentCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary900.withValues(alpha: 0.35),
+              color: context.appColors.primary.withValues(alpha: 0.35),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -76,11 +77,14 @@ class NextAppointmentCard extends StatelessWidget {
               // Base gradient background.
               Positioned.fill(
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [AppColors.primary900, AppColors.primary700],
+                      colors: [
+                        context.appColors.primaryContainer,
+                        context.appColors.primary,
+                      ],
                     ),
                   ),
                 ),
@@ -129,9 +133,9 @@ class NextAppointmentCard extends StatelessWidget {
                             onBackgroundImageError: doctor.imageUrl != null
                                 ? (_, __) {}
                                 : null,
-                            child: const Icon(
+                            child: Icon(
                               Icons.person,
-                              color: AppColors.primary800,
+                              color: context.appColors.primary,
                               size: 26,
                             ),
                           ),
@@ -148,7 +152,7 @@ class NextAppointmentCard extends StatelessWidget {
                                         .capitalizeFirst!,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.white,
@@ -161,7 +165,7 @@ class NextAppointmentCard extends StatelessWidget {
                                     : 'next_title'.tr(),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w400,
                                   color: AppColors.white.withValues(alpha: 0.7),
@@ -193,7 +197,7 @@ class NextAppointmentCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             '$formattedDate, ${appointment.time}',
-                            style: GoogleFonts.roboto(
+                            style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppColors.white,
@@ -219,15 +223,15 @@ class NextAppointmentCard extends StatelessWidget {
                                 Icon(
                                   _actionIcon,
                                   size: 18,
-                                  color: AppColors.primary700,
+                                  color: context.appColors.primary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   _actionLabel,
-                                  style: GoogleFonts.roboto(
+                                  style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.primary900,
+                                    color: context.appColors.primary,
                                   ),
                                 ),
                               ],

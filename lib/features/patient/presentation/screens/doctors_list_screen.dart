@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
@@ -46,7 +46,7 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
                                 '{specialization}', specialization)
                             : 'doctors_title'.tr(),
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: context.appColors.textPrimary,
@@ -62,7 +62,7 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
                 child: Text(
                   'doctors_found'.tr().replaceFirst(
                     '{count}', '${doctors.length}'),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: context.appColors.textSecondary,
                   ),
@@ -70,9 +70,9 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
               ),
               Expanded(
                 child: controller.isLoading.value
-                    ? const Center(
+                    ? Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                       )
                     : controller.errorMessage.value.isNotEmpty &&
@@ -84,7 +84,7 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
                                 Text(
                                   controller.errorMessage.value,
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.roboto(
+                                  style: GoogleFonts.inter(
                                     fontSize: 13,
                                     color: context.appColors.textSecondary,
                                   ),
@@ -93,7 +93,7 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
                                 ElevatedButton(
                                   onPressed: controller.fetchDoctors,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary900,
+                                    backgroundColor: context.appColors.primaryContainer,
                                     foregroundColor: AppColors.white,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
@@ -109,7 +109,7 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
                             ? Center(
                                 child: Text(
                                   'no_doctors'.tr(),
-                                  style: GoogleFonts.roboto(
+                                  style: GoogleFonts.inter(
                                     color: context.appColors.textSecondary,
                                   ),
                                 ),

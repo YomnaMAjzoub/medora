@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
@@ -20,8 +20,8 @@ class MedicalRecordsScreen extends GetView<PatientAccountController> {
         backgroundColor: context.appColors.background,
         title: Text(
           'records'.tr(),
-          style: GoogleFonts.roboto(
-            color: AppColors.primary700,
+          style: GoogleFonts.inter(
+            color: context.appColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -34,17 +34,17 @@ class MedicalRecordsScreen extends GetView<PatientAccountController> {
                   ? null
                   : controller.exportMedicalRecordsPdf,
               icon: controller.isExportingPdf.value
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary700,
+                        color: context.appColors.primary,
                       ),
                     )
-                  : const Icon(
+                  : Icon(
                       Icons.ios_share_rounded,
-                      color: AppColors.primary700,
+                      color: context.appColors.primary,
                     ),
               tooltip: 'export_records'.tr(),
             ),
@@ -56,8 +56,8 @@ class MedicalRecordsScreen extends GetView<PatientAccountController> {
         bottom: false,
         child: Obx(() {
           if (controller.isLoadingRecords.value) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary700),
+            return Center(
+              child: CircularProgressIndicator(color: context.appColors.primary),
             );
           }
           if (controller.recordsError.value.isNotEmpty &&
@@ -71,7 +71,7 @@ class MedicalRecordsScreen extends GetView<PatientAccountController> {
                     Text(
                       controller.recordsError.value,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: context.appColors.textSecondary,
                       ),
@@ -80,7 +80,7 @@ class MedicalRecordsScreen extends GetView<PatientAccountController> {
                     ElevatedButton(
                       onPressed: controller.fetchMedicalRecords,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary900,
+                        backgroundColor: context.appColors.primaryContainer,
                         foregroundColor: AppColors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -98,7 +98,7 @@ class MedicalRecordsScreen extends GetView<PatientAccountController> {
             return Center(
               child: Text(
                 'no_records'.tr(),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   color: context.appColors.textSecondary,
                 ),
@@ -144,7 +144,7 @@ class _RecordCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary900.withValues(alpha: 0.08),
+            color: context.appColors.primary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -162,7 +162,7 @@ class _RecordCard extends StatelessWidget {
                       : record.doctorName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: context.appColors.textPrimary,
@@ -171,7 +171,7 @@ class _RecordCard extends StatelessWidget {
               ),
               Text(
                 DateFormat('d MMM yyyy').format(record.appointmentTime),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: context.appColors.textSecondary,
@@ -183,7 +183,7 @@ class _RecordCard extends StatelessWidget {
           Text(
             '${record.type.capitalizeFirst ?? record.type} - '
             '${DateFormat('h:mm a').format(record.appointmentTime)}',
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: context.appColors.textSecondary,
@@ -199,15 +199,15 @@ class _RecordCard extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: '${entry.key}: ',
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                       ),
                       TextSpan(
                         text: entry.value,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: context.appColors.textPrimary,

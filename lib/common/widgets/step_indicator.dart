@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 
 
@@ -27,7 +26,7 @@ class StepIndicator extends StatelessWidget {
             margin: EdgeInsets.symmetric(horizontal: 8),
             height: 8.5,
             decoration: BoxDecoration(
-              color: isActive ? AppColors.primary900 : inactiveColor,
+              color: isActive ? context.appColors.primary : inactiveColor,
               borderRadius: BorderRadius.circular(7),
             ),
           ),

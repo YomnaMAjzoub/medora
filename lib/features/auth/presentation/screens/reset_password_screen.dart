@@ -1,4 +1,4 @@
-﻿// lib/features/authentication/ui/screens/reset_password_screen.dart
+// lib/features/authentication/ui/screens/reset_password_screen.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
@@ -90,7 +90,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Center(
                   child: Text(
                     "reset_password_title".tr(),
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: context.appColors.textPrimary,
@@ -102,7 +102,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   child: Text(
                     "reset_password_subtitle".tr(),
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       color: context.appColors.textSecondary,
                     ),
@@ -111,14 +111,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 CustomFormField(
                   controller: newPasswordController,
-                  width: MediaQuery.of(context).size.width * 0.93,
+                  width: double.infinity,
                   height: 48,
                   hint: "new_password".tr(),
                   inputAction: TextInputAction.next,
                   keyboard: TextInputType.text,
                   prefix: Icon(
                     Icons.lock,
-                    color: AppColors.primary900,
+                    color: context.appColors.primary,
                     size: 20,
                   ),
                   suffix: IconButton(
@@ -129,12 +129,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     icon: authController.obscurenew.value
                         ? Icon(
                             Icons.visibility_off,
-                            color: AppColors.primary900,
+                            color: context.appColors.primary,
                             size: 20,
                           )
                         : Icon(
                             Icons.visibility,
-                            color: AppColors.primary900,
+                            color: context.appColors.primary,
                             size: 20,
                           ),
                   ),
@@ -163,9 +163,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       : CustomElevated(
                           text: "reset_password_button".tr(),
                           height: 48,
-                          width: MediaQuery.of(context).size.width * 0.93,
+                          width: double.infinity,
                           onPressed: handleResetPassword,
-                          background: AppColors.primary900,
+                          background: context.appColors.primary,
                           textColor: AppColors.yellow,
                         ),
                 ),

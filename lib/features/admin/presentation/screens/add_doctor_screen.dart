@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
+import 'package:medora_git/features/admin/presentation/specializations.dart';
 
 /// "Add Doctor" form (addDoctor endpoint).
 class AddDoctorScreen extends StatefulWidget {
@@ -62,8 +63,8 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       initialTime: isStart ? _startTime : _endTime,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: AppColors.primary700,
+          colorScheme: ColorScheme.light(
+            primary: context.appColors.primary,
           ),
         ),
         child: child!,
@@ -80,18 +81,29 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
     }
   }
 
-  void _submit() {
-    final fields = [
-      _firstName.text,
-      _lastName.text,
-      _email.text,
-      _phone.text,
-      _password.text,
-      _confirmPassword.text,
-      _price.text,
+  Future<void> _submit() async {
+    final missing = <String>[
+      if (_firstName.text.trim().isEmpty) 'first_name'.tr(),
+      if (_lastName.text.trim().isEmpty) 'last_name'.tr(),
+      if (_email.text.trim().isEmpty) 'email'.tr(),
+      if (_phone.text.trim().isEmpty) 'phone'.tr(),
+      if (_password.text.isEmpty) 'pass'.tr(),
+      if (_confirmPassword.text.isEmpty) 'confirm_password'.tr(),
+      if (_price.text.trim().isEmpty) 'price'.tr(),
     ];
-    if (fields.any((f) => f.trim().isEmpty)) {
-      Get.snackbar('error'.tr(), 'please_fill_all'.tr());
+    if (missing.isNotEmpty) {
+      Get.snackbar(
+        'error'.tr(),
+        '${'please_fill_all'.tr()}: ${missing.join(', ')}',
+      );
+      return;
+    }
+    final email = _email.text.trim();
+    final emailValid = RegExp(
+      r'^[\w\.\-]+@[\w\-]+(\.[\w\-]+)+$',
+    ).hasMatch(email);
+    if (!emailValid) {
+      Get.snackbar('error'.tr(), 'invalid_email'.tr());
       return;
     }
     if (_password.text != _confirmPassword.text) {
@@ -102,14 +114,10 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       Get.snackbar('error'.tr(), 'choose_specialization'.tr());
       return;
     }
-    if (_photoPath == null) {
-      Get.snackbar('error'.tr(), 'choose_profile_photo'.tr());
-      return;
-    }
-    controller.addDoctor(
+    final added = await controller.addDoctor(
       firstName: _firstName.text.trim(),
       lastName: _lastName.text.trim(),
-      email: _email.text.trim(),
+      email: email,
       password: _password.text,
       specialization: _specialization,
       phone: _phone.text.trim(),
@@ -118,23 +126,22 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       startTime: _formatTime(_startTime),
       endTime: _formatTime(_endTime),
       homeVisit: _homeVisit,
-      price: double.tryParse(_price.text) ?? 0,
-      photoPath: _photoPath!,
+      price: double.tryParse(_price.text.trim().replaceAll(',', '.')) ?? 0,
+      photoPath: _photoPath,
     );
-    Get.back();
+    if (added) Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final specializations = controller.specialties;
     return Scaffold(
       backgroundColor: context.appColors.background,
       appBar: AppBar(
         backgroundColor: context.appColors.background,
         title: Text(
           'add_doctor'.tr(),
-          style: GoogleFonts.roboto(
-            color: AppColors.primary700,
+          style: GoogleFonts.inter(
+            color: context.appColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -177,17 +184,11 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                     context,
                     label: 'specialization'.tr(),
                     value: _specialization,
-                    items: specializations
+                    items: kDoctorSpecializations
                         .map(
-                          (s) => DropdownMenuItem(
-                            value: s.name,
-                            child: Text(s.name),
-                          ),
+                          (s) => DropdownMenuItem(value: s, child: Text(s)),
                         )
                         .toList(),
-                    hint: controller.isLoadingSpecializations.value
-                        ? 'loading'.tr()
-                        : null,
                     onChanged: (v) => _specialization = v ?? '',
                   ),
                   _dropdown<String>(
@@ -221,13 +222,13 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       'home_visit'.tr(),
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: context.appColors.textPrimary,
                       ),
                     ),
-                    activeTrackColor: AppColors.primary700,
+                    activeTrackColor: context.appColors.primary,
                     value: _homeVisit,
                     onChanged: (v) => setState(() => _homeVisit = v),
                   ),
@@ -239,6 +240,18 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                       decimal: true,
                     ),
                   ),
+                  _field(
+                    context,
+                    'new_password'.tr(),
+                    _password,
+                    obscure: true,
+                  ),
+                  _field(
+                    context,
+                    'confirm_password'.tr(),
+                    _confirmPassword,
+                    obscure: true,
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -247,7 +260,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                   onPressed:
                       controller.isSubmitting.value ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary900,
+                    backgroundColor: context.appColors.primaryContainer,
                     foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -266,7 +279,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                         )
                       : Text(
                           'save'.tr(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -288,15 +301,15 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
         decoration: BoxDecoration(
           color: context.appColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary700.withValues(alpha: 0.3)),
+          border: Border.all(color: context.appColors.primary.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
             _photoPath == null
-                ? const Icon(
+                ? Icon(
                     Icons.add_a_photo_rounded,
                     size: 40,
-                    color: AppColors.primary700,
+                    color: context.appColors.primary,
                   )
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -310,10 +323,10 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
             const SizedBox(height: 8),
             Text(
               'profile_photo'.tr(),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary700,
+                color: context.appColors.primary,
               ),
             ),
           ],
@@ -330,7 +343,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary900.withValues(alpha: 0.06),
+            color: context.appColors.primary.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -359,7 +372,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: context.appColors.textPrimary,
@@ -401,7 +414,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: context.appColors.textPrimary,
@@ -415,7 +428,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
           hint: hint != null
               ? Text(
                   hint,
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: context.appColors.textSecondary,
                   ),
@@ -469,7 +482,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
           children: [
             Text(
               label,
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: context.appColors.textPrimary,
@@ -477,10 +490,10 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
             ),
             Text(
               time.format(context),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.primary700,
+                color: context.appColors.primary,
               ),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/features/chat/data/models/chat_message_model.dart';
 import 'package:medora_git/features/chat/data/models/conversation_model.dart';
@@ -108,7 +109,7 @@ class ChatService {
   }) async {
     final currentUserId = _currentUserId;
     if (currentUserId == null) {
-      throw Exception('User id not found. Please login again.');
+      throw Exception('user_id_not_found'.tr());
     }
     final participants = _participants(otherPartyId);
 

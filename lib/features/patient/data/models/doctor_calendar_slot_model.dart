@@ -17,9 +17,17 @@ class CalendarSlotModel {
   final bool isClinicHour;
   final String displayType;
 
-  /// A slot is bookable only when it is a clinic hour, not booked
-  /// and marked available (this excludes "clinic_offline" slots).
+  /// A slot is bookable for a CLINIC (in-person) visit only when it is an
+  /// in-clinic hour, not booked and marked available (this excludes
+  /// "clinic_offline" slots).
   bool get isBookable => isClinicHour && !isBooked && status == 'available';
+
+  /// A slot is bookable for HOME VISIT / ONLINE visits when it falls
+  /// OUTSIDE the doctor's in-clinic hours (the "clinic_offline" window the
+  /// backend generates within the clinic's 8:00 AM - 10:00 PM operating
+  /// window), not booked and marked available.
+  bool get isOffClinicBookable =>
+      !isClinicHour && !isBooked && status == 'available';
 
   factory CalendarSlotModel.fromJson(Map<String, dynamic> json) {
     return CalendarSlotModel(

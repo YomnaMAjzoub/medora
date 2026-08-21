@@ -3,40 +3,37 @@ import 'package:medora_git/features/patient/data/models/add_booking_response_mod
 class PaymentSuccessResponseModel {
   const PaymentSuccessResponseModel({
     required this.message,
-    required this.data,
+    this.detailMessage,
+    this.appointment,
+    this.payment,
   });
 
+  /// Top-level message, e.g. "Payment successful".
   final String message;
-  final PaymentSuccessDataModel data;
 
+  /// Nested `data.message` with the real detail,
+  /// e.g. "First deposit (50%) paid successfully. Appointment confirmed."
+  final String? detailMessage;
+  final BookingAppointmentModel? appointment;
+  final PaymentModel? payment;
+
+  /// Tolerant parser: only `message` is guaranteed by the backend; the
+  /// appointment and payment objects are optional.
   factory PaymentSuccessResponseModel.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return PaymentSuccessResponseModel(
-      message: json['message'] as String,
-      data: PaymentSuccessDataModel.fromJson(
-        json['data'] as Map<String, dynamic>,
-      ),
-    );
-  }
-}
-
-class PaymentSuccessDataModel {
-  const PaymentSuccessDataModel({
-    required this.message,
-    required this.appointment,
-    required this.payment,
-  });
-
-  final String message;
-  final BookingAppointmentModel appointment;
-  final PaymentModel payment;
-
-  factory PaymentSuccessDataModel.fromJson(Map<String, dynamic> json) {
-    return PaymentSuccessDataModel(
-      message: json['message'] as String,
-      appointment: BookingAppointmentModel.fromJson(
-        json['appointment'] as Map<String, dynamic>,
-      ),
-      payment: PaymentModel.fromJson(json['payment'] as Map<String, dynamic>),
+      message: json['message']?.toString() ?? data['message']?.toString() ?? '',
+      detailMessage: data['message']?.toString(),
+      appointment: data['appointment'] is Map<String, dynamic>
+          ? BookingAppointmentModel.fromJson(
+              data['appointment'] as Map<String, dynamic>,
+            )
+          : null,
+      payment: data['payment'] is Map<String, dynamic>
+          ? PaymentModel.fromJson(data['payment'] as Map<String, dynamic>)
+          : null,
     );
   }
 }
@@ -50,8 +47,6 @@ class PaymentModel {
     required this.remainingAmount,
     required this.method,
     required this.status,
-    required this.createdAt,
-    required this.updatedAt,
   });
 
   final int id;
@@ -61,20 +56,17 @@ class PaymentModel {
   final String remainingAmount;
   final String method;
   final String status;
-  final DateTime createdAt;
-  final DateTime updatedAt;
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     return PaymentModel(
-      id: json['id'] as int,
-      appointmentId: json['appointment_id'] as int,
-      totalAmount: json['total_amount'].toString(),
-      amountPaid: json['amount_paid'].toString(),
-      remainingAmount: json['remaining_amount'].toString(),
-      method: json['method'] as String,
-      status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      id: int.tryParse('${json['id'] ?? 0}') ?? 0,
+      appointmentId:
+          int.tryParse('${json['appointment_id'] ?? 0}') ?? 0,
+      totalAmount: json['total_amount']?.toString() ?? '0',
+      amountPaid: json['amount_paid']?.toString() ?? '0',
+      remainingAmount: json['remaining_amount']?.toString() ?? '0',
+      method: json['method'] as String? ?? '',
+      status: json['status'] as String? ?? '',
     );
   }
 }

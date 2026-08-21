@@ -1,9 +1,9 @@
 ﻿import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
 import 'package:medora_git/features/patient/data/models/active_offer_model.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
@@ -11,6 +11,7 @@ import 'package:medora_git/features/patient/data/models/appointment_record_model
 import 'package:medora_git/features/patient/data/models/doctor_summary_model.dart';
 import 'package:medora_git/features/patient/data/models/medical_record_model.dart';
 import 'package:medora_git/features/patient/data/models/offer_model.dart';
+import 'package:medora_git/features/patient/data/models/patient_profile_model.dart';
 import 'package:medora_git/features/patient/data/src/patient_service.dart';
 
 /// Patient account data: appointments, medical records and active offers,
@@ -35,8 +36,33 @@ class PatientAccountController extends GetxController {
   final RxString offersError = ''.obs;
   final RxList<ActiveOfferModel> offers = <ActiveOfferModel>[].obs;
 
-  final RxBool isExportingPdf = false.obs;
+final RxBool isExportingPdf = false.obs;
   final RxInt processingAppointmentId = 0.obs;
+
+  final Rx<PatientProfileModel?> profile = Rx<PatientProfileModel?>(null);
+  final RxBool isLoadingProfile = false.obs;
+  final RxString profileError = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProfile();
+  }
+
+  /// Loads the logged-in user's full profile (getMyProfile) so the profile
+  /// and medical-file screens show real data instead of the session summary.
+  Future<void> fetchProfile() async {
+    if (isLoadingProfile.value) return;
+    isLoadingProfile.value = true;
+    profileError.value = '';
+    try {
+      profile.value = await _service.getMyProfile();
+    } catch (e) {
+      profileError.value = e.toString();
+    } finally {
+      isLoadingProfile.value = false;
+    }
+  }
 
   /// Offers mapped to the home slider's UI model.
   List<OfferModel> get offerModels =>
@@ -100,55 +126,9 @@ class PatientAccountController extends GetxController {
     }
   }
 
-  /// Resumes the deposit of a pending appointment: app-confirm -> gateway ->
-  /// paymentSuccess -> refresh.
+/// Resumes the deposit of a pending appointment with the simulated
+  /// in-app payment (paymentSuccess) and refreshes the list.
   Future<void> resumePayment({required int appointmentId}) async {
-    processingAppointmentId.value = appointmentId;
-    try {
-      final url = await _service.resumePayment(appointmentId: appointmentId);
-      if (url.isEmpty) {
-        Get.snackbar('warning'.tr(), 'no_payment_link'.tr());
-        return;
-      }
-      final launched = await launchUrl(
-        Uri.parse(url),
-        mode: LaunchMode.externalApplication,
-      );
-      if (!launched) {
-        Get.snackbar('error'.tr(), 'Could not open the payment page.');
-        return;
-      }
-      _showPaymentReturnDialog(appointmentId);
-    } catch (e) {
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      processingAppointmentId.value = 0;
-    }
-  }
-
-  void _showPaymentReturnDialog(int appointmentId) {
-    Get.dialog(
-      AlertDialog(
-        title: Text('payment'.tr()),
-        content: Text('payment_complete_question'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              _confirmPayment(appointmentId);
-            },
-            child: Text('yes_i_paid'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('not_yet'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _confirmPayment(int appointmentId) async {
     processingAppointmentId.value = appointmentId;
     try {
       await _service.confirmPaymentSuccess(appointmentId: appointmentId);
@@ -161,7 +141,7 @@ class PatientAccountController extends GetxController {
     }
   }
 
-  /// Cancels a pending appointment (paymentCancel) and refreshes the list.
+/// Cancels a pending appointment (paymentCancel) and refreshes the list.
   Future<void> cancelAppointment({required int appointmentId}) async {
     processingAppointmentId.value = appointmentId;
     try {
@@ -175,9 +155,72 @@ class PatientAccountController extends GetxController {
     }
   }
 
-  @override
+  /// Confirms a visit after the patient tapped an appointment-reminder
+  /// notification (app-confirm). When the backend returns a `payment_url`
+  /// ("please complete payment"), the Fatora checkout opens in the in-app
+  /// WebView to finish the remaining payment.
+  Future<void> confirmReminderAppointment(
+      {required int appointmentId}) async {
+    processingAppointmentId.value = appointmentId;
+    try {
+      final result = await _service.confirmAfterReminder(
+        appointmentId: appointmentId,
+      );
+      final url = result.paymentUrl;
+      if (url != null && url.isNotEmpty) {
+        Get.toNamed(
+          AppRouter.fatoraPayment,
+          arguments: {
+            'paymentUrl': url,
+            'appointmentId': appointmentId,
+            'flow': 'reminder',
+          },
+        );
+      } else {
+        Get.snackbar('success'.tr(), result.message);
+      }
+      await fetchAppointments();
+    } catch (e) {
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      processingAppointmentId.value = 0;
+    }
+  }
+
+  /// Called by the Fatora WebView after the reminder-flow checkout
+  /// redirected to /paymentSuccess: finalises the payment on the backend,
+  /// refreshes the list and returns to the appointments tab.
+  Future<void> completeReminderPayment({required int appointmentId}) async {
+    processingAppointmentId.value = appointmentId;
+    try {
+      await _service.confirmPaymentSuccess(appointmentId: appointmentId);
+      Get.snackbar('success'.tr(), 'payment_confirmed'.tr());
+      await fetchAppointments();
+      Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
+    } catch (e) {
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      processingAppointmentId.value = 0;
+    }
+  }
+
+  /// Called by the Fatora WebView when the reminder-flow checkout redirected
+  /// to /paymentCancel. The appointment stays confirmed server-side, so the
+  /// patient just returns to the appointments tab to pay later.
+  Future<void> cancelReminderPayment({required int appointmentId}) async {
+    try {
+      Get.snackbar('info'.tr(), 'payment_cancelled'.tr());
+      await fetchAppointments();
+      Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
+    } catch (e) {
+      Get.snackbar('error'.tr(), e.toString());
+    }
+  }
+
+@override
   void onInit() {
     super.onInit();
+    fetchProfile();
     fetchAppointments();
     fetchMedicalRecords();
     fetchOffers();
@@ -222,8 +265,8 @@ class PatientAccountController extends GetxController {
     }
   }
 
-  /// Downloads the medical records PDF and stores it in the system temp
-  /// directory (the backend returns the file bytes when it works).
+  /// Downloads the patient profile PDF, stores it in the system temp
+  /// directory and opens the share sheet so it can be saved/shared.
   Future<void> exportMedicalRecordsPdf() async {
     isExportingPdf.value = true;
     try {
@@ -237,7 +280,11 @@ class PatientAccountController extends GetxController {
         '${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
       await file.writeAsBytes(bytes);
-      Get.snackbar('success'.tr(), 'pdf_saved'.tr(namedArgs: {'path': file.path}));
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/pdf')],
+        ),
+      );
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
     } finally {

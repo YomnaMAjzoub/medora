@@ -1,16 +1,12 @@
 ﻿import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
-import 'package:medora_git/features/patient/data/models/app_confirm_response_model.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
-import 'package:medora_git/features/patient/data/models/complete_final_payment_response_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_model.dart';
 import 'package:medora_git/features/patient/data/models/payment_success_response_model.dart';
 import 'package:medora_git/features/patient/data/src/booking_service.dart';
-import 'package:medora_git/core/routing/app_router.dart';
 
 enum BookingStep { selectDoctor, visitType, homeLocation, dateTime, payment }
 
@@ -138,91 +134,36 @@ class BookingController extends GetxController {
   }
 
   final RxnInt appointmentId = RxnInt();
+
+  /// Fatora checkout URL returned by the backend from POST /addBooking.
   final RxnString paymentUrl = RxnString();
+
+  /// Amount the backend expects up front (deposit), when it reports one.
   final RxInt amountToPayNow = 0.obs;
-  final Rxn<PaymentSuccessResponseModel> paymentResult = Rxn<PaymentSuccessResponseModel>();
 
-/// Called after the payment redirect returns; confirms the booking server-side.
-  Future<void> confirmPaymentSuccess() async {
-    final id = appointmentId.value;
-    if (id == null) {
-      Get.snackbar('warning'.tr(), 'no_appointment_to_confirm'.tr());
-      return;
-    }
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      final result = await _bookingService.paymentSuccess(appointmentId: id);
-      paymentResult.value = result;
-      Get.snackbar('success'.tr(), result.data.message);
-      resetBooking();
-      // Leave the booking flow; the new appointment is now on the
-      // appointments screen. (The "Yes, I paid" dialog already popped itself.)
-      if (Get.currentRoute == AppRouter.book) Get.back();
-    } catch (e) {
-      errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  /// The last simulated-payment result, shown on the in-app result screen.
+  final Rxn<PaymentSuccessResponseModel> paymentResult =
+      Rxn<PaymentSuccessResponseModel>();
 
-  final Rxn<AppConfirmResponseModel> appConfirmResult =
-      Rxn<AppConfirmResponseModel>();
-  final Rxn<CompleteFinalPaymentResponseModel> finalPaymentResult =
-      Rxn<CompleteFinalPaymentResponseModel>();
+  /// The doctor's real session price, used for the payment summary.
+  /// (The old hardcoded 100.0 placeholder was removed.)
+  double get consultationFee =>
+      selectedDoctor.value?.pricePerSession ?? 0;
 
-Future<void> completeFinalPayment() async {
-    final id = appointmentId.value;
-    if (id == null) {
-      Get.snackbar('warning'.tr(), 'no_appointment_to_confirm'.tr());
-      return;
-    }
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      final result = await _bookingService.completeFinalPayment(
-        appointmentId: id,
-      );
-      finalPaymentResult.value = result;
-    } catch (e) {
-      errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  /// The booking flow charges 50% of the session price up front.
+  double get depositAmount => consultationFee * 0.5;
 
-Future<void> confirmAppointment() async {
-    final id = appointmentId.value;
-    if (id == null) {
-      Get.snackbar('warning'.tr(), 'no_appointment_to_confirm'.tr());
-      return;
-    }
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      final result = await _bookingService.confirmAppointment(
-        appointmentId: id,
-      );
-      appConfirmResult.value = result;
-      if (result.paymentUrl.isNotEmpty) {
-        paymentUrl.value = result.paymentUrl;
-      }
-    } catch (e) {
-      errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
+  /// Creates the booking on the backend (addBooking) and keeps the
+  /// created appointment id for the payment step.
   Future<void> submitBooking() async {
     final doctor = selectedDoctor.value;
     final visitType = selectedVisitType.value;
     final date = selectedDate.value;
     final timeSlot = selectedTimeSlot.value;
-    if (doctor == null || visitType == null || date == null || timeSlot == null) {
+    if (doctor == null ||
+        visitType == null ||
+        date == null ||
+        timeSlot == null) {
       Get.snackbar('warning'.tr(), 'complete_booking_first'.tr());
       return;
     }
@@ -257,6 +198,9 @@ Future<void> confirmAppointment() async {
       appointmentId.value = result.appointment.id;
       paymentUrl.value = result.paymentUrl;
       amountToPayNow.value = result.amountToPayNow;
+      if (result.appointment.id == 0) {
+        Get.snackbar('error'.tr(), 'booking_failed'.tr());
+      }
     } catch (e) {
       errorMessage.value = e.toString();
       Get.snackbar('error'.tr(), e.toString());
@@ -265,55 +209,103 @@ Future<void> confirmAppointment() async {
     }
   }
 
-  var consultationFee = 100.0.obs; // Ù…Ø«Ø§Ù„
-  double get depositAmount => consultationFee.value * 0.5;
-
-  /// Submits the booking (if not yet done), opens the gateway payment page,
-  /// then asks the user to confirm once they return from the gateway.
+  /// Creates the booking if needed, then opens Fatora's hosted checkout page
+  /// (paymentUrl from addBooking) in an in-app WebView. When the backend does
+  /// not return a payment_url, it falls back to the direct paymentSuccess
+  /// callback (simulated in-app payment).
   Future<void> payNow() async {
     if (appointmentId.value == null) {
       await submitBooking();
     }
-    final url = paymentUrl.value;
-    if (url == null || url.isEmpty) {
+    final id = appointmentId.value;
+    if (id == null || id == 0) {
       if (errorMessage.value.isEmpty) {
         Get.snackbar('warning'.tr(), 'unable_start_payment'.tr());
       }
       return;
     }
 
-    final launched = await launchUrl(
-      Uri.parse(url),
-      mode: LaunchMode.externalApplication,
-    );
-    if (!launched) {
-      Get.snackbar('error'.tr(), 'could_not_open_payment'.tr());
+    final url = paymentUrl.value;
+    if (url != null && url.isNotEmpty) {
+      Get.toNamed(
+        AppRouter.fatoraPayment,
+        arguments: {
+          'paymentUrl': url,
+          'appointmentId': id,
+        },
+      );
       return;
     }
 
-    _showPaymentReturnDialog();
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final result = await _bookingService.paymentSuccess(appointmentId: id);
+      paymentResult.value = result;
+      final doctorName = selectedDoctor.value?.name ?? '';
+      resetBooking();
+      Get.toNamed(
+        AppRouter.paymentResult,
+        arguments: {'result': result, 'doctorName': doctorName},
+      );
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void _showPaymentReturnDialog() {
-    Get.dialog(
-      AlertDialog(
-        title: Text('payment'.tr()),
-        content: Text('payment_complete_question'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              confirmPaymentSuccess();
-            },
-            child: Text('yes_i_paid'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('not_yet'.tr()),
-          ),
-        ],
-      ),
-    );
+  /// Called by the Fatora WebView when the checkout redirected to
+  /// /paymentSuccess. Confirms the booking on the backend and shows the
+  /// in-app result screen.
+  Future<void> confirmPaymentAfterWebview({int? appointmentId}) async {
+    final id = appointmentId ?? this.appointmentId.value;
+    if (id == null || id == 0) {
+      Get.snackbar('warning'.tr(), 'unable_start_payment'.tr());
+      return;
+    }
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final result = await _bookingService.paymentSuccess(appointmentId: id);
+      paymentResult.value = result;
+      final doctorName = selectedDoctor.value?.name ?? '';
+      resetBooking();
+      Get.toNamed(
+        AppRouter.paymentResult,
+        arguments: {'result': result, 'doctorName': doctorName},
+      );
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Called by the Fatora WebView when the checkout redirected to
+  /// /paymentCancel. Cancels the booking on the backend and returns to the
+  /// main screen's appointments tab.
+  Future<void> cancelPaymentAfterWebview({int? appointmentId}) async {
+    final id = appointmentId ?? this.appointmentId.value;
+    if (id == null || id == 0) {
+      Get.snackbar('warning'.tr(), 'unable_start_payment'.tr());
+      return;
+    }
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      await _bookingService.paymentCancel(appointmentId: id);
+      Get.snackbar('info'.tr(), 'payment_cancelled'.tr());
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar('error'.tr(), e.toString());
+    } finally {
+      isLoading.value = false;
+      resetBooking();
+      Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
+    }
   }
 
   void resetBooking() {
@@ -329,9 +321,6 @@ Future<void> confirmAppointment() async {
     paymentUrl.value = null;
     amountToPayNow.value = 0;
     paymentResult.value = null;
-    appConfirmResult.value = null;
-    finalPaymentResult.value = null;
-    depositAmount; // Reset deposit amount if needed
   }
 
   // ---- Navigation ----

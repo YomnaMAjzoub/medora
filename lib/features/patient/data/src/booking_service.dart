@@ -4,12 +4,15 @@ import 'package:medora_git/core/errors/error_handler.dart';
 import 'package:medora_git/core/network/api_client.dart';
 import 'package:medora_git/core/storage/appconfig.dart';
 import 'package:medora_git/features/patient/data/models/add_booking_response_model.dart';
-import 'package:medora_git/features/patient/data/models/app_confirm_response_model.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
-import 'package:medora_git/features/patient/data/models/complete_final_payment_response_model.dart';
 import 'package:medora_git/features/patient/data/models/location_model.dart';
 import 'package:medora_git/features/patient/data/models/payment_success_response_model.dart';
 
+/// Patient-side booking endpoints, matching the Postman collection:
+///   POST /addBooking        (requires api_key header)
+///   POST /addLocation       (requires api_key header)
+///   GET  /paymentSuccess    (simulated payment, no api_key header)
+///   GET  /paymentCancel     (no api_key header)
 class BookingService {
   Future<AddLocationResponseModel> addLocation({
     required String address,
@@ -67,6 +70,7 @@ class BookingService {
     }
   }
 
+  /// Simulated payment: marks the booking as paid on the backend.
   Future<PaymentSuccessResponseModel> paymentSuccess({
     required int appointmentId,
   }) async {
@@ -74,7 +78,6 @@ class BookingService {
       final response = await ApiClient.dio.get(
         '/paymentSuccess',
         queryParameters: {'appointment_id': appointmentId},
-        options: Options(headers: {'api_key': AppConfig.apiKey}),
       );
 
       return PaymentSuccessResponseModel.fromJson(
@@ -85,35 +88,12 @@ class BookingService {
     }
   }
 
-  Future<AppConfirmResponseModel> confirmAppointment({
-    required int appointmentId,
-  }) async {
+  /// Cancels the booking when the customer backs out of the Fatora checkout.
+  Future<void> paymentCancel({required int appointmentId}) async {
     try {
-      final response = await ApiClient.dio.post(
-        '/appointments/$appointmentId/app-confirm',
-        options: Options(headers: {'api_key': AppConfig.apiKey}),
-      );
-
-      return AppConfirmResponseModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      throw Exception(ErrorHandler.handleDioError(e));
-    }
-  }
-
-  Future<CompleteFinalPaymentResponseModel> completeFinalPayment({
-    required int appointmentId,
-  }) async {
-    try {
-      final response = await ApiClient.dio.get(
-        '/completeFinalPayment',
+      await ApiClient.dio.get(
+        '/paymentCancel',
         queryParameters: {'appointment_id': appointmentId},
-        options: Options(headers: {'api_key': AppConfig.apiKey}),
-      );
-
-      return CompleteFinalPaymentResponseModel.fromJson(
-        response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw Exception(ErrorHandler.handleDioError(e));

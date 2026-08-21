@@ -10,6 +10,8 @@ import 'package:medora_git/features/doctor/data/models/patient_medical_record_mo
 import 'package:medora_git/features/patient/data/models/appointment_record_model.dart';
 import 'package:medora_git/features/patient/data/models/medical_record_model.dart';
 
+enum QuickAddKind { diagnosis, prescription, note, file }
+
 /// Patient medical records (getMedicalRecord/{id}) with an edit form that
 /// updates the record of the tapped appointment (updateMedicalRecord).
 class MedicalRecordScreen extends StatefulWidget {
@@ -37,6 +39,18 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     orElse: () => AppointmentStatus.unknown,
   );
 
+  /// When the screen is opened outside an appointment context (from the
+  /// patients list), record updates attach to the patient's most recent
+  /// appointment instead.
+  int get _resolvedAppointmentId {
+    if (_appointmentId > 0) return _appointmentId;
+    final patient = controller.patientById(_patientId);
+    if (patient != null && patient.lastAppointmentId != null) {
+      return patient.lastAppointmentId!;
+    }
+    return 0;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,8 +65,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         backgroundColor: context.appColors.background,
         title: Text(
           'medical_record'.tr(),
-          style: GoogleFonts.roboto(
-            color: AppColors.primary700,
+          style: GoogleFonts.inter(
+            color: context.appColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -63,8 +77,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         bottom: false,
         child: Obx(() {
           if (controller.isLoadingRecords.value) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary700),
+            return Center(
+              child: CircularProgressIndicator(color: context.appColors.primary),
             );
           }
           if (controller.recordsError.value.isNotEmpty &&
@@ -78,7 +92,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     Text(
                       controller.recordsError.value,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: context.appColors.textSecondary,
                       ),
@@ -89,7 +103,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                         _patientId,
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary900,
+                        backgroundColor: context.appColors.primaryContainer,
                         foregroundColor: AppColors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -117,12 +131,14 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               ],
               _patientHeader(context, record),
               const SizedBox(height: 16),
+              _quickAddSection(context),
+              const SizedBox(height: 16),
               _sectionTitle('history'.tr()),
               const SizedBox(height: 10),
               if (record.records.isEmpty)
                 Text(
                   'no_records'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: context.appColors.textSecondary,
                   ),
@@ -147,7 +163,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         color: context.appColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.primary700.withValues(alpha: 0.3),
+          color: context.appColors.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -155,16 +171,16 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         children: [
           Text(
             'final_payment'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary700,
+              color: context.appColors.primary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'final_payment_hint'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: context.appColors.textSecondary,
             ),
@@ -178,7 +194,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                         appointmentId: _appointmentId,
                       ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary900,
+                backgroundColor: context.appColors.primaryContainer,
                 foregroundColor: AppColors.white,
                 disabledBackgroundColor: context.appColors.border,
                 elevation: 0,
@@ -198,7 +214,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                   : const Icon(Icons.payment_rounded, size: 18),
               label: Text(
                 'complete_final_payment'.tr(),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -218,7 +234,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary900.withValues(alpha: 0.08),
+            color: context.appColors.primary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -233,12 +249,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primary900.withValues(alpha: 0.1),
+                  color: context.appColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_rounded,
-                  color: AppColors.primary800,
+                  color: context.appColors.primary,
                   size: 24,
                 ),
               ),
@@ -249,7 +265,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                   children: [
                     Text(
                       record.fullName,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: context.appColors.textPrimary,
@@ -259,7 +275,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     Text(
                       '${record.gender.capitalizeFirst ?? record.gender}'
                       '${record.birth != null ? ' - ${record.birth}' : ''}',
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: context.appColors.textSecondary,
                       ),
@@ -273,7 +289,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
           Text(
             '${record.email}'
             '${record.previousIllnesses != null && record.previousIllnesses!.isNotEmpty ? '  |  ${'illnesses'.tr()}: ${record.previousIllnesses}' : ''}',
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: context.appColors.textSecondary,
             ),
@@ -283,13 +299,178 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     );
   }
 
+  Widget _quickAddSection(BuildContext context) {
+    final actions = <(IconData, String, QuickAddKind)>[
+      (Icons.medical_information_rounded, 'add_diagnosis'.tr(), QuickAddKind.diagnosis),
+      (Icons.medication_rounded, 'add_prescription'.tr(), QuickAddKind.prescription),
+      (Icons.sticky_note_2_rounded, 'add_note'.tr(), QuickAddKind.note),
+      (Icons.upload_file_rounded, 'upload_file'.tr(), QuickAddKind.file),
+    ];
+    return Row(
+      children: [
+        for (final (icon, label, kind) in actions)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: InkWell(
+                onTap: () => _openQuickAdd(context, kind),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: context.appColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: context.appColors.primary.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(icon, color: context.appColors.primary, size: 20),
+                      const SizedBox(height: 6),
+                      Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: context.appColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _openQuickAdd(BuildContext context, QuickAddKind kind) async {
+    if (kind == QuickAddKind.file) {
+      _pickAndUploadFile(context);
+      return;
+    }
+
+    final inputController = TextEditingController();
+    final label = switch (kind) {
+      QuickAddKind.diagnosis => 'diagnosis'.tr(),
+      QuickAddKind.prescription => 'prescription'.tr(),
+      _ => 'notes'.tr(),
+    };
+
+    await Get.bottomSheet(
+      isScrollControlled: true,
+      Container(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          20 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: context.appColors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.appColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 14),
+            _field(context, label, inputController, maxLines: 4),
+            const SizedBox(height: 16),
+            Obx(
+              () => ElevatedButton(
+                onPressed: controller.isUpdatingRecord.value
+                    ? null
+                    : () {
+                        if (inputController.text.trim().isEmpty) {
+                          Get.snackbar('error'.tr(), 'please_fill_all'.tr());
+                          return;
+                        }
+                        Get.back();
+                        _submitQuickAdd(kind, inputController.text.trim());
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.appColors.primaryContainer,
+                  foregroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+                child: controller.isUpdatingRecord.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.white,
+                        ),
+                      )
+                    : Text(
+                        'save'.tr(),
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadFile(BuildContext context) async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+    if (_resolvedAppointmentId == 0) {
+      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
+      return;
+    }
+    controller.updateMedicalRecord(
+      appointmentId: _resolvedAppointmentId,
+      patientId: _patientId,
+      imagePath: picked.path,
+    );
+    await controller.fetchPatientRecord(_patientId);
+  }
+
+  void _submitQuickAdd(QuickAddKind kind, String text) {
+    if (_resolvedAppointmentId == 0) {
+      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
+      return;
+    }
+    controller.updateMedicalRecord(
+      appointmentId: _resolvedAppointmentId,
+      patientId: _patientId,
+      diagnosis: kind == QuickAddKind.diagnosis ? text : null,
+      prescription: kind == QuickAddKind.prescription ? text : null,
+      notes: kind == QuickAddKind.note ? text : null,
+    );
+  }
+
   Widget _sectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.roboto(
+      style: GoogleFonts.inter(
         fontSize: 15,
         fontWeight: FontWeight.w700,
-        color: AppColors.primary700,
+        color: context.appColors.primary,
       ),
     );
   }
@@ -318,10 +499,10 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
           Text(
             DateFormat('EEE, d MMM yyyy - h:mm a')
                 .format(record.appointmentTime),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary700,
+              color: context.appColors.primary,
             ),
           ),
           if (entries.isEmpty)
@@ -329,7 +510,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 'no_details'.tr(),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: context.appColors.textSecondary,
                 ),
@@ -344,15 +525,15 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     children: [
                       TextSpan(
                         text: '${entry.key}: ',
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                       ),
                       TextSpan(
                         text: entry.value,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: context.appColors.textPrimary,
@@ -376,7 +557,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary900.withValues(alpha: 0.06),
+            color: context.appColors.primary.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -415,17 +596,17 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                         ? Icons.attach_file_rounded
                         : Icons.check_circle_rounded,
                     size: 20,
-                    color: AppColors.primary700,
+                    color: context.appColors.primary,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     _imagePath == null
                         ? 'attach_image'.tr()
                         : 'image_selected'.tr(),
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary700,
+                      color: context.appColors.primary,
                     ),
                   ),
                 ],
@@ -439,7 +620,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                   ? null
                   : () => _submit(record),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary900,
+                backgroundColor: context.appColors.primaryContainer,
                 foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -458,7 +639,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     )
                   : Text(
                       'save'.tr(),
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -498,7 +679,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: context.appColors.textPrimary,

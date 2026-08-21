@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ErrorHandler {
   static String handleDioError(DioException e) {
@@ -7,24 +8,24 @@ class ErrorHandler {
 switch(e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.connectionError:
-        return 'Connection error, please try again';
+        return 'connection_error'.tr();
       case DioExceptionType.receiveTimeout:
-        return 'Server is taking too long to respond';
+        return 'server_timeout'.tr();
       case DioExceptionType.badCertificate:
-        return 'Security error';
+        return 'security_error'.tr();
         case DioExceptionType.badResponse:  
         if (data is Map && data.containsKey('message')) {
           return data['data']?['message'] ?? data['message'];
         }
         break;
       case DioExceptionType.cancel:
-        return 'Request was cancelled';
+        return 'request_cancelled'.tr();
       case DioExceptionType.unknown:
         if (e.error is String) {
           return e.error.toString();
         }
 
-        return 'Unexpected error occurred';
+        return 'unexpected_error'.tr();
       default:
         if (e.response != null) {
           final data = e.response?.data;
@@ -42,33 +43,33 @@ switch(e.type) {
 
           switch (status) {
             case 401:
-              return 'Unauthorized';
+              return 'unauthorized'.tr();
             case 403:
-              return 'Forbidden';
+              return 'forbidden'.tr();
             case 404:
-              return 'Not found';
+              return 'not_found'.tr();
             case 500:
-              return 'Server error, try again later';
+              return 'server_error'.tr();
           }
         }
-        return 'Unexpected error occurred';
+        return 'unexpected_error'.tr();
     }
 
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return 'Connection error, please try again';
+      return 'connection_error'.tr();
     }
 
     if (e.type == DioExceptionType.receiveTimeout) {
-      return 'Server is taking too long to respond';
+      return 'server_timeout'.tr();
     }
 
     if (e.type == DioExceptionType.badCertificate) {
-      return 'Security error';
+      return 'security_error'.tr();
     }
 
     if (e.type == DioExceptionType.cancel) {
-      return 'Request was cancelled';
+      return 'request_cancelled'.tr();
     }
 
     if (e.response != null) {
@@ -86,17 +87,17 @@ switch(e.type) {
 
       switch (e.response?.statusCode) {
         case 401:
-          return 'Unauthorized';
+          return 'unauthorized'.tr();
         case 403:
-          return 'Forbidden';
+          return 'forbidden'.tr();
         case 404:
-          return 'Not found';
+          return 'not_found'.tr();
         case 500:
-          return 'Server error, try again later';
+          return 'server_error'.tr();
       }
     }
 
-    return 'Unexpected error occurred';
+    return 'unexpected_error'.tr();
   }
   static String _extractError(Map errors) {
     try {
@@ -109,7 +110,7 @@ switch(e.type) {
         return value.toString();
       }
     } catch (e) {
-      return 'Validation error';
+      return 'validation_error'.tr();
     }
   }
 }

@@ -85,8 +85,8 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
         backgroundColor: colors.background,
         title: Text(
           'add_offer'.tr(),
-          style: GoogleFonts.roboto(
-            color: AppColors.primary700,
+          style: GoogleFonts.inter(
+            color: context.appColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -136,7 +136,7 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
                 () => ElevatedButton(
                   onPressed: controller.isSubmitting.value ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary900,
+                    backgroundColor: context.appColors.primaryContainer,
                     disabledBackgroundColor: colors.border,
                     foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -156,7 +156,7 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
                         )
                       : Text(
                           'save'.tr(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -182,7 +182,7 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: context.appColors.textPrimary,
@@ -227,10 +227,10 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.calendar_month_rounded,
               size: 18,
-              color: AppColors.primary700,
+              color: context.appColors.primary,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -238,7 +238,7 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
                 value == null
                     ? label
                     : DateFormat('yyyy-MM-dd').format(value),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: value == null
                       ? FontWeight.w400

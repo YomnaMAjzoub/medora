@@ -1,6 +1,7 @@
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
+import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_calendar_slot_model.dart';
 import 'package:medora_git/features/patient/data/src/doctor_calendar_service.dart';
 
@@ -9,6 +10,12 @@ class DoctorCalendarController extends GetxController {
       : _service = service ?? DoctorCalendarService();
 
   final DoctorCalendarService _service;
+
+  /// The clinic's fixed operating window: 8:00 AM - 10:00 PM. Home visit
+  /// and online bookings may only be placed inside this window, outside
+  /// the doctor's in-clinic hours.
+  static const int clinicOpenHour = 8;
+  static const int clinicCloseHour = 22;
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
@@ -19,18 +26,46 @@ class DoctorCalendarController extends GetxController {
   int _doctorId = 0;
   final Map<String, List<CalendarSlotModel>> _dayCache = {};
 
-  /// Slots the user is allowed to book (clinic hour + not booked + available).
-  List<CalendarSlotModel> get bookableSlots =>
-      slots.where((slot) => slot.isBookable).toList();
-
-  bool isDayCached(DateTime date) => _dayCache.containsKey(_formatDate(date));
-
   @override
   void onInit() {
     super.onInit();
     _doctorId = _resolveDoctorId();
+    // Changing the visit type (clinic -> home/online) flips which slots are
+    // selectable, so any previously picked slot must be cleared.
+    if (Get.isRegistered<BookingController>()) {
+      ever(
+        Get.find<BookingController>().selectedVisitType,
+        (_) => selectedSlot.value = null,
+      );
+    }
     fetchCalendar(doctorId: _doctorId, date: _formatDate(selectedDate.value));
   }
+
+  /// The visit type the booking flow is currently in. Defaults to clinic
+  /// when no booking flow is active (e.g. standalone calendar usage).
+  VisitType get _visitType {
+    if (!Get.isRegistered<BookingController>()) return VisitType.clinic;
+    return Get.find<BookingController>().selectedVisitType.value ??
+        VisitType.clinic;
+  }
+
+  /// Whether a slot may be booked for the current visit type:
+  ///  - Clinic (in-person): the doctor's normal in-clinic working hours.
+  ///  - Home visit / Online: the hours OUTSIDE the doctor's in-clinic
+  ///    schedule, within the clinic's 8:00 AM - 10:00 PM window.
+  bool isSlotBookable(CalendarSlotModel slot) {
+    final hour = int.tryParse(slot.time.split(':').first) ?? -1;
+    if (hour < clinicOpenHour || hour >= clinicCloseHour) return false;
+    return _visitType == VisitType.clinic
+        ? slot.isBookable
+        : slot.isOffClinicBookable;
+  }
+
+  /// Slots the user is allowed to book for the current visit type.
+  List<CalendarSlotModel> get bookableSlots =>
+      slots.where(isSlotBookable).toList();
+
+  bool isDayCached(DateTime date) => _dayCache.containsKey(_formatDate(date));
 
   Future<void> fetchCalendar({
     required int doctorId,
@@ -59,12 +94,12 @@ class DoctorCalendarController extends GetxController {
   }
 
   void selectSlot(CalendarSlotModel slot) {
-    if (slot.isBookable) {
+    if (isSlotBookable(slot)) {
       selectedSlot.value = slot;
     } else {
       _showSnackbar(
-        'Warning',
-        'This slot is not available, please pick another time.',
+        'warning'.tr(),
+        'slot_not_available'.tr(),
       );
     }
   }
@@ -116,7 +151,14 @@ class DoctorCalendarController extends GetxController {
       DateFormat('yyyy-MM-dd').format(date);
 
   void _showSnackbar(String title, String message) {
-    Get.closeAllSnackbars();
-    Get.snackbar(title, message);
+    // The snackbar needs a live navigator; without one (e.g. during early
+    // controller startup or tests) the rejection is silently ignored.
+    if (Get.context == null) return;
+    try {
+      Get.closeAllSnackbars();
+      Get.snackbar(title, message);
+    } catch (_) {
+      // Navigator not ready yet; nothing to show.
+    }
   }
 }

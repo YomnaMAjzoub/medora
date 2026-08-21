@@ -1,10 +1,11 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
+import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
 import 'package:medora_git/features/patient/business_layer/controller/patient_account_controller.dart';
 import 'package:medora_git/features/patient/data/models/appointment_record_model.dart';
 
@@ -23,8 +24,8 @@ class AppointmentsScreen extends GetView<PatientAccountController> {
         backgroundColor: context.appColors.background,
         title: Text(
           'schedules'.tr(),
-          style: GoogleFonts.roboto(
-            color: AppColors.primary700,
+          style: GoogleFonts.inter(
+            color: context.appColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -35,8 +36,8 @@ class AppointmentsScreen extends GetView<PatientAccountController> {
         bottom: false,
         child: Obx(() {
           if (controller.isLoadingAppointments.value) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary700),
+            return Center(
+              child: CircularProgressIndicator(color: context.appColors.primary),
             );
           }
           if (controller.appointmentsError.value.isNotEmpty &&
@@ -53,15 +54,15 @@ class AppointmentsScreen extends GetView<PatientAccountController> {
                 Material(
                   color: context.appColors.background,
                   child: TabBar(
-                    labelColor: AppColors.primary700,
+                    labelColor: context.appColors.primary,
                     unselectedLabelColor: context.appColors.textSecondary,
-                    indicatorColor: AppColors.primary700,
+                    indicatorColor: context.appColors.primary,
                     indicatorWeight: 2.5,
-                    labelStyle: GoogleFonts.roboto(
+                    labelStyle: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
-                    unselectedLabelStyle: GoogleFonts.roboto(
+                    unselectedLabelStyle: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -138,6 +139,26 @@ class _AppointmentCard extends StatelessWidget {
 
   final AppointmentRecordModel appointment;
 
+  /// The booked doctor's name: taken from the backend when the appointment
+  /// payload includes the doctor relation, otherwise resolved from the
+  /// discovery list via doctor_id.
+  String _doctorName(BuildContext context) {
+    if (appointment.doctor != null &&
+        appointment.doctor!.name.isNotEmpty) {
+      return appointment.doctor!.name;
+    }
+    if (Get.isRegistered<DoctorDiscoveryController>()) {
+      final match = Get.find<DoctorDiscoveryController>()
+          .doctors
+          .firstWhereOrNull(
+            (d) => d.userId == appointment.doctorId ||
+                d.id == '${appointment.doctorId}',
+          );
+      if (match != null) return match.name;
+    }
+    return '';
+  }
+
   IconData get _typeIcon {
     switch (appointment.type) {
       case 'home':
@@ -149,18 +170,18 @@ class _AppointmentCard extends StatelessWidget {
     }
   }
 
-  Color get _statusColor {
+  Color _statusColor(BuildContext context) {
     switch (appointment.status) {
       case AppointmentStatus.pendingDeposit:
-        return AppColors.primary800;
+        return context.appColors.primary;
       case AppointmentStatus.confirmed:
-        return AppColors.primary700;
+        return context.appColors.primary;
       case AppointmentStatus.completed:
-        return const Color(0xFF2E7D32);
+        return context.appColors.success;
       case AppointmentStatus.cancelled:
-        return const Color(0xFFC62828);
+        return context.appColors.danger;
       case AppointmentStatus.unknown:
-        return AppColors.grey500;
+        return context.appColors.textSecondary;
     }
   }
 
@@ -187,7 +208,7 @@ class _AppointmentCard extends StatelessWidget {
       textCancel: 'cancel'.tr(),
       textConfirm: 'join'.tr(),
       confirmTextColor: AppColors.white,
-      buttonColor: AppColors.primary900,
+      buttonColor: Get.context!.appColors.primaryContainer,
       onConfirm: () {
         Get.back();
         launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication);
@@ -201,6 +222,7 @@ class _AppointmentCard extends StatelessWidget {
     final date = appointment.appointmentTime;
     final isProcessing =
         controller.processingAppointmentId.value == appointment.id;
+    final doctorName = _doctorName(context);
 
     final actions = <Widget>[];
     if (appointment.isOnline) {
@@ -213,6 +235,17 @@ class _AppointmentCard extends StatelessWidget {
       );
     }
     if (appointment.status == AppointmentStatus.pendingDeposit) {
+      actions.add(
+        _ActionButton(
+          icon: Icons.check_rounded,
+          label: 'confirm_visit'.tr(),
+          onTap: isProcessing
+              ? null
+              : () => controller.confirmReminderAppointment(
+                    appointmentId: appointment.id,
+                  ),
+        ),
+      );
       actions.add(
         _ActionButton(
           icon: Icons.payment_rounded,
@@ -245,7 +278,7 @@ class _AppointmentCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary900.withValues(alpha: 0.08),
+            color: context.appColors.primary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -260,10 +293,10 @@ class _AppointmentCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primary900.withValues(alpha: 0.1),
+                  color: context.appColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(_typeIcon, color: AppColors.primary800, size: 24),
+                child: Icon(_typeIcon, color: context.appColors.primary, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -272,7 +305,7 @@ class _AppointmentCard extends StatelessWidget {
                   children: [
                     Text(
                       appointment.type.capitalizeFirst ?? appointment.type,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: context.appColors.textPrimary,
@@ -282,27 +315,80 @@ class _AppointmentCard extends StatelessWidget {
                     Text(
                       '${DateFormat('EEE, d MMM yyyy').format(date)} - '
                       '${DateFormat('h:mm a').format(date)}',
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                         color: context.appColors.textSecondary,
                       ),
                     ),
+                    if (doctorName.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.person_rounded,
+                            size: 14,
+                            color: context.appColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              doctorName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: context.appColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (appointment.type == 'home' &&
+                        (appointment.locationAddress != null ||
+                            appointment.locationId != null)) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: 14,
+                            color: context.appColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              appointment.locationAddress ??
+                                  '${'location'.tr()} #${appointment.locationId}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: context.appColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: _statusColor.withValues(alpha: 0.12),
+                  color: _statusColor(context).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   _statusLabel,
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: _statusColor,
+                    color: _statusColor(context),
                   ),
                 ),
               ),
@@ -352,11 +438,15 @@ class _ActionButton extends StatelessWidget {
         ),
       ),
       icon: Icon(icon, size: 16),
-      label: Text(
-        label,
-        style: GoogleFonts.roboto(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+      label: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          label,
+          maxLines: 1,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -380,13 +470,13 @@ class _ErrorRetry extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.roboto(fontSize: 13, color: AppColors.grey300),
+              style: GoogleFonts.inter(fontSize: 13, color: AppColors.grey300),
             ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary900,
+                backgroundColor: context.appColors.primaryContainer,
                 foregroundColor: AppColors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -412,7 +502,7 @@ class _EmptyState extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: GoogleFonts.roboto(fontSize: 14, color: AppColors.grey300),
+        style: GoogleFonts.inter(fontSize: 14, color: AppColors.grey300),
       ),
     );
   }

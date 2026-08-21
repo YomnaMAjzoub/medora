@@ -1,8 +1,7 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/booking_controller.dart';
 import 'package:medora_git/features/patient/presentation/widgets/booking/booking_step_progress.dart';
@@ -39,9 +38,9 @@ class BookingView extends GetView<BookingController> {
                       onPressed: controller.currentStep.value == 0
                           ? () => Get.back()
                           : controller.goToPreviousStep,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back_rounded,
-                        color: AppColors.grey500,
+                        color: context.appColors.textPrimary,
                       ),
                     ),
                   ),
@@ -49,7 +48,7 @@ class BookingView extends GetView<BookingController> {
                     child: Text(
                       'book_appointment'.tr(),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: context.appColors.textPrimary,

@@ -68,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.primary900,
+                      color: context.appColors.primary,
                     ),
                   ),
                 ),
@@ -99,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   controller: _pageController,
                   count: onboardingPagesData.length,
                   effect: ExpandingDotsEffect(
-                    activeDotColor: AppColors.primary500,
+                    activeDotColor: context.appColors.primary,
                     dotColor: context.appColors.border,
                     dotHeight: 8,
                     dotWidth: 8,
@@ -130,14 +130,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         side: BorderSide(
-                          color: AppColors.primary900,
+                          color: context.appColors.primary,
                           width: 1.5,
                         ),
                       ),
                       child: Text(
                         'previous'.tr(),
                         style: TextStyle(
-                          color: AppColors.primary900,
+                          color: context.appColors.primary,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -164,8 +164,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           //log('Finished onboarding! Navigate to main app.');
                         }
                       },
-                      color: AppColors.primary900,
-                      background: AppColors.primary900,
+                      color: context.appColors.primary,
+                      background: context.appColors.primary,
                       textColor: AppColors.yellow,
                     ),
                   ),

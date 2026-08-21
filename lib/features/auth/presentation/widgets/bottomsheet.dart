@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/core/const/app_colors.dart';
@@ -23,7 +23,7 @@ void showBirthDatePicker(BuildContext context) {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary900,
+              color: context.appColors.primary,
             ),
           ),
           const SizedBox(height: 10),
@@ -40,7 +40,7 @@ void showBirthDatePicker(BuildContext context) {
                     "error".tr(),
                     "adult_required".tr(),
                     backgroundColor: AppColors.primary50,
-                    colorText: AppColors.primary900,
+                    colorText: context.appColors.primary,
                   );
                   return;
                 }

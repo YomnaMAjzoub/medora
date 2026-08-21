@@ -1,8 +1,7 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/core/theme/settings_controller.dart';
 
@@ -17,10 +16,10 @@ class SettingsScreen extends GetView<SettingsController> {
       appBar: AppBar(
         title: Text(
           'settings'.tr(),
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: AppColors.primary700,
+            color: context.appColors.primary,
           ),
         ),
         centerTitle: true,
@@ -85,7 +84,7 @@ class SettingsScreen extends GetView<SettingsController> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         label,
-        style: GoogleFonts.roboto(
+        style: GoogleFonts.inter(
           fontSize: 13,
           fontWeight: FontWeight.w700,
           color: context.appColors.textSecondary,
@@ -113,12 +112,12 @@ class SettingsScreen extends GetView<SettingsController> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Icon(icon, color: AppColors.primary700, size: 22),
+                Icon(icon, color: context.appColors.primary, size: 22),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
                     label,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: colors.textPrimary,
@@ -130,7 +129,7 @@ class SettingsScreen extends GetView<SettingsController> {
                       ? Icons.radio_button_checked
                       : Icons.radio_button_off,
                   color: selected
-                      ? AppColors.primary700
+                      ? colors.primary
                       : colors.textHint,
                   size: 22,
                 ),

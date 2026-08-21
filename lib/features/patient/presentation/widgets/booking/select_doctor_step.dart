@@ -64,7 +64,7 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
                     children: [
                       Text(
                         'available_doctors'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: context.appColors.textPrimary,
@@ -75,7 +75,7 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
                         'doctors_found'
                             .tr()
                             .replaceFirst('{count}', '${doctors.length}'),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           color: context.appColors.textSecondary,
                         ),
@@ -89,11 +89,11 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
             ),
             const SizedBox(height: 20),
             if (discovery.isLoading.value)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 60),
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: AppColors.primary700,
+                    color: context.appColors.primary,
                   ),
                 ),
               )
@@ -107,7 +107,7 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
                       Text(
                         discovery.errorMessage.value,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           color: context.appColors.textSecondary,
                         ),
@@ -116,7 +116,7 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
                       ElevatedButton(
                         onPressed: discovery.fetchDoctors,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary900,
+                          backgroundColor: context.appColors.primaryContainer,
                           foregroundColor: AppColors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -135,7 +135,7 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
                 child: Center(
                   child: Text(
                     'no_doctors_match'.tr(),
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       color: context.appColors.textSecondary,
                     ),
                   ),
@@ -175,7 +175,7 @@ class _FilterButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.primary900,
+          color: context.appColors.primary,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -188,7 +188,7 @@ class _FilterButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               'filter'.tr(),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.white,

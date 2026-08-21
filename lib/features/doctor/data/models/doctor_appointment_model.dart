@@ -11,6 +11,8 @@ class DoctorAppointmentModel {
     required this.appointmentTime,
     required this.status,
     required this.patient,
+    this.locationId,
+    this.locationAddress,
     this.meetLink,
   });
 
@@ -20,6 +22,10 @@ class DoctorAppointmentModel {
   final DateTime appointmentTime;
   final AppointmentStatus status;
   final DoctorAppointmentPatientModel patient;
+  final int? locationId;
+
+  /// Home-visit address when the backend includes the `location` relation.
+  final String? locationAddress;
   final String? meetLink;
 
   /// Online consultations have no backend meeting link, so a deterministic
@@ -31,6 +37,13 @@ class DoctorAppointmentModel {
   bool get isOnline => type == 'online';
 
   factory DoctorAppointmentModel.fromJson(Map<String, dynamic> json) {
+    final location = json['location'];
+    String? locationAddress;
+    if (location is Map<String, dynamic>) {
+      locationAddress = location['address']?.toString();
+    } else if (location != null && location.toString().isNotEmpty) {
+      locationAddress = location.toString();
+    }
     return DoctorAppointmentModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       patientId: (json['patient_id'] as num?)?.toInt() ?? 0,
@@ -42,6 +55,8 @@ class DoctorAppointmentModel {
       patient: DoctorAppointmentPatientModel.fromJson(
         json['patient'] as Map<String, dynamic>? ?? const {},
       ),
+      locationId: (json['location_id'] as num?)?.toInt(),
+      locationAddress: locationAddress,
       meetLink: MeetLink.fromJson(json),
     );
   }

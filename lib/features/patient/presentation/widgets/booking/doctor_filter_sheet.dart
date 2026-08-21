@@ -87,7 +87,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
               children: [
                 Text(
                   'filters'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: context.appColors.textPrimary,
@@ -102,7 +102,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
             const SizedBox(height: 16),
             Text(
               'specialization'.tr(),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: context.appColors.textSecondary,
@@ -138,7 +138,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
             const SizedBox(height: 20),
             Text(
               'doctor_gender'.tr(),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: context.appColors.textSecondary,
@@ -162,7 +162,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
                     onSelected: (_) => setState(
                       () => _filters = _filters.copyWith(gender: gender),
                     ),
-                    selectedColor: AppColors.primary900,
+                    selectedColor: context.appColors.primary,
                     labelStyle: TextStyle(
                       color: isSelected
                           ? AppColors.white
@@ -173,7 +173,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
                     shape: StadiumBorder(
                       side: BorderSide(
                         color: isSelected
-                            ? AppColors.primary900
+                            ? context.appColors.primary
                             : context.appColors.border,
                       ),
                     ),
@@ -184,7 +184,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
             const SizedBox(height: 20),
             Text(
               'price_range'.tr(),
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: context.appColors.textSecondary,
@@ -195,7 +195,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
               min: 0,
               max: 500,
               divisions: 20,
-              activeColor: AppColors.primary700,
+              activeColor: context.appColors.primary,
               onChanged: (value) =>
                   setState(() => _filters = _filters.copyWith(maxPrice: value)),
             ),
@@ -243,7 +243,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context, _filters),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary900,
+                      backgroundColor: context.appColors.primaryContainer,
                       foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       elevation: 0,
@@ -272,7 +272,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.primary900,
+      selectedColor: context.appColors.primary,
       labelStyle: TextStyle(
         color: selected ? AppColors.white : colors.textSecondary,
         fontSize: 12,
@@ -280,7 +280,7 @@ class _DoctorFilterSheetState extends State<_DoctorFilterSheet> {
       backgroundColor: colors.background,
       shape: StadiumBorder(
         side: BorderSide(
-          color: selected ? AppColors.primary900 : colors.border,
+          color: selected ? context.appColors.primary : colors.border,
         ),
       ),
     );

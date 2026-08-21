@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'hide Trans;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
@@ -51,7 +50,7 @@ class GenderSelector extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary900 : context.appColors.border,
+            color: isSelected ? context.appColors.primary : context.appColors.border,
             width: 1.4,
           ),
          // color: isSelected ? AppColors.primary500 : AppColors.white,
@@ -60,13 +59,13 @@ class GenderSelector extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary900 : context.appColors.textSecondary,
+              color: isSelected ? context.appColors.primary : context.appColors.textSecondary,
               size: 22,
             ),
             const SizedBox(width: 8),
             Text(
               label,
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color:context.appColors.textSecondary,
@@ -87,7 +86,7 @@ class GenderSelector extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? AppColors.primary900 : context.appColors.border,
+          color: isSelected ? context.appColors.primary : context.appColors.border,
           width: 2,
         ),
       ),
@@ -96,9 +95,9 @@ class GenderSelector extends StatelessWidget {
               child: Container(
                 width: 10,
                 height: 10,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary900,
+                  color: context.appColors.primary,
                 ),
               ),
             )

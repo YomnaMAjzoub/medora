@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 
 /// Segmented progress indicator for the booking wizard, e.g. "Step 2 of 4".
@@ -32,7 +31,7 @@ class BookingStepProgress extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppColors.primary700
+                      ? context.appColors.primary
                       : context.appColors.border,
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -46,7 +45,7 @@ class BookingStepProgress extends StatelessWidget {
               .replaceFirst('{current}', '${currentStep + 1}')
               .replaceFirst('{total}', '$totalSteps')
               .replaceFirst('{label}', stepLabel),
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: context.appColors.textSecondary,

@@ -1,4 +1,4 @@
-﻿// lib/features/authentication/ui/screens/otp_screen.dart
+// lib/features/authentication/ui/screens/otp_screen.dart
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:flutter/material.dart';
@@ -34,6 +34,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   void dispose() {
+    FocusManager.instance.primaryFocus?.unfocus();
     widget.otpController.dispose();
     super.dispose();
   }
@@ -68,16 +69,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     color: context.appColors.surface,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.mail_outline,
                     size: 40,
-                    color: AppColors.primary800,
+                    color: context.appColors.primary,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   isRegister ? "otp_title".tr() : "verify_email_title".tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 22,
                     color: context.appColors.textPrimary,
                     fontWeight: FontWeight.bold,
@@ -88,7 +89,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   "${isRegister ? "otp_subtitle".tr() : "verify_email_subtitle".tr()}$email",
                   textAlign: TextAlign.center,
                   maxLines: 2,
-                  style: GoogleFonts.roboto(color: context.appColors.textSecondary),
+                  style: GoogleFonts.inter(color: context.appColors.textSecondary),
                 ),
                 const SizedBox(height: 40),
                 Container(
@@ -103,33 +104,42 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   ),
                   child: Column(
                     children: [
-                      PinCodeTextField(
-                        controller: otpController,
-                        appContext: context,
-                        length: 6,
-                        keyboardType: TextInputType.number,
-                        animationType: AnimationType.fade,
-                        enableActiveFill: true,
-                        cursorColor: AppColors.primary800,
-                        showCursor: false,
-                        textStyle: GoogleFonts.roboto(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        pinTheme: PinTheme(
-                          shape: PinCodeFieldShape.box,
-                          borderRadius: BorderRadius.circular(12),
-                          fieldHeight: 55,
-                          fieldWidth: 45,
-                          inactiveColor: context.appColors.border,
-                          inactiveFillColor: context.appColors.inputFill,
-                          selectedColor: AppColors.primary800,
-                          selectedFillColor: context.appColors.inputFill,
-                          activeColor: AppColors.primary800,
-                          activeFillColor: context.appColors.inputFill,
-                        ),
-                        onChanged: (value) {
-                         otp=value;
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Keep the classic 45px fields but shrink them so
+                          // six fields always fit the card on small phones.
+                          final fieldWidth =
+                              (constraints.maxWidth / 6).clamp(28.0, 45.0);
+                          return PinCodeTextField(
+                            controller: otpController,
+                            autoDisposeControllers: false,
+                            appContext: context,
+                            length: 6,
+                            keyboardType: TextInputType.number,
+                            animationType: AnimationType.fade,
+                            enableActiveFill: true,
+                            cursorColor: context.appColors.primary,
+                            showCursor: false,
+                            textStyle: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(12),
+                              fieldHeight: 55,
+                              fieldWidth: fieldWidth,
+                              inactiveColor: context.appColors.border,
+                              inactiveFillColor: context.appColors.inputFill,
+                              selectedColor: context.appColors.primary,
+                              selectedFillColor: context.appColors.inputFill,
+                              activeColor: context.appColors.primary,
+                              activeFillColor: context.appColors.inputFill,
+                            ),
+                            onChanged: (value) {
+                              otp = value;
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 20),
@@ -141,11 +151,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   () => authController.isloading.value
                       ? Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary800,
+                            color: context.appColors.primary,
                           ),
                         )
                       : CustomElevated(
                           onPressed: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
                             if (otp.length != 6) {
                               Get.snackbar('error'.tr(), 'enter_full_code'.tr());
                               return;
@@ -159,7 +170,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                                     'Success',
                                     msg,
                                     backgroundColor: AppColors.primary100,
-                                    colorText: AppColors.black,
+                                    colorText: context.appColors.textPrimary,
                                     duration: Duration(seconds: 3),
                                   );
                                   Get.offAllNamed(AppRouter.login);
@@ -169,7 +180,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                                     'Error',
                                     err,
                                     backgroundColor: Colors.red.shade100,
-                                    colorText: AppColors.black,
+                                    colorText: context.appColors.textPrimary,
                                     duration: Duration(seconds: 3),
                                   );
                                 },
@@ -188,11 +199,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             }
                           },
                           text: "Verify".tr(),
-                          background: AppColors.primary900,
+                          background: context.appColors.primary,
                           height: 48,
-                          width: MediaQuery.of(context).size.width * 0.50,
+                          width: double.infinity,
                           textColor: AppColors.yellow,
-                          color: AppColors.primary900,
+                          color: context.appColors.primary,
                         ),
                 ),
               ],

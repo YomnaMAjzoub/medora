@@ -30,7 +30,7 @@ class MedicalRecordModel {
       diagnosis: json['diagnosis']?.toString(),
       prescription: json['prescription']?.toString(),
       tests: json['tests']?.toString(),
-      images: json['images']?.toString(),
+      images: _imagesToString(json['images']),
       notes: json['notes']?.toString(),
       appointmentTime:
           DateTime.tryParse(json['appointment_time'] as String? ?? '') ??
@@ -39,5 +39,20 @@ class MedicalRecordModel {
       doctorName: json['doctor_name'] as String? ?? '',
       doctorSpecialization: json['doctor_specialization']?.toString(),
     );
+  }
+
+  /// The backend stores uploaded files as a comma-joined string; some
+  /// responses may hand the raw list instead. Normalize both to a string.
+  static String? _imagesToString(dynamic images) {
+    if (images == null) return null;
+    if (images is List) {
+      final parts = images
+          .map((e) => e?.toString() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+      return parts.isEmpty ? null : parts.join(',');
+    }
+    final raw = images.toString();
+    return raw.trim().isEmpty ? null : raw;
   }
 }

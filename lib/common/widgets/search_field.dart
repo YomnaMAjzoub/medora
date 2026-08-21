@@ -4,13 +4,14 @@ import 'package:medora_git/core/theme/app_theme.dart';
 
 
 class SearchField extends StatelessWidget {
- const SearchField({
+  const SearchField({
     required this.hint,
     required this.prefix,
     required this.suffix,
     required this.width,
     required this.height,
     this.onTap,
+    this.onChanged,
     super.key,
   });
   final double width;
@@ -19,6 +20,7 @@ class SearchField extends StatelessWidget {
   final Widget prefix;
   final Widget suffix;
  final void Function()? onTap;
+ final void Function(String)? onChanged;
   
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,7 @@ class SearchField extends StatelessWidget {
       height: height,
       child: TextFormField(
         onTap:onTap ,
+        onChanged: onChanged,
         decoration: InputDecoration(
           prefixIcon: prefix,
           suffixIcon: suffix,

@@ -5,16 +5,25 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/services/local_notifications_service.dart';
+import 'package:medora_git/core/services/notification_router.dart';
 import 'package:medora_git/features/auth/data/src/auth_service.dart';
 
 /// Background isolate handler -- must be a top-level function. Runs when the
-/// app is terminated (or in the background without the engine active) and a
-/// push notification arrives.
+/// app is in the background (or terminated) and a data-only push arrives.
+/// Shows a local notification banner (the engine has no UI in this isolate)
+/// and persists the payload so the foreground side can react on next open.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // The engine/plugins are not available here; only persist what matters
-  // so the foreground side can react when the app is opened again.
+  await LocalNotificationsService.initForBackgroundIsolate();
+  final payload = PushNotificationPayload.fromMessage(message);
+  await LocalNotificationsService.show(
+    id: LocalNotificationsService.idFor(message.data),
+    title: message.notification?.title ?? payload.title ?? 'Medora',
+    body: message.notification?.body ?? payload.body ?? '',
+    payload: message.data.isEmpty ? null : payload.encode(),
+  );
+
   final box = GetStorage();
   if (message.data.isNotEmpty) {
     await box.write('last_notification', message.data);
@@ -35,7 +44,13 @@ class FirebaseService extends GetxService {
     }
   }
 
-  static Future<void> init() async {
+  static Future<void>? _initFuture;
+
+  /// Idempotent: repeated calls return the already-running initialisation,
+  /// so the splash can await it before raising permission prompts.
+  static Future<void> init() => _initFuture ??= _doInit();
+
+  static Future<void> _doInit() async {
     try {
       await Firebase.initializeApp();
 
@@ -48,6 +63,12 @@ class FirebaseService extends GetxService {
       } catch (e) {
         // Anonymous auth unavailable; chat stays functional under open rules.
       }
+
+      // Local banner layer: renders foreground pushes and routes taps to the
+      // right screen (role + type aware).
+      await LocalNotificationsService.init(
+        onTap: _handleLocalNotificationTap,
+      );
 
       final messaging = FirebaseMessaging.instance;
 
@@ -65,24 +86,35 @@ class FirebaseService extends GetxService {
       // token so the next login/register sends the current one.
       messaging.onTokenRefresh.listen((token) => _saveToken(messaging));
 
-      // Foreground: show a snackbar while the app is visible.
+      // Foreground: the system does not show pushes by default, so render
+      // them through the local notification banner.
       FirebaseMessaging.onMessage.listen((message) {
-        Get.snackbar(
-          message.notification?.title ?? 'Notification',
-          message.notification?.body ?? '',
+        final payload = PushNotificationPayload.fromMessage(message);
+        LocalNotificationsService.show(
+          id: LocalNotificationsService.idFor(message.data),
+          title: message.notification?.title ?? payload.title ?? 'Medora',
+          body: message.notification?.body ?? payload.body ?? '',
+          payload: message.data.isEmpty ? null : payload.encode(),
         );
       });
 
-      // Tapped while the app is in the background: open the chat inbox.
+      // Tapped while the app is in the background: route by role + type.
       FirebaseMessaging.onMessageOpenedApp.listen((message) {
-        _handleNotificationTap();
+        NotificationRouter.route(
+          payload: PushNotificationPayload.fromMessage(message),
+        );
       });
 
       // Tapped from a terminated state.
       final initialMessage = await messaging.getInitialMessage();
       if (initialMessage != null) {
-        // Delay until the router is mounted; splash is still on screen.
-        Future.delayed(const Duration(seconds: 2), _handleNotificationTap);
+        // Wait until the splash redirect (3s) has built the app shell, then
+        // route the tap to the correct screen.
+        Future.delayed(const Duration(milliseconds: 3500), () {
+          NotificationRouter.route(
+            payload: PushNotificationPayload.fromMessage(initialMessage),
+          );
+        });
       }
     } catch (e) {
       // Firebase config files not present yet; notifications stay disabled.
@@ -103,16 +135,12 @@ class FirebaseService extends GetxService {
     }
   }
 
-  static void _handleNotificationTap() {
-    // Guard: only navigate once the app shell is up.
-    final storage = GetStorage();
-    final hasToken = storage.read<String>('access_token')?.isNotEmpty ?? false;
-    if (!hasToken) return;
-    try {
-      Get.toNamed(AppRouter.conversations);
-    } catch (_) {
-      // Route not ready yet -- the inbox screen handles its own state.
-    }
+  /// Taps on locally-displayed banners (foreground pushes, background
+  /// data-only pushes) arrive here with the JSON data payload.
+  static void _handleLocalNotificationTap(Map<String, dynamic> data) {
+    NotificationRouter.route(
+      payload: PushNotificationPayload.fromData(data),
+    );
   }
 
   /// Android 8+ notifications need a channel; the firebase_messaging plugin

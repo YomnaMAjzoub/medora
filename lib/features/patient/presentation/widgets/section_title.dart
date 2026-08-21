@@ -1,6 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 
 /// A section header used across the patient home screen:
@@ -19,15 +18,19 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.roboto(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: context.appColors.textPrimary,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: context.appColors.textPrimary,
+            ),
           ),
         ),
         if (actionLabel != null)
@@ -35,10 +38,10 @@ class SectionTitle extends StatelessWidget {
             onTap: onActionTap,
             child: Text(
               actionLabel!,
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.primary800,
+                color: context.appColors.primary,
               ),
             ),
           ),

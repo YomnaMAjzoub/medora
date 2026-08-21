@@ -1,4 +1,4 @@
-﻿import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
@@ -59,7 +59,7 @@ class _SliderComponentState extends State<SliderComponent> {
                             children: [
                               Text(
                                 offer.title,
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.white,
@@ -68,7 +68,7 @@ class _SliderComponentState extends State<SliderComponent> {
                               const SizedBox(height: 6),
                               Text(
                                 offer.subtitle,
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                   color: AppColors.white,
@@ -100,7 +100,7 @@ class _SliderComponentState extends State<SliderComponent> {
           activeIndex: activeIndex,
           count: itemCount,
           effect: ColorTransitionEffect(
-            activeDotColor: AppColors.primary500,
+            activeDotColor: context.appColors.primary,
             dotColor: context.appColors.border,
             dotHeight: 10,
             dotWidth: 10,

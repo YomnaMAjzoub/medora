@@ -6,11 +6,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
+import 'package:medora_git/features/admin/presentation/specializations.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_model.dart';
+import 'package:medora_git/features/patient/data/models/doctor_profile_model.dart';
 
-/// "Edit Doctor" form (updateDoctor endpoint). The backend only supports
-/// updating price, home visit, specialization, photo and password.
+/// "Edit Doctor" form (updateDoctor endpoint, partial update). The backend
+/// accepts price, home visit, specialization, photo, password and the
+/// working day / hours, all optional.
 class EditDoctorScreen extends StatefulWidget {
   const EditDoctorScreen({super.key});
 
@@ -33,6 +36,85 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
   late bool _homeVisit = _doctor.supports(VisitType.home);
   String? _photoPath;
 
+  static const _days = [
+    'All',
+    'Saturday',
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+  ];
+
+  DoctorProfileModel? get _profile {
+    for (final profile in controller.doctorProfiles) {
+      if (profile.id.toString() == _doctor.id) return profile;
+    }
+    return null;
+  }
+
+  DoctorScheduleModel? get _schedule {
+    final profile = _profile;
+    if (profile == null || profile.schedules.isEmpty) return null;
+    return profile.schedules.first;
+  }
+
+  late String _day = 'All';
+  late TimeOfDay _startTime = const TimeOfDay(hour: 8, minute: 0);
+  late TimeOfDay _endTime = const TimeOfDay(hour: 17, minute: 0);
+  bool _dayTouched = false;
+  bool _timesTouched = false;
+
+  /// The doctor's real schedule may arrive asynchronously
+  /// (`controller.doctorProfiles`), so until the user edits the working
+  /// hours, fall back to the loaded profile instead of the defaults.
+  String get _effectiveDay => _dayTouched ? _day : (_schedule?.day ?? _day);
+  TimeOfDay get _effectiveStart => _timesTouched
+      ? _startTime
+      : (_timeOfDay(_schedule?.startTime) ?? _startTime);
+  TimeOfDay get _effectiveEnd => _timesTouched
+      ? _endTime
+      : (_timeOfDay(_schedule?.endTime) ?? _endTime);
+
+  TimeOfDay? _timeOfDay(String? raw) {
+    if (raw == null) return null;
+    final parts = raw.split(':');
+    if (parts.length < 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  String _formatTime(TimeOfDay t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  Future<void> _pickTime({required bool isStart}) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: isStart ? _startTime : _endTime,
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: context.appColors.primary,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() {
+        _timesTouched = true;
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,8 +123,8 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
         backgroundColor: context.appColors.background,
         title: Text(
           'edit_doctor'.tr(),
-          style: GoogleFonts.roboto(
-            color: AppColors.primary700,
+          style: GoogleFonts.inter(
+            color: context.appColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -84,7 +166,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                       children: [
                         Text(
                           _doctor.name,
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: context.appColors.textPrimary,
@@ -93,7 +175,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                         const SizedBox(height: 3),
                         Text(
                           _doctor.specialty,
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 13,
                             color: context.appColors.textSecondary,
                           ),
@@ -118,7 +200,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                     color: context.appColors.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.primary700.withValues(alpha: 0.3),
+                      color: context.appColors.primary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -129,17 +211,17 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                             ? Icons.photo_library_rounded
                             : Icons.check_circle_rounded,
                         size: 22,
-                        color: AppColors.primary700,
+                        color: context.appColors.primary,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         _photoPath == null
                             ? 'change_photo'.tr()
                             : 'photo_selected'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary700,
+                          color: context.appColors.primary,
                         ),
                       ),
                     ],
@@ -154,7 +236,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary900.withValues(alpha: 0.06),
+                      color: context.appColors.primary.withValues(alpha: 0.06),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -163,18 +245,21 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _dropdown(
+                    _dropdown<String>(
                       context,
                       label: 'specialization'.tr(),
                       value: _specialization,
-                      items: controller.specialties
-                          .map(
-                            (s) => DropdownMenuItem(
-                              value: s.name,
-                              child: Text(s.name),
-                            ),
-                          )
-                          .toList(),
+                      items: [
+                        if (_specialization.isNotEmpty &&
+                            !kDoctorSpecializations.contains(_specialization))
+                          DropdownMenuItem(
+                            value: _specialization,
+                            child: Text(_specialization),
+                          ),
+                        ...kDoctorSpecializations.map(
+                          (s) => DropdownMenuItem(value: s, child: Text(s)),
+                        ),
+                      ],
                       onChanged: (v) => _specialization = v ?? '',
                     ),
                     const SizedBox(height: 14),
@@ -187,15 +272,54 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         'home_visit'.tr(),
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: context.appColors.textPrimary,
                         ),
                       ),
-                      activeTrackColor: AppColors.primary700,
+                      activeTrackColor: context.appColors.primary,
                       value: _homeVisit,
                       onChanged: (v) => setState(() => _homeVisit = v),
+                    ),
+                    const SizedBox(height: 14),
+                    Obx(
+                      () => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _dropdown<String>(
+                            context,
+                            label: 'working_days'.tr(),
+                            value: _effectiveDay,
+                            items: _days
+                                .map(
+                                  (d) => DropdownMenuItem(
+                                    value: d,
+                                    child: Text(d.tr()),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() {
+                              _day = v ?? 'All';
+                              _dayTouched = true;
+                            }),
+                          ),
+                          const SizedBox(height: 14),
+                          _timeRow(
+                            context,
+                            'start_time'.tr(),
+                            _effectiveStart,
+                            isStart: true,
+                          ),
+                          const SizedBox(height: 14),
+                          _timeRow(
+                            context,
+                            'end_time'.tr(),
+                            _effectiveEnd,
+                            isStart: false,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 14),
                     _field(context, 'new_password'.tr(), _password,
@@ -216,7 +340,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                   onPressed:
                       controller.isSubmitting.value ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary900,
+                    backgroundColor: context.appColors.primaryContainer,
                     foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -235,7 +359,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                         )
                       : Text(
                           'save'.tr(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -249,21 +373,35 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
     );
   }
 
-  void _submit() {
-    if (_password.text != _confirmPassword.text) {
-      Get.snackbar('error'.tr(), 'passwords_not_match'.tr());
-      return;
+  Future<void> _submit() async {
+    if (_password.text.isNotEmpty || _confirmPassword.text.isNotEmpty) {
+      if (_password.text != _confirmPassword.text) {
+        Get.snackbar('error'.tr(), 'passwords_not_match'.tr());
+        return;
+      }
     }
-    controller.updateDoctor(
+    final schedule = _schedule;
+    final start = _timesTouched
+        ? _startTime
+        : _timeOfDay(schedule?.startTime);
+    final end = _timesTouched ? _endTime : _timeOfDay(schedule?.endTime);
+    final updated = await controller.updateDoctor(
       doctor: _doctor,
-      price: _price.text.isNotEmpty ? (double.tryParse(_price.text) ?? 0) : null,
+      price: _price.text.isNotEmpty
+          ? (double.tryParse(_normalizeNumber(_price.text)) ?? 0)
+          : null,
       homeVisit: _homeVisit,
       specialization: _specialization,
       photoPath: _photoPath,
       password: _password.text.isEmpty ? null : _password.text,
+      day: _dayTouched ? _day : schedule?.day,
+      startTime: start == null ? null : _formatTime(start),
+      endTime: end == null ? null : _formatTime(end),
     );
-    Get.back();
+    if (updated) Get.back();
   }
+
+  String _normalizeNumber(String raw) => raw.trim().replaceAll(',', '.');
 
   Widget _field(
     BuildContext context,
@@ -277,7 +415,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: context.appColors.textPrimary,
@@ -318,7 +456,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: context.appColors.textPrimary,
@@ -344,6 +482,54 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _timeRow(
+    BuildContext context,
+    String label,
+    TimeOfDay time, {
+    required bool isStart,
+  }) {
+    return InkWell(
+      onTap: () => _pickTime(isStart: isStart),
+      borderRadius: BorderRadius.circular(10),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
+          filled: true,
+          fillColor: context.appColors.inputFill,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: context.appColors.textPrimary,
+              ),
+            ),
+            Text(
+              time.format(context),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: context.appColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

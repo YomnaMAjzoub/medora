@@ -27,7 +27,7 @@ class SelectVisitTypeStep extends GetView<BookingController> {
           const SizedBox(height: 24),
           Text(
             'choose_visit_type'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 22,
               fontWeight: FontWeight.w700,
               color: context.appColors.textPrimary,
@@ -36,7 +36,7 @@ class SelectVisitTypeStep extends GetView<BookingController> {
           const SizedBox(height: 4),
           Text(
             'visit_type_hint'.tr(),
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: context.appColors.textSecondary,
             ),
@@ -114,7 +114,7 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
                 children: [
                   Text(
                     doctor.name,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: context.appColors.textPrimary,
@@ -123,7 +123,7 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
                   const SizedBox(height: 2),
                   Text(
                     doctor.specialty,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       color: context.appColors.textSecondary,
                     ),
@@ -139,10 +139,10 @@ class _SelectedDoctorSummary extends GetView<BookingController> {
               ),
               child: Text(
                 'change'.tr(),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary700,
+                  color: context.appColors.primary,
                 ),
               ),
             ),
@@ -203,7 +203,7 @@ class _VisitTypeOptionCard extends StatelessWidget {
           color: isSelected ? AppColors.secondary100 : context.appColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary700 : context.appColors.border,
+            color: isSelected ? context.appColors.primary : context.appColors.border,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
@@ -223,13 +223,13 @@ class _VisitTypeOptionCard extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary700
+                    ? context.appColors.primary
                     : AppColors.secondary100,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 content.icon,
-                color: isSelected ? AppColors.white : AppColors.primary700,
+                color: isSelected ? AppColors.white : context.appColors.primary,
                 size: 22,
               ),
             ),
@@ -240,7 +240,7 @@ class _VisitTypeOptionCard extends StatelessWidget {
                 children: [
                   Text(
                     content.title,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: context.appColors.textPrimary,
@@ -249,7 +249,7 @@ class _VisitTypeOptionCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     content.subtitle,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       color: context.appColors.textSecondary,
                     ),
@@ -262,7 +262,7 @@ class _VisitTypeOptionCard extends StatelessWidget {
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_off_rounded,
               color: isSelected
-                  ? AppColors.primary700
+                  ? context.appColors.primary
                   : context.appColors.textHint,
             ),
           ],

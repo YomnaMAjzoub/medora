@@ -41,7 +41,7 @@ class DoctorCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   doctor.name,
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: context.appColors.textPrimary,
@@ -59,10 +59,10 @@ class DoctorCard extends StatelessWidget {
                         '{count}',
                         '${doctor.experienceYears}',
                       ),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary700,
+                    color: context.appColors.primary,
                   ),
                 ),
               ),
@@ -71,7 +71,7 @@ class DoctorCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             doctor.specialty,
-            style: GoogleFonts.roboto(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: context.appColors.textSecondary,
             ),
@@ -88,30 +88,38 @@ class DoctorCard extends StatelessWidget {
               if (doctor.isTopRated)
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.star_rounded,
                       size: 16,
-                      color: Color(0xFFFFB800),
+                      color: context.appColors.warning,
                     ),
                     const SizedBox(width: 2),
-                    Text(
-                      '${doctor.rating} (${doctor.reviewsCount})',
-                      style: GoogleFonts.roboto(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: context.appColors.textPrimary,
+                    Flexible(
+                      child: Text(
+                        '${doctor.rating} (${doctor.reviewsCount})',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: context.appColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],
                 )
               else
-                Text(
-                  '\$${doctor.pricePerSession.toStringAsFixed(0)}'
-                  '${'per_session'.tr()}',
-                  style: GoogleFonts.roboto(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary700,
+                Flexible(
+                  child: Text(
+                    '\$${doctor.pricePerSession.toStringAsFixed(0)}'
+                    '${'per_session'.tr()}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: context.appColors.primary,
+                    ),
                   ),
                 ),
             ],
@@ -124,10 +132,10 @@ class DoctorCard extends StatelessWidget {
                 Text(
                   '\$${doctor.pricePerSession.toStringAsFixed(0)}'
                   '${'per_session'.tr()}',
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary700,
+                    color: context.appColors.primary,
                   ),
                 ),
               ],
@@ -139,7 +147,7 @@ class DoctorCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onBook,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary900,
+                backgroundColor: context.appColors.primaryContainer,
                 foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -149,7 +157,7 @@ class DoctorCard extends StatelessWidget {
               ),
               child: Text(
                 'book_appointment'.tr(),
-                style: GoogleFonts.roboto(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -203,10 +211,10 @@ class _Photo extends StatelessWidget {
                 ),
                 child: Text(
                   'top_rated'.tr(),
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary900,
+                    color: context.appColors.primary,
                   ),
                 ),
               ),
@@ -224,15 +232,15 @@ class _Photo extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.star_rounded,
                       size: 16,
-                      color: Color(0xFFFFB800),
+                      color: context.appColors.warning,
                     ),
                     const SizedBox(width: 2),
                     Text(
                       '${doctor.rating}',
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -266,7 +274,7 @@ class _Photo extends StatelessWidget {
                     Expanded(
                       child: Text(
                         doctor.highlightNote!,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.inter(
                           fontSize: 11,
                           color: context.appColors.textPrimary,
                         ),

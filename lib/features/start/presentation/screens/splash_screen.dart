@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/services/firebase_service.dart';
+import 'package:medora_git/core/services/permission_service.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,6 +24,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Best-effort: stays silent if Firebase config files are missing.
     FirebaseService.init();
+
+    // Startup permission checks (location services + notifications) run
+    // early in the app lifecycle, right after the first frame so the
+    // navigator/dialogs are available. They are fired without awaiting so
+    // the splash redirect is never blocked or interrupted by the prompts:
+    //  - Notification permission is requested first (system prompt).
+    //  - The location-services prompt is shown afterwards (in-app dialog
+    //    with a redirect to the system location settings) and stays
+    //    available for the user to answer even after the splash navigates.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PermissionService.requestNotificationPermission();
+      PermissionService.ensureLocationServicesEnabled();
+    });
 
     Timer(const Duration(milliseconds: 300), () {
       setState(() {

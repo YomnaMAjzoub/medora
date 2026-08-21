@@ -1,7 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/auth/business_layer/controller/auth_controller.dart';
 
@@ -35,28 +34,31 @@ class BloodTypeSelector extends StatelessWidget {
           return GestureDetector(
             onTap: () => controller.setBloodType(value),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary900 : context.appColors.border,
+                  color: isSelected ? context.appColors.primary : context.appColors.border,
                   width: 1.4,
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    value,
-                    style: GoogleFonts.roboto(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: context.appColors.textPrimary,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      value,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: context.appColors.textPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  _customRadio(isSelected, context.appColors),
-                ],
+                    const SizedBox(width: 6),
+                    _customRadio(isSelected, context.appColors),
+                  ],
+                ),
               ),
             ),
           );
@@ -72,7 +74,7 @@ class BloodTypeSelector extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? AppColors.primary900 : colors.border,
+          color: isSelected ? colors.primary : colors.border,
           width: 2,
         ),
       ),
@@ -81,9 +83,9 @@ class BloodTypeSelector extends StatelessWidget {
               child: Container(
                 width: 10,
                 height: 10,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary900,
+                  color: colors.primary,
                 ),
               ),
             )

@@ -39,7 +39,7 @@ class CustomElevated extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: GoogleFonts.roboto(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: textColor,

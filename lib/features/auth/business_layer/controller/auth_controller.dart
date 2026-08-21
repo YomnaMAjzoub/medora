@@ -1,10 +1,11 @@
-﻿import 'dart:developer';
+import 'dart:developer';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
+import 'package:medora_git/core/theme/app_theme.dart';
 
 import 'package:medora_git/features/auth/data/src/auth_service.dart';
 
@@ -62,7 +63,7 @@ class AuthController extends GetxController {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary900,
+                color: context.appColors.primary,
               ),
             ),
             const SizedBox(height: 10),
@@ -75,11 +76,14 @@ class AuthController extends GetxController {
                 lastDate: DateTime.now(),
                 onDateChanged: (date) {
                   if (!isAdult(date)) {
+                    // Close the sheet first so the error snackbar is
+                    // visible (it renders behind an open bottom sheet).
+                    Get.back();
                     Get.snackbar(
                       "error".tr(),
                       "adult_required".tr(),
                       backgroundColor: AppColors.primary50,
-                      colorText: AppColors.primary900,
+                      colorText: context.appColors.primary,
                     );
                     return;
                   }
@@ -195,6 +199,14 @@ class AuthController extends GetxController {
       log('user_name : ${authService.storage.read<String>('user_name')}');
       log('user_email: ${authService.storage.read<String>('user_email')}');
       log('fcm_token : ${fcmToken.isEmpty ? 'NOT SET' : fcmToken}');
+
+      // The login body already carries the token; pushing it explicitly too
+      // guarantees the server is up to date even when the login payload was
+      // built before the token existed.
+      if (fcmToken.isNotEmpty) {
+        authService.updateFcmToken(fcmToken);
+      }
+
       if (role == "patient") {
         Get.offAllNamed(AppRouter.main);
       } else if (role == "doctor") {
@@ -235,7 +247,7 @@ class AuthController extends GetxController {
     try {
       isloading.value = true;
       await authService.verifyOtp(email, otp);
-      onSuccess('Email verified successfully.');
+      onSuccess('email_verified_success'.tr());
       Get.offNamed(
         AppRouter.resetPass,
         arguments: {
@@ -259,12 +271,22 @@ class AuthController extends GetxController {
     try {
       isloading.value = true;
       await authService.resetPass(email, pass);
-      onSuccess('Password reset successful');
+      onSuccess('password_reset_success'.tr());
       Get.offAllNamed(AppRouter.login);
     } catch (e) {
       onError(e.toString());
     } finally {
       isloading.value = false;
     }
+  }
+
+  /// Logs the user out: backend session invalidation (best-effort), local
+  /// session + FCM token cleanup, then back to onboarding.
+  Future<void> logout() async {
+    isloading.value = true;
+    await authService.logout();
+    await authService.clearSession();
+    isloading.value = false;
+    Get.offAllNamed(AppRouter.onboarding);
   }
 }

@@ -55,7 +55,8 @@ class CustomFormField extends StatelessWidget {
         keyboardType: keyboard,
         textInputAction: inputAction,
         obscureText: obscuretext,
-       hintLocales: [Locale('en', 'US'), Locale('ar', 'EG')],
+        readOnly: readOnly ?? false,
+        hintLocales: [Locale('en', 'US'), Locale('ar', 'EG')],
         maxLines: obscuretext ? 1 : (maxLines ?? 1),
 
         decoration: InputDecoration(
@@ -63,7 +64,7 @@ class CustomFormField extends StatelessWidget {
           focusedBorder: focused,
           enabledBorder: enabled,
           hintText: hint,
-          hintStyle: GoogleFonts.roboto(
+          hintStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: context.appColors.textHint,

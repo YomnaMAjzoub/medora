@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get_storage/get_storage.dart';
@@ -6,26 +6,24 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
+import 'package:medora_git/features/auth/data/src/auth_service.dart';
 
 class PatientDrawer extends StatelessWidget {
   const PatientDrawer({super.key});
 
   void _logout() {
-    final storage = GetStorage();
     Get.defaultDialog(
       title: 'logout'.tr(),
       middleText: 'logout_confirm'.tr(),
       textCancel: 'cancel'.tr(),
       textConfirm: 'logout'.tr(),
       confirmTextColor: AppColors.white,
-      buttonColor: AppColors.primary900,
-      onConfirm: () {
+      buttonColor: Get.context!.appColors.primaryContainer,
+      onConfirm: () async {
         Get.back();
-        storage.remove('access_token');
-        storage.remove('user_id');
-        storage.remove('role');
-        storage.remove('user_name');
-        storage.remove('user_email');
+        final service = AuthService();
+        await service.logout();
+        await service.clearSession();
         Get.offAllNamed(AppRouter.onboarding);
       },
     );
@@ -46,13 +44,13 @@ class PatientDrawer extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
             decoration: BoxDecoration(
-              color: AppColors.primary700.withValues(alpha: 0.1),
+              color: context.appColors.primary.withValues(alpha: 0.1),
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.primary700,
+                  backgroundColor: context.appColors.primaryContainer,
                   child: const Icon(
                     Icons.person,
                     color: Colors.white,
@@ -60,28 +58,30 @@ class PatientDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.roboto(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary700,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: context.appColors.primary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "patient_account".tr(),
-                      style: GoogleFonts.roboto(
-                        fontSize: 14,
-                        color: colors.textSecondary,
+                      const SizedBox(height: 4),
+                      Text(
+                        "patient_account".tr(),
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: colors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -94,6 +94,13 @@ class PatientDrawer extends StatelessWidget {
             icon: Icons.person,
             label: "profile_title".tr(),
             onTap: () {},
+          ),
+          _drawerItem(context: context,
+            icon: Icons.folder_open,
+            label: "medical_file".tr(),
+            onTap: () {
+              Get.toNamed(AppRouter.medicalFile);
+            },
           ),
           _drawerItem(context: context,
             icon: Icons.calendar_month,
@@ -150,7 +157,7 @@ class PatientDrawer extends StatelessWidget {
             const SizedBox(width: 16),
             Text(
               label,
-              style: GoogleFonts.roboto(
+              style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: context.appColors.textPrimary,
