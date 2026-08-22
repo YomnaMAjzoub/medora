@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart' hide Trans;
@@ -22,7 +22,7 @@ class DoctorHomeScreen extends GetView<DoctorController> {
     final storage = GetStorage();
     final name = storage.read<String>('user_name') ?? '';
     final unread = Get.isRegistered<NotificationsController>()
-        ? Get.find<NotificationsController>().unreadCount
+        ? Get.find<NotificationsController>().unreadCount.value
         : 0;
 
     return Scaffold(

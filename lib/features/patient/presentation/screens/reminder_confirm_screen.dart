@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/patient_account_controller.dart';
 import 'package:medora_git/features/patient/data/models/appointment_record_model.dart';
 
 /// Reached when a patient taps an appointment-reminder push. Shows the
-/// appointment being reminded and a "Confirm visit" action that calls
-/// POST /appointments/{id}/app-confirm.
+/// appointment being reminded with two actions:
+///  - Confirm & pay -> POST /appointments/{id}/app-confirm, then opens the
+///    payment flow for the remaining amount.
+///  - Cancel        -> POST /appointments/{id}/app-cancel (after a
+///    confirmation dialog) and returns to the appointments tab.
 class ReminderConfirmScreen extends GetView<PatientAccountController> {
   const ReminderConfirmScreen({super.key});
 
@@ -59,10 +63,29 @@ class ReminderConfirmScreen extends GetView<PatientAccountController> {
               onConfirm: () => controller.confirmReminderAppointment(
                 appointmentId: appointment.id,
               ),
+              onCancel: () => _confirmCancel(controller, appointment.id),
             );
           }),
         ),
       ),
+    );
+  }
+
+  /// Asks for confirmation before cancelling (app-cancel), then returns to
+  /// the appointments tab.
+  void _confirmCancel(PatientAccountController controller, int appointmentId) {
+    Get.defaultDialog(
+      title: 'cancel_appointment'.tr(),
+      middleText: 'cancel_appointment_confirm'.tr(),
+      textCancel: 'not_yet'.tr(),
+      textConfirm: 'cancel'.tr(),
+      confirmTextColor: AppColors.white,
+      buttonColor: Get.context!.appColors.danger,
+      onConfirm: () async {
+        Get.back();
+        await controller.cancelAppointment(appointmentId: appointmentId);
+        Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
+      },
     );
   }
 }
@@ -72,11 +95,13 @@ class _ReminderBody extends StatelessWidget {
     required this.appointment,
     required this.isProcessing,
     required this.onConfirm,
+    required this.onCancel,
   });
 
   final AppointmentRecordModel appointment;
   final bool isProcessing;
   final VoidCallback onConfirm;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +167,24 @@ class _ReminderBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        if (alreadyConfirmed) ...[
+        if (appointment.status == AppointmentStatus.cancelled) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: context.appColors.danger.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'appointment_cancelled'.tr(),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: context.appColors.danger,
+              ),
+            ),
+          ),
+        ] else if (appointment.status == AppointmentStatus.completed) ...[
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -150,7 +192,7 @@ class _ReminderBody extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'appointment_already_confirmed'.tr(),
+              'completed'.tr(),
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 13,
@@ -159,35 +201,88 @@ class _ReminderBody extends StatelessWidget {
               ),
             ),
           ),
-        ] else
-          ElevatedButton(
-            onPressed: isProcessing ? null : onConfirm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.appColors.primaryContainer,
-              foregroundColor: AppColors.white,
-              disabledBackgroundColor: AppColors.grey300,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
+        ] else ...[
+          if (alreadyConfirmed) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: context.appColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
+              child: Text(
+                'appointment_already_confirmed'.tr(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: context.appColors.success,
+                ),
+              ),
             ),
-            child: isProcessing
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      color: AppColors.white,
-                      strokeWidth: 2.5,
+            const SizedBox(height: 16),
+          ],
+          Row(
+            children: [
+              // Cancel: app-cancel after a confirmation dialog, then back
+              // to the appointments tab.
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: isProcessing ? null : onCancel,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: context.appColors.danger,
+                    side: BorderSide(
+                      color: context.appColors.danger.withValues(alpha: 0.4),
                     ),
-                  )
-                : Text(
-                    'confirm_visit'.tr(),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'cancel'.tr(),
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Confirm & pay: app-confirm, then the payment flow opens for
+              // the remaining amount.
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: isProcessing ? null : onConfirm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.appColors.primaryContainer,
+                    foregroundColor: AppColors.white,
+                    disabledBackgroundColor: AppColors.grey300,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: isProcessing
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Text(
+                          'confirm_and_pay'.tr(),
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                ),
+              ),
+            ],
           ),
+        ],
       ],
       ),
     );

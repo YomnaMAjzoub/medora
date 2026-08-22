@@ -1,4 +1,4 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
@@ -46,7 +46,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
           Obx(
             () => IconButton(
               tooltip: 'mark_all_read'.tr(),
-              onPressed: controller.unreadCount == 0
+              onPressed: controller.unreadCount.value == 0
                   ? null
                   : controller.markAllAsRead,
               icon: Icon(
@@ -60,7 +60,10 @@ class NotificationsScreen extends GetView<NotificationsController> {
       ),
       body: SafeArea(
         bottom: false,
-        child: Obx(() {
+        child: RefreshIndicator(
+          onRefresh: controller.fetchNotifications,
+          color: context.appColors.primary,
+          child: Obx(() {
           if (controller.isLoading.value) {
             return Center(
               child: CircularProgressIndicator(color: context.appColors.primary),
@@ -89,6 +92,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
             },
           );
         }),
+        ),
       ),
     );
   }

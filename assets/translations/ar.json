@@ -440,5 +440,17 @@
   "mock_payment_notice": "هذه عملية دفع تجريبية. لن يتم خصم أي مبلغ حقيقي.",
   "transaction_ref": "رقم العملية",
   "payment_failed": "فشل الدفع",
-  "payment_failed_hint": "تعذر إكمال عملية الدفع. يرجى المحاولة مرة أخرى."
+  "payment_failed_hint": "تعذر إكمال عملية الدفع. يرجى المحاولة مرة أخرى.",
+  "confirm_and_pay": "تأكيد & دفع",
+  "visits": "زيارات",
+  "complete_appointment": "إكمال الموعد",
+  "consultations": "الاستشارات",
+  "invalid_notifications_response": "تعذر تحميل الإشعارات",
+  "medical_history": "التاريخ الطبي",
+  "now": "الآن",
+  "offer_add_failed": "فشل إضافة العرض. حاول مرة أخرى.",
+  "price_per_session": "سعر الجلسة",
+  "remaining_amount": "المبلغ المتبقي",
+  "schedule": "المواعيد",
+  "photo_pick_failed": "تعذر اختيار الصورة. حاول مرة أخرى."
 }

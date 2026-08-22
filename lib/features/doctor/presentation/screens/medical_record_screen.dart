@@ -7,7 +7,6 @@ import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/doctor/business_layer/controller/doctor_controller.dart';
 import 'package:medora_git/features/doctor/data/models/patient_medical_record_model.dart';
-import 'package:medora_git/features/patient/data/models/appointment_record_model.dart';
 import 'package:medora_git/features/patient/data/models/medical_record_model.dart';
 
 enum QuickAddKind { diagnosis, prescription, note, file }
@@ -33,20 +32,15 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   late final int _appointmentId =
       (Get.arguments as Map)['appointmentId'] as int;
   late final int _patientId = (Get.arguments as Map)['patientId'] as int;
-  late final AppointmentStatus _appointmentStatus =
-      AppointmentStatus.values.firstWhere(
-    (s) => s.name == (Get.arguments as Map)['status'],
-    orElse: () => AppointmentStatus.unknown,
-  );
 
-  /// Editing is allowed only on the LAST appointment between this doctor
-  /// and the patient, and only while it is 'completed' (see
-  /// DoctorController.canEditMedicalRecord). The appointment whose id is
-  /// passed to this screen must be that last one.
-  bool get _canEdit =>
-      _appointmentId > 0 &&
-      controller.canEditMedicalRecord(_patientId) &&
-      controller.lastAppointmentForPatient(_patientId)?.id == _appointmentId;
+  /// Resolves the appointment to attach edits to. Uses the one passed via
+  /// navigation when available; otherwise falls back to the latest
+  /// appointment between this doctor and the patient.
+  int get _resolvedAppointmentId {
+    if (_appointmentId > 0) return _appointmentId;
+    final last = controller.lastAppointmentForPatient(_patientId);
+    return last?.id ?? 0;
+  }
 
   @override
   void initState() {
@@ -121,20 +115,10 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
-              if (_appointmentStatus == AppointmentStatus.pendingDeposit ||
-                  _appointmentStatus == AppointmentStatus.confirmed) ...[
-                _finalPaymentCard(context),
-                const SizedBox(height: 16),
-              ],
               _patientHeader(context, record),
               const SizedBox(height: 16),
-              if (_canEdit) ...[
-                _quickAddSection(context),
-                const SizedBox(height: 16),
-              ] else ...[
-                _editLockedCard(context),
-                const SizedBox(height: 16),
-              ],
+              _quickAddSection(context),
+              const SizedBox(height: 16),
               _sectionTitle('history'.tr()),
               const SizedBox(height: 10),
               if (record.records.isEmpty)
@@ -147,12 +131,10 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 )
               else
                 ...record.records.map((r) => _recordCard(context, r)),
-              if (_canEdit) ...[
-                const SizedBox(height: 24),
-                _sectionTitle('update_record'.tr()),
-                const SizedBox(height: 10),
-                _editForm(context, record),
-              ],
+              const SizedBox(height: 24),
+              _sectionTitle('update_record'.tr()),
+              const SizedBox(height: 10),
+              _editForm(context, record),
             ],
           );
         }),
@@ -160,109 +142,6 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     );
   }
 
-  /// Shown instead of the edit form when the last appointment between this
-  /// doctor and the patient is not completed yet: nothing is editable.
-  Widget _editLockedCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.appColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.appColors.primary.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.lock_outline_rounded,
-            size: 22,
-            color: context.appColors.primary,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'record_edit_locked'.tr(),
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: context.appColors.textSecondary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _finalPaymentCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.appColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.appColors.primary.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'final_payment'.tr(),
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: context.appColors.primary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'final_payment_hint'.tr(),
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: context.appColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Obx(
-            () => ElevatedButton.icon(
-              onPressed: controller.isCompletingPayment.value
-                  ? null
-                  : () => controller.completeFinalPayment(
-                        appointmentId: _appointmentId,
-                      ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.appColors.primaryContainer,
-                foregroundColor: AppColors.white,
-                disabledBackgroundColor: context.appColors.border,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              icon: controller.isCompletingPayment.value
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.white,
-                      ),
-                    )
-                  : const Icon(Icons.payment_rounded, size: 18),
-              label: Text(
-                'complete_final_payment'.tr(),
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _patientHeader(BuildContext context, PatientMedicalRecordModel record) {
     return Container(
@@ -495,14 +374,20 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   Future<void> _pickAndUploadFile(BuildContext context) async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
     if (picked == null) return;
-    if (!_canEdit) {
-      Get.snackbar('error'.tr(), 'record_edit_locked'.tr());
+    final apptId = _resolvedAppointmentId;
+    if (apptId <= 0) {
+      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
       return;
     }
     controller.updateMedicalRecord(
-      appointmentId: _appointmentId,
+      appointmentId: apptId,
       patientId: _patientId,
       imagePath: picked.path,
     );
@@ -510,12 +395,13 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   void _submitQuickAdd(QuickAddKind kind, String text) {
-    if (!_canEdit) {
-      Get.snackbar('error'.tr(), 'record_edit_locked'.tr());
+    final apptId = _resolvedAppointmentId;
+    if (apptId <= 0) {
+      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
       return;
     }
     controller.updateMedicalRecord(
-      appointmentId: _appointmentId,
+      appointmentId: apptId,
       patientId: _patientId,
       diagnosis: kind == QuickAddKind.diagnosis ? text : null,
       prescription: kind == QuickAddKind.prescription ? text : null,
@@ -635,8 +521,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
           const SizedBox(height: 14),
           GestureDetector(
             onTap: () async {
-              final picked =
-                  await ImagePicker().pickImage(source: ImageSource.gallery);
+              final picked = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+                maxWidth: 1024,
+                maxHeight: 1024,
+                imageQuality: 85,
+              );
               if (picked != null) {
                 setState(() => _imagePath = picked.path);
               }
@@ -711,12 +601,13 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   void _submit(PatientMedicalRecordModel record) {
-    if (!_canEdit) {
-      Get.snackbar('error'.tr(), 'record_edit_locked'.tr());
+    final apptId = _resolvedAppointmentId;
+    if (apptId <= 0) {
+      Get.snackbar('error'.tr(), 'no_appointment_to_confirm'.tr());
       return;
     }
     controller.updateMedicalRecord(
-      appointmentId: _appointmentId,
+      appointmentId: apptId,
       patientId: _patientId,
       diagnosis: _diagnosis.text,
       prescription: _prescription.text,

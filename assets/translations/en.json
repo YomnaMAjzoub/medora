@@ -386,6 +386,7 @@
   "pay_later": "Pay later from my appointments",
   "record_edit_locked": "Editing is only available on the most recent completed appointment with this patient. Complete the final payment of the last visit first.",
   "payment_service_unavailable": "The payment service is temporarily unavailable. Please try again shortly.",
+  "photo_pick_failed": "Could not select the photo. Please try again.",
   "added_offers": "Added offers",
   "appointment_reminder": "Appointment reminder",
   "confirm_visit_prompt": "Please confirm your visit to keep this appointment.",
@@ -440,5 +441,16 @@
   "mock_payment_notice": "This is a simulated payment. No real money will be charged.",
   "transaction_ref": "Transaction ref",
   "payment_failed": "Payment failed",
-  "payment_failed_hint": "The payment could not be completed. Please try again."
+  "payment_failed_hint": "The payment could not be completed. Please try again.",
+  "confirm_and_pay": "Confirm & Pay",
+  "visits": "Visits",
+  "complete_appointment": "Complete Appointment",
+  "consultations": "Consultations",
+  "invalid_notifications_response": "Could not load notifications",
+  "medical_history": "Medical History",
+  "now": "now",
+  "offer_add_failed": "Could not add the offer. Please try again.",
+  "price_per_session": "Price / Session",
+  "remaining_amount": "Remaining Amount",
+  "schedule": "Schedules"
 }

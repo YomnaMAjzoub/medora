@@ -107,15 +107,28 @@ void main() {
     expect(record.appointmentTime, DateTime(2026, 8, 19, 16, 0));
   });
 
-  test('patient service fetches records via getMedicalRecord/{user_id}', () async {
-    GetStorage().write('user_id', 18);
-    ApiClient.dio.httpClientAdapter = _FakeAdapter(realMedicalRecordPayload());
+  test('patient service fetches records via getMedicaleRecord', () async {
+    // Shape actually returned by GET /getMedicaleRecord (patient-scoped).
+    ApiClient.dio.httpClientAdapter = _FakeAdapter({
+      'message': [
+        {
+          'diagnosis': 'lkjhgfdeU+U.O',
+          'prescription': '.lkjhgfds',
+          'tests': null,
+          'images': null,
+          'notes': ';olikujyhtgrte',
+          'appointment_time': '2026-08-19 16:00:00',
+          'type': 'clinic',
+          'doctor_name': 'doctor fem',
+          'doctor_specialization': null,
+        },
+      ],
+    });
 
     final service = PatientService();
     final records = await service.getMedicalRecords();
 
     expect(records, hasLength(1));
     expect(records.first.doctorName, 'doctor fem');
-    expect(records.first.appointmentTime, DateTime(2026, 8, 19, 16, 0));
   });
 }

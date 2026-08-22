@@ -196,9 +196,8 @@ class PatientHomeScreen extends StatelessWidget {
                           return SpecialtyItem(
                             specialty: specialty,
                             onTap: () {
-                              discovery.applyFilter(
-                                specialization: specialty.name,
-                              );
+                              // The doctors-list screen applies the
+                              // specialization filter on entry.
                               Get.toNamed(
                                 AppRouter.doctorsList,
                                 arguments: {

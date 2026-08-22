@@ -199,6 +199,25 @@ class AdminService {
     }
   }
 
+  /// Distinct specializations from the backend (GET /getSpcialization,
+  /// `{"message":[{"specialization":"Cardiology"},...]}`), used by the
+  /// Add/Edit Doctor forms so no specialty list is hardcoded.
+  Future<List<String>> getSpecializations() async {
+    try {
+      final response = await ApiClient.dio.get('/getSpcialization');
+      final data = response.data as Map<String, dynamic>;
+      final list = data['message'];
+      if (list is! List) return const [];
+      return list
+          .whereType<Map<String, dynamic>>()
+          .map((s) => s['specialization']?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(ErrorHandler.handleDioError(e));
+    }
+  }
+
   /// Unwraps `{"headers":{},"original":{<key>:[...]},"exception":null}` and
   /// `{"<key>":[...]}` envelopes into the plain list.
   List<dynamic> _unwrapNestedList(dynamic container, String key) {

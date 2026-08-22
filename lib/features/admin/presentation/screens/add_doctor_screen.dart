@@ -8,7 +8,6 @@ import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
-import 'package:medora_git/features/admin/presentation/specializations.dart';
 
 /// "Add Doctor" form (addDoctor endpoint).
 class AddDoctorScreen extends StatefulWidget {
@@ -37,6 +36,16 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
   bool _homeVisit = false;
   String? _photoPath;
 
+  @override
+  void initState() {
+    super.initState();
+    // Re-fetch on entry so a failed earlier attempt (or an empty list from
+    // startup) never leaves a permanently-empty dropdown.
+    if (controller.specialties.isEmpty) {
+      controller.fetchSpecializations();
+    }
+  }
+
   static const _days = [
     'All',
     'Saturday',
@@ -52,9 +61,20 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   Future<void> _pickPhoto() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _photoPath = picked.path);
+    try {
+      // Downscale + transcode to JPEG so uploads stay small and are always
+      // accepted by the backend's jpeg/png mime check (HEIC included).
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        setState(() => _photoPath = picked.path);
+      }
+    } catch (e) {
+      Get.snackbar('error'.tr(), 'photo_pick_failed'.tr());
     }
   }
 
@@ -185,20 +205,85 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
               _card(
                 context,
                 children: [
-                  _dropdown<String>(
-                    context,
-                    label: 'specialization'.tr(),
-                    value: _specialization,
-                    items: kDoctorSpecializations
-                        .map(
-                          (s) => DropdownMenuItem(value: s, child: Text(s)),
-                        )
-                        .toList(),
-                    onChanged: (v) => _specialization = v ?? '',
-                  ),
-                  _dropdown<String>(
-                    context,
-                    label: 'gender'.tr(),
+                  Obx(
+                    () {
+                      if (controller.isLoadingSpecialties.value) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      }
+                      if (controller.specialties.isEmpty) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'specialization'.tr(),
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: context.appColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Container(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: context.appColors.inputFill,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      controller.specialtiesError.value
+                                          .isNotEmpty
+                                          ? controller.specialtiesError.value
+                                          : 'no_data'.tr(),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color:
+                                            context.appColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: controller
+                                        .fetchSpecializations,
+                                    child: Text('retry'.tr()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      return _dropdown<String>(
+                        context,
+                        label: 'specialization'.tr(),
+                        value: _specialization,
+                        items: controller.specialties
+                            .map(
+                              (s) => DropdownMenuItem(value: s, child: Text(s)),
+                            )
+                            .toList(),
+                        onChanged: (v) =>
+                            setState(() => _specialization = v ?? ''),
+                      );
+                     },
+                   ),
+                   _dropdown<String>(
+                     context,
+                     label: 'gender'.tr(),
                     value: _gender,
                     items: [
                       DropdownMenuItem(value: 'male', child: Text('male'.tr())),
@@ -215,7 +300,8 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                     value: _day,
                     items: _days
                         .map(
-                          (d) => DropdownMenuItem(value: d, child: Text(d.tr())),
+                          (d) => DropdownMenuItem(
+                              value: d, child: Text(d.toLowerCase().tr())),
                         )
                         .toList(),
                     onChanged: (v) => _day = v ?? 'All',

@@ -108,7 +108,12 @@ class AppPages {
      GetPage(
       name: AppRouter.adminHome,
       page: () => const StaffDashboardScreen(),
-      binding: AdminBindings(),
+      bindings: [AdminBindings(), NotificationsBindings()],
+    ),
+    GetPage(
+      name: AppRouter.adminNotifications,
+      page: () => const NotificationsScreen(),
+      binding: NotificationsBindings(),
     ),
     GetPage(
       name: AppRouter.staffDoctors,

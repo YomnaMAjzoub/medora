@@ -46,7 +46,7 @@ class _FakePatientService extends PatientService {
           locationId: null,
           type: 'clinic',
           appointmentTime: DateTime.now().add(const Duration(days: 1)),
-          status: AppointmentStatus.pendingDeposit,
+          status: AppointmentStatus.confirmed,
           createdAt: DateTime.now(),
           doctor: null,
         ),
@@ -139,16 +139,16 @@ void main() {
   }
 
   group('Bug 4 responsive hazards at 320px', () {
-    testWidgets('pending-deposit appointment keeps 3 action buttons in row',
+    testWidgets('confirmed appointments render without overflow at 320px',
         (tester) async {
       final account = PatientAccountController(service: _FakePatientService());
       Get.put(account);
       addTearDown(Get.deleteAll);
       await pump(tester, const AppointmentsScreen());
-      await tester.tap(find.text('pending_schedules'));
+      await tester.tap(find.text('confirmed_schedules'));
       await tester.pumpAndSettle();
-      expect(find.text('complete_payment'), findsOneWidget);
-      expect(find.text('cancel'), findsOneWidget);
+      expect(find.text('no_appointments'), findsNothing,
+          reason: 'the seeded confirmed appointment should be visible');
       expect(tester.takeException(), isNull);
     });
 

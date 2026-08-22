@@ -150,17 +150,17 @@ class FirebaseService extends GetxService {
     try {
       await init();
       final messaging = FirebaseMessaging.instance;
-      var token = await messaging.getToken().timeout(
+      // Only FCM device tokens — never APNS tokens (Laravel expects fcm_token).
+      final token = await messaging.getToken().timeout(
             const Duration(seconds: 10),
           );
-      token ??= await messaging.getAPNSToken();
       if (token != null && token.isNotEmpty) {
         final storage = GetStorage();
         await storage.write('fcm_token', token);
         await AuthService().updateFcmToken(token);
         log('ensureFcmTokenSent: token delivered (${token.length} chars)');
       } else {
-        log('ensureFcmTokenSent: no token available from Firebase');
+        log('ensureFcmTokenSent: no FCM token available from Firebase');
       }
     } catch (e) {
       // Firebase not configured / offline: notifications stay disabled but

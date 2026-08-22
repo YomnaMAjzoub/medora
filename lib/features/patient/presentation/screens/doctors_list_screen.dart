@@ -8,18 +8,41 @@ import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/patient/business_layer/controller/doctor_discovery_controller.dart';
 import 'package:medora_git/features/patient/presentation/widgets/booking/doctor_card.dart';
 
-/// Filtered doctor results (specialization tapped from the home screen).
-/// Reuses [DoctorCard]; booking preselection happens via
-/// [BookingController] reading the `doctor_id` argument.
-class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
+/// Doctor results screen. Opened with a `specialization` argument from the
+/// home specialties grid (filtered list), or without one (full list).
+/// Every entry re-fetches from the backend: with the requested filter when
+/// given, otherwise filters are cleared so ALL doctors are shown — never a
+/// stale subset left over from a previous visit.
+class DoctorsListScreen extends StatefulWidget {
   const DoctorsListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final args = Get.arguments;
-    final specialization =
-        args is Map ? args['specialization'] as String? : null;
+  State<DoctorsListScreen> createState() => _DoctorsListScreenState();
+}
 
+class _DoctorsListScreenState extends State<DoctorsListScreen> {
+  DoctorDiscoveryController get controller =>
+      Get.find<DoctorDiscoveryController>();
+
+  String? specialization;
+
+  @override
+  void initState() {
+    super.initState();
+    final args = Get.arguments;
+    specialization = args is Map ? args['specialization'] as String? : null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (specialization != null && specialization!.isNotEmpty) {
+        controller.applyFilter(specialization: specialization);
+      } else {
+        controller.clearFilters();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.appColors.background,
       body: SafeArea(
@@ -43,7 +66,7 @@ class DoctorsListScreen extends GetView<DoctorDiscoveryController> {
                       child: Text(
                         specialization != null
                             ? 'doctors_title'.tr().replaceFirst(
-                                '{specialization}', specialization)
+                                '{specialization}', specialization!)
                             : 'doctors_title'.tr(),
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(

@@ -7,8 +7,7 @@ import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
 import 'package:medora_git/features/notifications/business_layer/controller/notifications_controller.dart';
 
-/// The kind of push a notification represents. Classified from the backend
-/// `notification_type` value, which the Laravel source sends as:
+/// Matches Laravel Flutter push `notification_type` values:
 /// `appointment_reminder`, `appointment_cancelled`, `payment_completed`,
 /// `low_stock`, `item_restocked`.
 enum PushNotificationKind {
@@ -21,15 +20,14 @@ enum PushNotificationKind {
   general,
 }
 
-/// Parsed FCM data payload.
+/// Parsed FCM / in-app data payload (aligned with Laravel).
 ///
-/// The backend payload (verified against the Laravel source) uses:
-///   notification_type: 'appointment_reminder' | 'appointment_cancelled' |
-///                      'payment_completed' | 'low_stock'
-///   appointment_id    : (string) the appointment id
-///   action_required   : 'confirm_and_pay' on reminders
-/// Older/alternative key names (`type`, `id`, `appointmentId`) are read
-/// defensively so nothing breaks if the backend varies.
+/// Backend data keys:
+///   notification_type: appointment_reminder | appointment_cancelled |
+///                      payment_completed | low_stock | item_restocked
+///   appointment_id    : string|int
+///   action_required   : confirm_and_pay (reminders)
+///   item_id           : string|int (stock events)
 class PushNotificationPayload {
   const PushNotificationPayload({
     this.type,
@@ -65,23 +63,42 @@ class PushNotificationPayload {
   }
 
   factory PushNotificationPayload.fromMessage(RemoteMessage message) =>
-      PushNotificationPayload.fromData(message.data);
+      PushNotificationPayload.fromData(
+        Map<String, dynamic>.from(message.data),
+      );
 
+  /// Prefer exact Laravel type strings, then safe fallbacks.
   PushNotificationKind get kind {
-    final raw = (type ?? '').toLowerCase();
-    if (raw.contains('restock') || raw == 'item_restocked') {
-      return PushNotificationKind.itemRestocked;
+    final raw = (type ?? '').toLowerCase().trim();
+    switch (raw) {
+      case 'item_restocked':
+      case 'restock':
+        return PushNotificationKind.itemRestocked;
+      case 'payment_completed':
+      case 'deposit_paid':
+      case 'payment':
+      case 'paid':
+      case 'deposit':
+        return PushNotificationKind.payment;
+      case 'appointment_reminder':
+      case 'reminder':
+        return PushNotificationKind.appointmentReminder;
+      case 'appointment_cancelled':
+      case 'cancellation':
+      case 'cancelled':
+        return PushNotificationKind.appointmentCancelled;
+      case 'low_stock':
+        return PushNotificationKind.lowStock;
+      default:
+        break;
     }
-    if (raw.contains('payment') || raw == 'paid' || raw == 'deposit') {
+    if (raw.contains('restock')) return PushNotificationKind.itemRestocked;
+    if (raw.contains('payment') || raw.contains('paid')) {
       return PushNotificationKind.payment;
     }
-    if (raw.contains('reminder') || raw.contains('confirm')) {
-      return PushNotificationKind.appointmentReminder;
-    }
-    if (raw.contains('cancelled') || raw.contains('cancel')) {
-      return PushNotificationKind.appointmentCancelled;
-    }
-    if (raw.contains('low_stock') || raw.contains('stock')) {
+    if (raw.contains('reminder')) return PushNotificationKind.appointmentReminder;
+    if (raw.contains('cancel')) return PushNotificationKind.appointmentCancelled;
+    if (raw.contains('low_stock') || raw == 'stock') {
       return PushNotificationKind.lowStock;
     }
     if (raw.contains('chat') || raw.contains('message')) {
@@ -89,6 +106,10 @@ class PushNotificationPayload {
     }
     return PushNotificationKind.general;
   }
+
+  bool get requiresConfirmAndPay =>
+      actionRequired == 'confirm_and_pay' ||
+      kind == PushNotificationKind.appointmentReminder;
 
   Map<String, dynamic> toData() => {
         if (type != null) 'notification_type': type,
@@ -102,20 +123,15 @@ class PushNotificationPayload {
   String encode() => jsonEncode(toData());
 }
 
-/// Decides where a notification tap should navigate, based on the logged-in
-/// role and the notification kind. Called from the foreground, background and
-/// terminated handlers.
+/// Routes a tapped push / in-app notification by role + Laravel type.
 class NotificationRouter {
   static const _lastHandledKey = 'last_notification_handled';
 
-  /// Routes a tapped push to the appropriate screen for the current role.
-  /// Returns true when a route was opened.
   static bool route({required PushNotificationPayload payload}) {
     final storage = GetStorage();
     final hasToken = storage.read<String>('access_token')?.isNotEmpty ?? false;
     if (!hasToken) return false;
 
-    // Ignore duplicate taps of the same notification while the app is open.
     final signature = payload.toData().toString();
     if (Get.currentRoute != AppRouter.splash &&
         storage.read<String>(_lastHandledKey) == signature) {
@@ -123,8 +139,6 @@ class NotificationRouter {
     }
     storage.write(_lastHandledKey, signature);
 
-    // The tapped push is already stored server-side (GET /notifications);
-    // refresh the in-app list so the unread badge stays accurate.
     if (Get.isRegistered<NotificationsController>()) {
       Get.find<NotificationsController>().fetchNotifications();
     }
@@ -136,6 +150,7 @@ class NotificationRouter {
       case 'doctor':
         return _routeDoctor(payload, appointmentId);
       case 'admin':
+      case 'super_admin':
         return _routeAdmin(payload);
       default:
         return _routePatient(payload, appointmentId);
@@ -148,8 +163,8 @@ class NotificationRouter {
   ) {
     switch (payload.kind) {
       case PushNotificationKind.appointmentReminder:
-        // "confirm_and_pay" reminders open the confirmation screen so the
-        // patient can keep the visit; anything else lands on the schedule.
+        // Laravel reminder: notification_type=appointment_reminder +
+        // action_required=confirm_and_pay + appointment_id
         if (appointmentId != null) {
           Get.toNamed(
             AppRouter.reminderConfirm,
@@ -181,8 +196,7 @@ class NotificationRouter {
   static bool _routeDoctor(PushNotificationPayload payload, int? _) {
     switch (payload.kind) {
       case PushNotificationKind.payment:
-        // "payment_completed" pushes: the patient paid, so the doctor is
-        // sent to their appointments (a new record was created).
+        // Laravel sends payment_completed after full payment.
         Get.toNamed(AppRouter.doctorAppointments, preventDuplicates: true);
         return true;
       case PushNotificationKind.appointmentReminder:
@@ -201,8 +215,6 @@ class NotificationRouter {
   }
 
   static bool _routeAdmin(PushNotificationPayload payload) {
-    // A stock-related push refreshes the inventory in the background so the
-    // next time the admin opens the list it is already up to date.
     if (payload.kind == PushNotificationKind.lowStock ||
         payload.kind == PushNotificationKind.itemRestocked) {
       if (Get.isRegistered<AdminController>()) {

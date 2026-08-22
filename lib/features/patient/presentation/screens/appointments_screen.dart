@@ -390,17 +390,15 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.isDestructive = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
-  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? AppColors.red : AppColors.primary900;
+    const color = AppColors.primary900;
     return OutlinedButton.icon(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(

@@ -18,6 +18,7 @@ class AppRouter {
   static const chat = '/chat';
   static const doctorsList = '/doctorsList';
   static const adminHome = '/adminHome';
+  static const adminNotifications = '/adminNotifications';
   static const addDoctor = '/addDoctor';
   static const editDoctor = '/editDoctor';
   static const addOffer = '/addOffer';

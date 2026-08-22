@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:medora_git/core/const/app_colors.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
-import 'package:medora_git/features/admin/presentation/specializations.dart';
 import 'package:medora_git/features/patient/data/models/appointment_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_profile_model.dart';
@@ -35,6 +34,16 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
   late String _specialization = _doctor.specialty;
   late bool _homeVisit = _doctor.supports(VisitType.home);
   String? _photoPath;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure the backend-driven specialty list is available for the
+    // dropdown (no-op when already loaded).
+    if (controller.specialties.isEmpty) {
+      controller.fetchSpecializations();
+    }
+  }
 
   static const _days = [
     'All',
@@ -188,8 +197,14 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: () async {
-                  final picked = await ImagePicker()
-                      .pickImage(source: ImageSource.gallery);
+                  // Downscale + transcode to JPEG so uploads stay small and
+                  // always pass the backend's jpeg/png mime check.
+                  final picked = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                    maxWidth: 1024,
+                    maxHeight: 1024,
+                    imageQuality: 85,
+                  );
                   if (picked != null) {
                     setState(() => _photoPath = picked.path);
                   }
@@ -245,22 +260,91 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _dropdown<String>(
-                      context,
-                      label: 'specialization'.tr(),
-                      value: _specialization,
-                      items: [
-                        if (_specialization.isNotEmpty &&
-                            !kDoctorSpecializations.contains(_specialization))
-                          DropdownMenuItem(
-                            value: _specialization,
-                            child: Text(_specialization),
+                    Obx(
+                      () {
+                        if (controller.isLoadingSpecialties.value) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            child: Center(
+                              child: SizedBox(
+                                width: 22,
+                                height: 22,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          );
+                        }
+                        if (controller.specialties.isEmpty) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'specialization'.tr(),
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.appColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: context.appColors.inputFill,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        controller.specialtiesError.value
+                                                .isNotEmpty
+                                            ? controller.specialtiesError.value
+                                            : 'no_data'.tr(),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          color: context
+                                              .appColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: controller
+                                          .fetchSpecializations,
+                                      child: Text('retry'.tr()),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        // Keep the doctor's current specialty selectable even
+                        // if the backend list is momentarily missing it.
+                        final items = [
+                          ...controller.specialties.map(
+                            (s) => DropdownMenuItem(value: s, child: Text(s)),
                           ),
-                        ...kDoctorSpecializations.map(
-                          (s) => DropdownMenuItem(value: s, child: Text(s)),
-                        ),
-                      ],
-                      onChanged: (v) => _specialization = v ?? '',
+                          if (_specialization.isNotEmpty &&
+                              !controller.specialties.contains(_specialization))
+                            DropdownMenuItem(
+                              value: _specialization,
+                              child: Text(_specialization),
+                            ),
+                        ];
+                        return _dropdown<String>(
+                          context,
+                          label: 'specialization'.tr(),
+                          value: _specialization,
+                          items: items,
+                          onChanged: (v) =>
+                              setState(() => _specialization = v ?? ''),
+                        );
+                      },
                     ),
                     const SizedBox(height: 14),
                     _field(context, 'price'.tr(), _price,
@@ -295,7 +379,7 @@ class _EditDoctorScreenState extends State<EditDoctorScreen> {
                                 .map(
                                   (d) => DropdownMenuItem(
                                     value: d,
-                                    child: Text(d.tr()),
+                                    child: Text(d.toLowerCase().tr()),
                                   ),
                                 )
                                 .toList(),

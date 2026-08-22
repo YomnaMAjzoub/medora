@@ -8,6 +8,7 @@ import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
 import 'package:medora_git/features/auth/data/src/auth_service.dart';
+import 'package:medora_git/features/notifications/business_layer/controller/notifications_controller.dart';
 
 /// Staff (Admin) dashboard shell: quick access to every clinic module.
 /// Only Doctors is functional this phase; the rest land on placeholder
@@ -50,6 +51,29 @@ class StaffDashboardScreen extends GetView<AdminController> {
         ),
         centerTitle: true,
         actions: [
+          Obx(
+            () => IconButton(
+              tooltip: 'notifications'.tr(),
+              onPressed: () => Get.toNamed(AppRouter.adminNotifications),
+              icon: Badge(
+                isLabelVisible:
+                    Get.find<NotificationsController>().unreadCount.value > 0,
+                label: Text(
+                  '${Get.find<NotificationsController>().unreadCount.value}',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
+                ),
+                backgroundColor: context.appColors.danger,
+                child: Icon(
+                  Icons.notifications_rounded,
+                  color: context.appColors.primary,
+                ),
+              ),
+            ),
+          ),
           IconButton(
             tooltip: 'logout'.tr(),
             onPressed: _logout,

@@ -275,42 +275,12 @@ class DoctorAppointmentDetailsScreen extends StatelessWidget {
     BuildContext context,
     DoctorAppointmentModel appointment,
   ) {
-    final isProcessing =
-        controller.processingAppointmentId.value == appointment.id;
-
     final actions = <(IconData, String, Color, VoidCallback?)>[];
 
-    if (appointment.status == AppointmentStatus.pendingDeposit) {
-      actions.add((
-        Icons.check_circle_rounded,
-        'confirm_appointment'.tr(),
-        AppColors.primary900,
-        isProcessing
-            ? null
-            : () => controller.confirmAppointment(appointmentId: appointment.id),
-      ));
-    }
-    if (appointment.status == AppointmentStatus.confirmed) {
-      actions.add((
-        Icons.payment_rounded,
-        'complete_appointment'.tr(),
-        context.appColors.success,
-        isProcessing
-            ? null
-            : () => controller.completeFinalPayment(appointmentId: appointment.id),
-      ));
-    }
-    if (appointment.status == AppointmentStatus.pendingDeposit ||
-        appointment.status == AppointmentStatus.confirmed) {
-      actions.add((
-        Icons.close_rounded,
-        'cancel_appointment'.tr(),
-        context.appColors.danger,
-        isProcessing
-            ? null
-            : () => _confirmCancel(appointment),
-      ));
-    }
+    // Doctors cannot confirm, cancel or collect payments for appointments.
+    // Those actions belong exclusively to the patient via their reminder
+    // flow (app-confirm → pay remaining → completed / app-cancel).
+
     if (appointment.isOnline &&
         appointment.resolvedMeetLink != null &&
         appointment.status != AppointmentStatus.cancelled) {
@@ -375,23 +345,6 @@ class DoctorAppointmentDetailsScreen extends StatelessWidget {
     );
   }
 
-  void _confirmCancel(DoctorAppointmentModel appointment) {
-    Get.defaultDialog(
-      title: 'cancel_appointment'.tr(),
-      middleText: 'cancel_appointment_confirm'.tr(),
-      textCancel: 'not_yet'.tr(),
-      textConfirm: 'cancel'.tr(),
-      confirmTextColor: AppColors.white,
-      buttonColor: Get.context!.appColors.danger,
-      onConfirm: () {
-        Get.back();
-        controller.cancelAppointment(appointmentId: appointment.id);
-      },
-    );
-  }
-
-  /// Starts the online consultation using the Google Meet link the backend
-  /// generated for this appointment (available once it is completed).
   void _startConsultation(
     BuildContext context,
     DoctorAppointmentModel appointment,

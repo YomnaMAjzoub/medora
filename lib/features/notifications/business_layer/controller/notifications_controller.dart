@@ -1,10 +1,13 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:medora_git/features/notifications/data/models/notification_model.dart';
 import 'package:medora_git/features/notifications/data/src/notifications_service.dart';
 
 /// In-app notifications state: list, loading/error flags, read/unread
-/// actions. Shared by the patient and the doctor side.
-class NotificationsController extends GetxController {
+/// actions. Shared by the patient, doctor and admin side. Refreshes on app
+/// resume so pushes missed while backgrounded still appear.
+class NotificationsController extends GetxController
+    with WidgetsBindingObserver {
   NotificationsController({NotificationsService? service})
       : _service = service ?? NotificationsService();
 
@@ -15,13 +18,34 @@ class NotificationsController extends GetxController {
   final RxList<AppNotificationModel> notifications =
       <AppNotificationModel>[].obs;
 
-  /// Number of notifications still unread.
-  int get unreadCount => notifications.where((n) => !n.isRead).length;
+  /// Reactive unread badge count (bell icons listen to this).
+  final RxInt unreadCount = 0.obs;
+
+  void _syncUnreadCount() {
+    unreadCount.value = notifications.where((n) => !n.isRead).length;
+  }
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     fetchNotifications();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-fetch when the user brings the app back so anything that arrived
+    // while backgrounded (push or polling) shows up without a manual
+    // pull-to-refresh.
+    if (state == AppLifecycleState.resumed) {
+      fetchNotifications();
+    }
   }
 
   Future<void> fetchNotifications() async {
@@ -30,6 +54,7 @@ class NotificationsController extends GetxController {
     try {
       final items = await _service.fetchNotifications();
       notifications.assignAll(items);
+      _syncUnreadCount();
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {
@@ -46,6 +71,7 @@ class NotificationsController extends GetxController {
     final index = notifications.indexWhere((n) => n.id == id);
     if (index != -1) {
       notifications[index] = notifications[index].copyWith(isRead: true);
+      _syncUnreadCount();
     }
   }
 
@@ -54,5 +80,6 @@ class NotificationsController extends GetxController {
     notifications.assignAll(
       notifications.map((n) => n.copyWith(isRead: true)),
     );
+    _syncUnreadCount();
   }
 }

@@ -30,10 +30,31 @@ class AdminController extends GetxController {
   /// indicator grows with this list.
   final RxList<AdminOfferModel> createdOffers = <AdminOfferModel>[].obs;
 
+  /// Distinct specializations fetched from the backend
+  /// (GET /getSpcialization) — drives the Add/Edit Doctor dropdowns.
+  final RxList<String> specialties = <String>[].obs;
+  final RxBool isLoadingSpecialties = false.obs;
+  final RxString specialtiesError = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
     fetchDoctors();
+    fetchSpecializations();
+  }
+
+  Future<void> fetchSpecializations() async {
+    isLoadingSpecialties.value = true;
+    specialtiesError.value = '';
+    try {
+      specialties.assignAll(await _service.getSpecializations());
+    } catch (e) {
+      // Surface the failure to the forms (retry affordance) instead of
+      // leaving a silently-empty dropdown.
+      specialtiesError.value = e.toString();
+    } finally {
+      isLoadingSpecialties.value = false;
+    }
   }
 
   Future<void> fetchDoctors() async {

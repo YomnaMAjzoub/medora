@@ -1,4 +1,6 @@
-/// The kind of event a notification represents.
+import 'dart:convert';
+
+/// Matches Laravel `notifications.type` values used by the Flutter app.
 enum NotificationType {
   appointmentBooked,
   appointmentReminder,
@@ -11,11 +13,7 @@ enum NotificationType {
   general,
 }
 
-/// A notification item shown in the in-app notifications list.
-///
-/// Both the patient and the doctor side use this model. The backend
-/// `GET /notifications` returns a bare JSON array with fields:
-/// id, user_id, title, body, type, data, read_at, created_at, updated_at.
+/// In-app row from `GET /notifications` (Laravel bare JSON array).
 class AppNotificationModel {
   const AppNotificationModel({
     required this.id,
@@ -36,12 +34,10 @@ class AppNotificationModel {
   final bool isRead;
   final Map<String, dynamic> data;
 
-  /// The backend's original `type` string
-  /// ('appointment_reminder', 'appointment_cancelled', 'payment_completed',
-  /// 'low_stock', 'item_restocked', ...).
+  /// Laravel `type`: appointment_reminder, appointment_cancelled,
+  /// payment_completed, low_stock, item_restocked, ...
   final String rawType;
 
-  /// Extra payload keys used for navigation (appointment_id, item_id, ...).
   int? get appointmentId => _intValue('appointment_id');
   int? get itemId => _intValue('item_id');
 
@@ -67,9 +63,21 @@ class AppNotificationModel {
 
   factory AppNotificationModel.fromJson(Map<String, dynamic> json) {
     final rawData = json['data'];
-    final data = rawData is Map<String, dynamic>
-        ? rawData
-        : (rawData is Map ? Map<String, dynamic>.from(rawData) : <String, dynamic>{});
+    Map<String, dynamic> data = {};
+    if (rawData is Map<String, dynamic>) {
+      data = rawData;
+    } else if (rawData is Map) {
+      data = Map<String, dynamic>.from(rawData);
+    } else if (rawData is String && rawData.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawData);
+        if (decoded is Map) {
+          data = Map<String, dynamic>.from(decoded);
+        }
+      } catch (_) {
+        data = {};
+      }
+    }
     final rawType = json['type'] as String? ?? '';
     return AppNotificationModel(
       id: json['id'].toString(),
@@ -102,9 +110,11 @@ class AppNotificationModel {
       case 'consultation':
         return NotificationType.consultationStarted;
       case 'deposit_paid':
-      case 'payment':
         return NotificationType.depositPaid;
       case 'payment_completed':
+        return NotificationType.paymentCompleted;
+      case 'payment':
+        // Laravel test type "payment" maps to full-payment doctor flow.
         return NotificationType.paymentCompleted;
       case 'low_stock':
         return NotificationType.lowStock;
