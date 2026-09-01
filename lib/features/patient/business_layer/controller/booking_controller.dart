@@ -209,10 +209,11 @@ class BookingController extends GetxController {
     }
   }
 
-  /// Creates the booking if needed, then opens Fatora's hosted checkout page
-  /// (paymentUrl from addBooking) in an in-app WebView. When the backend does
-  /// not return a payment_url, it falls back to the direct paymentSuccess
-  /// callback (simulated in-app payment).
+  /// Creates the booking if needed, then opens the in-app MOCK payment
+  /// screen for the deposit. The backend has no redirect-URL parameter on
+  /// its payment endpoints, so the mock flow is synchronous: the screen
+  /// calls GET /paymentSuccess?appointment_id=... when the patient confirms,
+  /// which is what moves the appointment to 'confirmed' server-side.
   Future<void> payNow() async {
     if (appointmentId.value == null) {
       await submitBooking();
@@ -225,32 +226,41 @@ class BookingController extends GetxController {
       return;
     }
 
-    final url = paymentUrl.value;
-    if (url != null && url.isNotEmpty) {
-      Get.toNamed(
-        AppRouter.fatoraPayment,
-        arguments: {
-          'paymentUrl': url,
-          'appointmentId': id,
-        },
-      );
-      return;
-    }
+    Get.toNamed(
+      AppRouter.mockPayment,
+      arguments: {
+        'appointmentId': id,
+        'amount': amountToPayNow.value > 0
+            ? amountToPayNow.value.toStringAsFixed(2)
+            : depositAmount.toStringAsFixed(2),
+        'doctorName': selectedDoctor.value?.name ?? '',
+        'mode': 'deposit',
+      },
+    );
+  }
 
+  /// Called by the mock payment screen after the patient confirms the
+  /// deposit. GET /paymentSuccess marks the payment partially_paid and the
+  /// appointment 'confirmed'; the backend response (message, appointment,
+  /// payment amounts) is shown on the in-app result screen.
+  Future<bool> payDeposit({required int appointmentId}) async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final result = await _bookingService.paymentSuccess(appointmentId: id);
+      final result = await _bookingService.paymentSuccess(
+        appointmentId: appointmentId,
+      );
       paymentResult.value = result;
       final doctorName = selectedDoctor.value?.name ?? '';
       resetBooking();
-      Get.toNamed(
+      Get.offNamed(
         AppRouter.paymentResult,
         arguments: {'result': result, 'doctorName': doctorName},
       );
+      return true;
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar('error'.tr(), e.toString());
+      return false;
     } finally {
       isLoading.value = false;
     }

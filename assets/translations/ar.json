@@ -431,4 +431,11 @@
   "failed_to_load_records": "فشل تحميل السجلات الطبية",
   "final_payment_failed": "فشل الدفع النهائي",
   "user_id_not_found": "معرف المستخدم غير موجود. يرجى تسجيل الدخول مرة أخرى"
+  "pay_now": "ادفع الآن",
+  "confirm_payment": "تأكيد الدفع",
+  "mock_payment_review": "راجع تفاصيل الدفع",
+  "mock_payment_notice": "هذه عملية دفع تجريبية. لن يتم خصم أي مبلغ حقيقي.",
+  "transaction_ref": "رقم العملية",
+  "payment_failed": "فشل الدفع",
+  "payment_failed_hint": "تعذر إكمال عملية الدفع. يرجى المحاولة مرة أخرى."
 }

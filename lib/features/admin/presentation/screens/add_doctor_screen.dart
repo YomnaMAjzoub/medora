@@ -5,6 +5,7 @@ import 'package:get/get.dart' hide Trans;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medora_git/core/const/app_colors.dart';
+import 'package:medora_git/core/routing/app_router.dart';
 import 'package:medora_git/core/theme/app_theme.dart';
 import 'package:medora_git/features/admin/business_layer/controller/admin_controller.dart';
 import 'package:medora_git/features/admin/presentation/specializations.dart';
@@ -114,6 +115,10 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       Get.snackbar('error'.tr(), 'choose_specialization'.tr());
       return;
     }
+    // addDoctor returns true only after the backend confirmed success
+    // (HTTP 210 with the created doctor payload); only then leave the
+    // form and land directly on the doctors list (already refreshed by
+    // AdminController.addDoctor).
     final added = await controller.addDoctor(
       firstName: _firstName.text.trim(),
       lastName: _lastName.text.trim(),
@@ -129,7 +134,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       price: double.tryParse(_price.text.trim().replaceAll(',', '.')) ?? 0,
       photoPath: _photoPath,
     );
-    if (added) Get.back();
+    if (added) Get.offNamed(AppRouter.staffDoctors);
   }
 
   @override

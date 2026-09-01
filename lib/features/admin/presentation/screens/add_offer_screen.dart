@@ -50,7 +50,7 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final title = _title.text.trim();
     final description = _description.text.trim();
     final discount = double.tryParse(_discount.text.trim());
@@ -66,14 +66,16 @@ class _AddOfferScreenState extends State<AddOfferScreen> {
       Get.snackbar('Warning', 'invalid_dates'.tr());
       return;
     }
-    controller.addOffer(
+    // Wait for the backend to confirm the offer was created before
+    // leaving the form, so failures keep the user here to retry.
+    final added = await controller.addOffer(
       title: title,
       description: description,
       discountPercentage: discount,
       validFrom: _validFrom!,
       validUntil: _validUntil!,
     );
-    Get.back();
+    if (added) Get.back();
   }
 
   @override

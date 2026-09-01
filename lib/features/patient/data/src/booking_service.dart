@@ -88,6 +88,27 @@ class BookingService {
     }
   }
 
+  /// Final payment: the backend marks the payment fully_paid and moves the
+  /// appointment to 'completed' (creating the medical record and, for online
+  /// visits, the meet link). Requires the deposit to already be paid
+  /// (payment status 'partially_paid').
+  Future<PaymentSuccessResponseModel> completeFinalPayment({
+    required int appointmentId,
+  }) async {
+    try {
+      final response = await ApiClient.dio.get(
+        '/completeFinalPayment',
+        queryParameters: {'appointment_id': appointmentId},
+      );
+
+      return PaymentSuccessResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      throw Exception(ErrorHandler.handleDioError(e));
+    }
+  }
+
   /// Cancels the booking when the customer backs out of the Fatora checkout.
   Future<void> paymentCancel({required int appointmentId}) async {
     try {

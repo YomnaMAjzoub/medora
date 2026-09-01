@@ -199,10 +199,18 @@ class ProfileScreen extends GetView<PatientAccountController> {
     );
   }
 
+  /// Manual capitalize helper — used instead of GetX's `capitalizeFirst`
+  /// extension because `profile` fields are accessed as `dynamic`, and
+  /// extension methods cannot be resolved on values with static type
+  /// `dynamic` (that caused: NoSuchMethodError: Class 'String' has no
+  /// instance getter 'capitalizeFirst').
+  String _capitalize(String s) =>
+      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+
   Widget _infoGrid(dynamic colors, dynamic profile) {
     final entries = <(IconData, String, String)>[
-      (Icons.phone_rounded, 'phone'.tr(), profile.phone),
-      (Icons.wc_rounded, 'gender'.tr(), profile.gender.capitalizeFirst ?? ''),
+      (Icons.phone_rounded, 'phone'.tr(), profile.phone ?? ''),
+      (Icons.wc_rounded, 'gender'.tr(), _capitalize(profile.gender ?? '')),
       (Icons.cake_rounded, 'birth'.tr(), profile.birth ?? ''),
       (Icons.bloodtype_rounded, 'blood_type'.tr(), profile.bloodType ?? ''),
       (
@@ -218,7 +226,7 @@ class ProfileScreen extends GetView<PatientAccountController> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Icon(icon, size: 18, color:AppColors.primary),
+                Icon(icon, size: 18, color: AppColors.primary),
                 const SizedBox(width: 10),
                 Text(
                   '$label: ',

@@ -129,21 +129,6 @@ final RxBool isExportingPdf = false.obs;
     }
   }
 
-/// Resumes the deposit of a pending appointment with the simulated
-  /// in-app payment (paymentSuccess) and refreshes the list.
-  Future<void> resumePayment({required int appointmentId}) async {
-    processingAppointmentId.value = appointmentId;
-    try {
-      await _service.confirmPaymentSuccess(appointmentId: appointmentId);
-      Get.snackbar('success'.tr(), 'payment_confirmed'.tr());
-      await fetchAppointments();
-    } catch (e) {
-      Get.snackbar('error'.tr(), e.toString());
-    } finally {
-      processingAppointmentId.value = 0;
-    }
-  }
-
 /// Cancels a pending appointment (paymentCancel) and refreshes the list.
   Future<void> cancelAppointment({required int appointmentId}) async {
     processingAppointmentId.value = appointmentId;
@@ -159,29 +144,24 @@ final RxBool isExportingPdf = false.obs;
   }
 
   /// Confirms a visit after the patient tapped an appointment-reminder
-  /// notification (app-confirm). When the backend returns a `payment_url`
-  /// ("please complete payment"), the Fatora checkout opens in the in-app
-  /// WebView to finish the remaining payment.
+  /// notification (app-confirm). The backend sets the appointment to
+  /// 'confirmed' and returns a payment_url for the remaining balance; with
+  /// the mock flow the patient completes that remaining payment in-app,
+  /// which is what moves the appointment to 'completed' server-side
+  /// (GET /completeFinalPayment).
   Future<void> confirmReminderAppointment(
       {required int appointmentId}) async {
     processingAppointmentId.value = appointmentId;
     try {
-      final result = await _service.confirmAfterReminder(
-        appointmentId: appointmentId,
+      await _service.confirmAfterReminder(appointmentId: appointmentId);
+      Get.toNamed(
+        AppRouter.mockPayment,
+        arguments: {
+          'appointmentId': appointmentId,
+          'doctorName': '',
+          'mode': 'final',
+        },
       );
-      final url = result.paymentUrl;
-      if (url != null && url.isNotEmpty) {
-        Get.toNamed(
-          AppRouter.fatoraPayment,
-          arguments: {
-            'paymentUrl': url,
-            'appointmentId': appointmentId,
-            'flow': 'reminder',
-          },
-        );
-      } else {
-        Get.snackbar('success'.tr(), result.message);
-      }
       await fetchAppointments();
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
@@ -190,18 +170,21 @@ final RxBool isExportingPdf = false.obs;
     }
   }
 
-  /// Called by the Fatora WebView after the reminder-flow checkout
-  /// redirected to /paymentSuccess: finalises the payment on the backend,
-  /// refreshes the list and returns to the appointments tab.
-  Future<void> completeReminderPayment({required int appointmentId}) async {
+  /// Called by the mock payment screen after the reminder-flow payment is
+  /// confirmed: finalises the remaining payment on the backend
+  /// (/completeFinalPayment — the endpoint that marks the appointment
+  /// 'completed'), refreshes the list and returns to the appointments tab.
+  Future<bool> completeReminderPayment({required int appointmentId}) async {
     processingAppointmentId.value = appointmentId;
     try {
-      await _service.confirmPaymentSuccess(appointmentId: appointmentId);
+      await _service.completeFinalPayment(appointmentId: appointmentId);
       Get.snackbar('success'.tr(), 'payment_confirmed'.tr());
       await fetchAppointments();
       Get.offAllNamed(AppRouter.main, arguments: {'tab': 2});
+      return true;
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
+      return false;
     } finally {
       processingAppointmentId.value = 0;
     }

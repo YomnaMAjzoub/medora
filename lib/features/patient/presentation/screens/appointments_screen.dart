@@ -10,9 +10,10 @@ import 'package:medora_git/features/patient/business_layer/controller/patient_ac
 import 'package:medora_git/features/patient/data/models/appointment_record_model.dart';
 
 /// "Schedules" tab: the patient's appointments fetched from
-/// getAppointmentPatient, split into Confirmed / Pending / Cancelled tabs.
-/// Online visits get a Join Meeting action, pending-deposit bookings get
-/// resume/cancel actions.
+/// getAppointmentPatient, split into Confirmed / Completed / Cancelled tabs.
+/// Online visits get a Join Meeting action. The old "pending" split is gone:
+/// bookings become 'confirmed' through the mock deposit payment
+/// (/paymentSuccess) and 'completed' through /completeFinalPayment.
 class AppointmentsScreen extends GetView<PatientAccountController> {
   const AppointmentsScreen({super.key});
 
@@ -68,7 +69,7 @@ class AppointmentsScreen extends GetView<PatientAccountController> {
                     ),
                     tabs: [
                       Tab(text: 'confirmed_schedules'.tr()),
-                      Tab(text: 'pending_schedules'.tr()),
+                      Tab(text: 'completed'.tr()),
                       Tab(text: 'cancelled_schedules'.tr()),
                     ],
                   ),
@@ -79,13 +80,12 @@ class AppointmentsScreen extends GetView<PatientAccountController> {
                       _AppointmentList(
                         appointments: _forStatuses(const {
                           AppointmentStatus.confirmed,
-                          AppointmentStatus.completed,
+                          AppointmentStatus.unknown,
                         }),
                       ),
                       _AppointmentList(
                         appointments: _forStatuses(const {
-                          AppointmentStatus.pendingDeposit,
-                          AppointmentStatus.unknown,
+                          AppointmentStatus.completed,
                         }),
                       ),
                       _AppointmentList(
@@ -218,10 +218,7 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PatientAccountController>();
     final date = appointment.appointmentTime;
-    final isProcessing =
-        controller.processingAppointmentId.value == appointment.id;
     final doctorName = _doctorName(context);
 
     final actions = <Widget>[];
@@ -231,42 +228,6 @@ class _AppointmentCard extends StatelessWidget {
           icon: Icons.videocam_rounded,
           label: 'join_meeting'.tr(),
           onTap: () => _joinMeeting(context),
-        ),
-      );
-    }
-    if (appointment.status == AppointmentStatus.pendingDeposit) {
-      actions.add(
-        _ActionButton(
-          icon: Icons.check_rounded,
-          label: 'confirm_visit'.tr(),
-          onTap: isProcessing
-              ? null
-              : () => controller.confirmReminderAppointment(
-                    appointmentId: appointment.id,
-                  ),
-        ),
-      );
-      actions.add(
-        _ActionButton(
-          icon: Icons.payment_rounded,
-          label: 'complete_payment'.tr(),
-          onTap: isProcessing
-              ? null
-              : () => controller.resumePayment(
-                    appointmentId: appointment.id,
-                  ),
-        ),
-      );
-      actions.add(
-        _ActionButton(
-          icon: Icons.close_rounded,
-          label: 'cancel'.tr(),
-          isDestructive: true,
-          onTap: isProcessing
-              ? null
-              : () => controller.cancelAppointment(
-                    appointmentId: appointment.id,
-                  ),
         ),
       );
     }

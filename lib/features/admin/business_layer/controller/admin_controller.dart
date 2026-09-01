@@ -179,7 +179,10 @@ class AdminController extends GetxController {
     }
   }
 
-  Future<void> addOffer({
+  /// Creates a discount offer (addOffer). Returns true only after the
+  /// backend confirms the offer was created, so the caller can navigate
+  /// away on success and stay on the form on failure.
+  Future<bool> addOffer({
     required String title,
     required String description,
     required double discountPercentage,
@@ -196,8 +199,10 @@ class AdminController extends GetxController {
         validUntil: validUntil,
       );
       Get.snackbar('success'.tr(), 'offer_added'.tr());
+      return true;
     } catch (e) {
       Get.snackbar('error'.tr(), e.toString());
+      return false;
     } finally {
       isSubmitting.value = false;
     }

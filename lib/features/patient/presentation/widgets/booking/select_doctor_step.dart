@@ -28,7 +28,13 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
 
   DoctorFilters _filters = const DoctorFilters();
 
+  /// Whether the user actually applied the filter sheet. Until then ALL
+  /// doctors returned by the backend are shown — the default maxPrice
+  /// must never hide doctors the patient did not ask to filter.
+  bool _filtersApplied = false;
+
   List<DoctorModel> get _filteredDoctors {
+    if (!_filtersApplied) return discovery.doctors.toList();
     return discovery.doctors.where((doctor) {
       return doctor.pricePerSession <= _filters.maxPrice;
     }).toList();
@@ -37,7 +43,10 @@ class _SelectDoctorStepState extends State<SelectDoctorStep> {
   Future<void> _openFilterSheet() async {
     final result = await showDoctorFilterSheet(context, _filters);
     if (result != null) {
-      setState(() => _filters = result);
+      setState(() {
+        _filters = result;
+        _filtersApplied = true;
+      });
       discovery.applyFilter(
         specialization: result.specialization,
         gender: result.gender == GenderFilter.any ? null : result.gender.name,

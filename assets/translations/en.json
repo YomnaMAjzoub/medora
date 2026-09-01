@@ -445,5 +445,12 @@
   "update_failed": "Update failed",
   "failed_to_load_records": "Failed to load medical records",
   "final_payment_failed": "Final payment failed",
-  "user_id_not_found": "User id not found. Please login again."
+  "user_id_not_found": "User id not found. Please login again.",
+  "pay_now": "Pay",
+  "confirm_payment": "Confirm Payment",
+  "mock_payment_review": "Review your payment details",
+  "mock_payment_notice": "This is a simulated payment. No real money will be charged.",
+  "transaction_ref": "Transaction ref",
+  "payment_failed": "Payment failed",
+  "payment_failed_hint": "The payment could not be completed. Please try again."
 }

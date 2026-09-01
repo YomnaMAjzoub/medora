@@ -6,6 +6,7 @@ import 'package:medora_git/features/patient/data/models/active_offer_model.dart'
 import 'package:medora_git/features/patient/data/models/appointment_record_model.dart';
 import 'package:medora_git/features/patient/data/models/doctor_profile_model.dart';
 import 'package:medora_git/features/patient/data/models/medical_record_model.dart';
+import 'package:medora_git/features/patient/data/models/payment_success_response_model.dart';
 import 'package:medora_git/features/patient/data/models/patient_profile_model.dart';
 import 'package:medora_git/features/patient/data/models/specialization_model.dart';
 
@@ -80,7 +81,7 @@ class PatientService {
     }
   }
 
-/// The patient's own medical records via the patient-scoped endpoint
+  /// The patient's own medical records via the patient-scoped endpoint
   /// (getMedicaleRecord). The payload wraps the rows under `message`, each
   /// carrying diagnosis, prescription, tests, notes, images, appointment
   /// time/type and the attending doctor's name and specialization.
@@ -94,6 +95,25 @@ class PatientService {
           .whereType<Map<String, dynamic>>()
           .map(MedicalRecordModel.fromJson)
           .toList();
+    } on DioException catch (e) {
+      throw Exception(ErrorHandler.handleDioError(e));
+    }
+  }
+
+  /// Final payment for a confirmed appointment
+  /// (GET /completeFinalPayment?appointment_id=...). The backend marks the
+  /// payment fully_paid and moves the appointment to 'completed'.
+  Future<PaymentSuccessResponseModel> completeFinalPayment({
+    required int appointmentId,
+  }) async {
+    try {
+      final response = await ApiClient.dio.get(
+        '/completeFinalPayment',
+        queryParameters: {'appointment_id': appointmentId},
+      );
+      return PaymentSuccessResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw Exception(ErrorHandler.handleDioError(e));
     }

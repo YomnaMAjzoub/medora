@@ -43,8 +43,17 @@ class DoctorDiscoveryController extends GetxController {
     specializationsError.value = '';
     try {
       final result = await _service.getSpecializations();
+      // Only the specializations the backend actually returned
+      // (GET /getSpcialization = distinct doctors.specialization values).
+      // Blank rows (null/'' specialization on a doctor) are skipped so no
+      // extra placeholder tiles appear.
       specialties.assignAll(
-        result.asMap().entries.map(
+        result
+            .where((s) => s.name.trim().isNotEmpty)
+            .toList()
+            .asMap()
+            .entries
+            .map(
               (entry) => SpecialtyModel(
                 id: entry.key.toString(),
                 name: entry.value.name,
